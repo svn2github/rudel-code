@@ -1,3 +1,169 @@
+2009-09-06  Jan Moringen  <jmoringe@techfak.uni-bielefeld.de>
+
+	* ChangeLog (whole file): updated
+
+	* backend.el (header, footer): fixed filename
+	* compat.el (header, footer): fixed filename
+	* errors.el (header, footer): fixed filename
+	* hooks.el (header, footer): fixed filename
+	* interactive.el (header, footer): fixed filename
+	* mode.el (header, footer): fixed filename
+	* operations.el (header, footer): fixed filename
+	* operators.el (header, footer): fixed filename
+	* overlay.el (header, footer): fixed filename
+	* protocol.el (header, footer): fixed filename
+	* session-initiation.el (header, footer): fixed filename
+	* speedbar.el (header, footer): fixed filename
+	* state-machine.el (header, footer): fixed filename
+	* tls.el (header, footer): fixed filename
+	* util.el (header, footer): fixed filename
+	* obby/client.el (header, footer): fixed filename
+	* obby/errors.el (header, footer): fixed filename
+	* obby/obby.el (header, footer): fixed filename
+	* obby/server.el (header, footer): fixed filename
+	* obby/state.el (header, footer): fixed filename
+	* obby/util.el (header, footer): fixed filename
+	* wave/wave.el (header, footer): fixed filename
+	* zeroconf/zeroconf.el (header, footer): fixed filename
+	* zeroconf/Makefile (target zeroconf): fixed name of zeroconf.el
+	* telepathy/telepathy.el (whole file): renamed
+	telepathy/rudel-telepathy.el -> telepathy/telepathy.el
+	* telepathy/rudel-telepathy.el (whole file): renamed
+	telepathy/rudel-telepathy.el -> telepathy/telepathy.el
+
+	* jupiter/jupiter.el (whole file): rewrote requires
+	* jupiter/jupiter-compound.el (whole file): rewrote requires,
+	renamed jupiter/jupiter-compound.el -> jupiter/compound.el
+	* jupiter/compound.el (whole file): renamed
+	jupiter/jupiter-compound.el -> jupiter/compound.el
+	* jupiter/jupiter-delete.el (whole file): rewrote requires,
+	renamed jupiter/jupiter-delete.el -> jupiter/delete.el
+	* jupiter/delete.el (whole file): renamed
+	jupiter/jupiter-delete.el -> jupiter/delete.el
+	* jupiter/jupiter-insert.el (whole file): rewrote requires,
+	renamed jupiter/jupiter-insert.el -> jupiter/insert.el
+	* jupiter/insert.el (whole file): renamed
+	jupiter/jupiter-insert.el -> jupiter/insert.el
+	* jupiter/jupiter-nop.el (whole file): rewrote requires, renamed
+	jupiter/jupiter-compound.el -> jupiter/compound.el
+	* jupiter/nop.el (whole file): renamed jupiter/jupiter-compound.el
+	-> jupiter/compound.el
+	* jupiter/jupiter-operation.el (whole file): rewrote requires,
+	renamed jupiter/jupiter-compound.el -> jupiter/compound.el
+	* jupiter/operation.el (whole file): renamed
+	jupiter/jupiter-compound.el -> jupiter/compound.el
+	* jupiter/Project.ede (target jupiter): changed according to
+	renamed files
+	* jupiter/Makefile (target jupiter): changed according to renamed
+	files
+	* zeroconf/rudel-zeroconf.el (whole file): rewrote requires,
+	renamed zeroconf/rudel-zeroconf.el -> zeroconf/zeroconf.el
+	* zeroconf/zeroconf.el (whole file): renamed
+	zeroconf/rudel-zeroconf.el -> zeroconf/zeroconf.el
+	* zeroconf/Project.ede (target zeroconf): changed according to
+	renamed files
+	* zeroconf/Makefile (target zeroconf): changed according to
+	renamed files
+	* wave/rudel-wave.el (whole file): rewrote requires, renamed
+	wave/rudel-wave.el -> wave/wave.el
+	* wave/wave.el (whole file): renamed wave/rudel-wave.el ->
+	wave/wave.el
+	* wave/Project.ede (target wave): changed according to renamed
+	files
+	* wave/Makefile (target wave): changed according to renamed files
+	* telepathy/rudel-telepathy.el (whole file): rewrote requires,
+	renamed telepathy/rudel-telepathy.el -> telepathy/telepathy.el
+	* telepathy/telepathy.el (whole file): renamed
+	telepathy/rudel-telepathy.el -> telepathy/telepathy.el
+	* telepathy/Project.ede (target telepathy): changed according to
+	renamed files
+	* telepathy/Makefile (target telepathy): changed according to
+	renamed files
+	* obby/rudel-obby.el (whole file): rewrote requires, renamed
+	obby/rudel-obby.el -> obby/obby.el
+	* obby/obby.el (whole file): renamed obby/rudel-obby.el ->
+	obby/obby.el
+	* obby/rudel-obby-util.el (whole file): rewrote requires, renamed
+	obby/rudel-obby-util.el -> obby/util.el
+	* obby/util.el (whole file): renamed obby/rudel-obby-util.el ->
+	obby/util.el
+	* obby/rudel-obby-state.el (whole file): rewrote requires, renamed
+	obby/rudel-obby-state.el -> obby/state.el
+	* obby/state.el (whole file): renamed obby/rudel-obby-state.el ->
+	obby/state.el
+	* obby/rudel-obby-server.el (whole file): rewrote requires,
+	renamed obby/rudel-obby-server.el -> obby/server.el
+	* obby/server.el (whole file): renamed obby/rudel-obby-server.el
+	-> obby/server.el
+	* obby/rudel-obby-errors.el (whole file): rewrote requires,
+	renamed obby/rudel-obby-errors.el -> obby/errors.el
+	* obby/errors.el (whole file): renamed obby/rudel-obby-errors.el
+	-> obby/errors.el
+	* obby/rudel-obby-client.el (whole file): rewrote requires,
+	renamed obby/rudel-obby-client.el -> obby/client.el
+	* obby/client.el (whole file): renamed obby/rudel-obby-client.el
+	-> obby/client.el
+	* obby/Project.ede (target obby): changed according to renamed
+	files
+	* obby/Makefile (target obby): changed according to renamed files
+	* rudel-util.el (whole file): rewrote requires, renamed
+	rudel-util.el -> util.el
+	* util.el (whole file): renamed rudel-util.el -> util.el
+	* rudel-tls.el (whole file): rewrote requires, renamed
+	rudel-tls.el -> tls.el
+	* tls.el (whole file): renamed rudel-tls.el -> tls.el
+	* rudel-state-machine.el (whole file): rewrote requires, renamed
+	rudel-state-machine.el -> state-machine.el
+	* state-machine.el (whole file): renamed rudel-state-machine.el ->
+	state-machine.el
+	* rudel-speedbar.el (whole file): rewrote requires, renamed
+	rudel-speedbar.el -> speedbar.el
+	* speedbar.el (whole file): renamed rudel-speedbar.el ->
+	speedbar.el
+	* rudel-session-initiation.el (whole file): rewrote requires,
+	renamed rudel-session-initiation.el -> session-initiation.el
+	* session-initiation.el (whole file): renamed
+	rudel-session-initiation.el -> session-initiation.el
+	* rudel-protocol.el (whole file): rewrote requires, renamed
+	rudel-protocol.el -> protocol.el
+	* protocol.el (whole file): renamed rudel-protocol.el ->
+	protocol.el
+	* rudel-overlay.el (whole file): rewrote requires, renamed
+	rudel-overlay.el -> overlay.el
+	* overlay.el (whole file): renamed rudel-overlay.el -> overlay.el
+	* rudel-operators.el (whole file): rewrote requires, renamed
+	rudel-operators.el -> operators.el
+	* operators.el (whole file): renamed rudel-operators.el ->
+	operators.el
+	* rudel-operations.el (whole file): rewrote requires, renamed
+	rudel-operations.el -> operations.el
+	* operations.el (whole file): renamed rudel-operations.el ->
+	operations.el
+	* rudel-mode.el (whole file): rewrote requires, renamed
+	rudel-mode.el -> mode.el
+	* mode.el (whole file): renamed rudel-mode.el -> mode.el
+	* rudel-interactive.el (whole file): rewrote requires, renamed
+	rudel-interactive.el -> interactive.el
+	* interactive.el (whole file): renamed rudel-interactive.el ->
+	interactive.el
+	* rudel-icons.el (whole file): rewrote requires, renamed
+	rudel-icons.el -> icons.el
+	* icons.el (whole file): renamed rudel-icons.el -> icons.el
+	* rudel-hooks.el (whole file): rewrote requires, renamed
+	rudel-hooks.el -> hooks.el
+	* hooks.el (whole file): renamed rudel-hooks.el -> hooks.el
+	* rudel-errors.el (whole file): rewrote requires, renamed
+	rudel-errors.el -> errors.el
+	* errors.el (whole file): renamed rudel-errors.el -> errors.el
+	* rudel-compat.el (whole file): rewrote requires, renamed
+	rudel-compat.el -> compat.el
+	* compat.el (whole file): renamed rudel-compat.el -> compat.el
+	* rudel-backend.el (whole file): rewrote requires, renamed
+	rudel-backend.el -> backend.el
+	* backend.el (whole file): renamed rudel-backend.el -> backend.el
+	* Project.ede (target obby): changed according to renamed files
+	* Makefile (target obby): changed according to renamed files
+
 2009-08-26  Jan Moringen  <jmoringe@techfak.uni-bielefeld.de>
 
 	* ChangeLog (whole file): updated
