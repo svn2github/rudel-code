@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, XMPP, state machine
+;; Keywords: rudel, xmpp, state machine
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -86,7 +86,7 @@ which uses the state object."))
      (t 'we-finalize)))
   )
 
-(defmethod rudel-set-assembly-function ((this rudel-xmpp-state)
+(defmethod rudel-set-assembly-function ((this rudel-xmpp-state) ;; TODO can this be solved by delegation?
 					function)
   "Install FUNCTION as assembly function in the transport object of THIS."
   (with-slots (transport) this
