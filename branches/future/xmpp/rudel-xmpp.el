@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, XMPP, transport, backend
+;; Keywords: rudel, xmpp, transport, backend
 ;; X-RCS: $Id:$
 ;;
 ;; This program is free software: you can redistribute it and/or modify
@@ -44,8 +44,11 @@
 ;;; Constants
 ;;
 
-(defconst rudel-xmpp-protocol-version '(0 1)
-  "Version of the XMPP backend for Rudel.")
+(defconst rudel-xmpp-transport-version '(0 1)
+  "Version of the XMPP transport backend for Rudel.")
+
+(defconst rudel-xmpp-protocol-version '(1 0)
+  "Version of the XMPP protocol supported by this implementation.")
 
 
 ;;; Class rudel-xmpp-backend
@@ -60,9 +63,9 @@
   (when (next-method-p)
     (call-next-method))
 
-  (oset this :version rudel-xmpp-protocol-version))
+  (oset this :version rudel-xmpp-transport-version))
 
-(defmethod rudel-connect ((this rudel-xmpp-backend) info)
+(defmethod rudel-make-connection ((this rudel-xmpp-backend) info)
   "Connect to an XMPP server using the information in INFO.
 INFO has to be a property list containing at least the keys :host
 and :port."
@@ -108,7 +111,7 @@ and :port."
 
 (defclass rudel-xmpp-state-new (rudel-xmpp-state)
   ()
-  "")
+  "Initial state of new XMPP connections.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-new))
   ""
@@ -122,14 +125,15 @@ and :port."
   ((success-state :initarg :success-state
 		  :type    symbol
 		  :documentation
-		  ""))
-  "")
+		  "State to switch to in case of successful
+negotiation."))
+  "Stream negotiation state.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-negotiate-stream)
 			success-state) ;; host)
   ""
-  ;; Store name of the successor state in case of successful stream
-  ;; negotiation for later.
+  ;; Store the name of the successor state in case of successful
+  ;; stream negotiation for later.
   (oset this :success-state success-state)
 
   ;; The first message we receive will be an incomplete <stream:stream
@@ -142,7 +146,9 @@ and :port."
   (rudel-send this
 	      (format "<?xml version=\"1.0\" encoding=\"%s\"?><stream:stream xmlns:stream=\"http://etherx.jabber.org/streams\" xmlns=\"jabber:client\" version=\"%s\" to=\"%s\" id=\"%s\">"
 		      "UTF-8"
-		      rudel-xmpp-protocol-version
+		      (mapconcat #'identity
+				 (mapcar #'number-to-string rudel-xmpp-protocol-version)
+				 ".") ;; TODO rudel-version->string. hm, Emacs has version-to-list, maybe also version-list-to-string?
 		      "jabber.org" ;;"gunhead.local"
 		      "scymtym@jabber.org")) ;; "361729367874")) ;; "gunhead")) ;; host))
   nil)
@@ -296,11 +302,11 @@ and :port."
 
 (defmethod rudel-transport-set-handler ((this rudel-transport)
 					 handler1)
-  "TODO"
+  "Install HANDLER1 as dispatcher for messages received by THIS."
   (with-slots (handler) this
     (setq handler handler1)))
 
-;; TODO I don't look this name too much
+;; TODO I don't like this name too much
 (defmethod rudel-transport-send ((this rudel-xmpp-transport) xml)
   ""
   (rudel-send this xml))
