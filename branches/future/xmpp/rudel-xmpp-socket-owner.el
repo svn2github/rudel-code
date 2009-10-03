@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: XMPP, backend, socket, Rudel
+;; Keywords: xmpp, backend, socket, Rudel
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -65,9 +65,9 @@ does not contains any incomplete stanzas."
        buffer))) ;; TODO wrong
   )
 ;; One problem: peer can send
-;; <stream:stream xmlns:stream="http://etherx.jabber.org/streams" 
-;;                xmlns="jabber:client" 
-;;                version="1.0" 
+;; <stream:stream xmlns:stream="http://etherx.jabber.org/streams"
+;;                xmlns="jabber:client"
+;;                version="1.0"
 ;;                from="gunhead">
 ;; and then
 ;; <stream:features/>
@@ -80,17 +80,18 @@ does not contains any incomplete stanzas."
 (defclass rudel-xmpp-socket-owner (rudel-assembling-socket-owner)
   ((assembly-function :initform 'rudel-xmpp-assemble-stream)
    (parse-function    :initform 'string->xml))
-  ""
+  "A socket owner that specializes in sending and receiving XMPP
+messages."
   :abstract t)
 
 (defmethod rudel-send ((this rudel-xmpp-socket-owner) string-or-xml)
   "Send STRING-OR-XML through the socket of THIS.
-STRING-OR_XML can be of type string or an XML tree in which case
+STRING-OR-XML can be of type string or an XML tree in which case
 it will be serialised and send."
   (with-slots (socket) this
     (process-send-string socket (if (stringp string-or-xml)
 				    string-or-xml
-				  (xml->string string-or-xml)))) ;; TODO send-next-method?
+				  (xml->string string-or-xml)))) ;; TODO call-next-method?
   )
 
 (provide 'rudel-xmpp-socket-owner)
