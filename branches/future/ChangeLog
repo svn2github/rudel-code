@@ -1,4 +1,38 @@
+2009-10-01  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/rudel-xmpp-tls.el (header): added commentary
+	(require rudel-tls): removed; require it when needed
+	(rudel-xmpp-state-tls-start): new class; state used to enable TLS
+	encryption for a connection
+	(rudel-xmpp-state-tls-start::rudel-enter): new method; enable TLS
+	encryption for the associated connection and switch to authenticated
+	state
+
+	* rudel-state-machine.el (rudel-state-wait): fixed progress range
+	[0, 100] -> [0, 1]; fixed reference to reporter object
+	* obby/rudel-obby.el (rudel-obby-send): removed remnants of calls
+	to `working-*' functions; call `progress-reporter-pulse' just
+	before `progress-reporter-done'
+
 2009-09-30  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-compat.el: only define pulsing progress reporter when
+	Emacs does not have one itself
+	(header): downcased keywords
+	(make-pulsing-progress-reporter): renamed
+	`make-progress-reporter-pulse' ->
+	`make-pulsing-progress-reporter'; cosmetic changes; explanatory
+	comment
+	(progress-reporter-pulse): added documentation string
+	Suggested by Phil Hagelberg
+
+	* rudel-compat.el (progress-pulse-values): new variable; indicator
+	strings used by pulsing progress reporter
+	(make-progress-reporter-pulse): new function; creates pulsing
+	progress reporter
+	(progress-reporter-pulse): new function; updates pulsing progress
+	reporter
+	Suggested by Phil Hagelberg
 
 	* xmpp/rudel-xmpp-socket-owner.el (header): downcased keywords
 	(rudel-xmpp-socket-owner::rudel-send): fixed documentation string
@@ -40,7 +74,59 @@
 	(rudel-xmpp-sasl-states): new variable; list of states used by the
 	SASL implementation; states are added to `rudel-xmpp-states'
 
+	* tests/rudel-integration-tests.el: new file; various tools for
+	integration tests
+
+	* doc/manual.xml: new file; docbook XML manual
+
+	* rudel-user.el: new file; Rudel user class
+	* rudel-document.el: new file; Rudel document class
+	* Project.ede (target compile): added rudel-user.el and
+	rudel-document.el
+
+	* xmpp/rudel-xmpp-socket-owner.el (rudel-xmpp-assemble-stream):
+	added line breaks in long comment
+
+	* Project.ede (target compile): added rudel-xml.el
+	* rudel-xml.el: new file; XML functions for Rudel
+
+	* infinote/rudel-infinote.el: new file; infinote backend main file
+	* infinote/rudel-infinote-util.el: new file; infinote backend
+	miscellaneous functions
+	* infinote/rudel-infinote-user.el: new file; infinote user class
+	* infinote/rudel-infinote-text-document.el: new file; infinote text
+	document class
+	* infinote/rudel-infinote-states.el: new file; infinote state base
+	classes
+	* infinote/rudel-infinote-operations.el: new file; infinote
+	operation classes
+	* infinote/rudel-infinote-group.el: new file; infinote communication
+	group base class
+	* infinote/rudel-infinote-group-text-document.el: new file; text
+	document communication group class
+	* infinote/rudel-infinote-group-document.el: new file; document
+	communication group class
+	* infinote/rudel-infinote-group-directory.el: new file; directory
+	communication group class
+	* infinote/rudel-infinote-document.el: new file; infinote document
+	class
+	* infinote/rudel-infinote-directory-document.el: new file; infinote
+	directory document class
+	* infinote/rudel-infinote-client.el: new file; infinote client
+	functionality
+	* infinote/doc/infinote-client-connection-states.cogre: new file;
+	state machine diagram for infinote client
+	* infinote/Project.ede: mew file; project file for
+	* Project.ede (target autoloads): added infinote directory
+
 2009-09-29  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* obby/rudel-obby-server.el
+	(rudel-obby-server-state-before-join::rudel-obby/net6_client_login):
+	accept two additional arguments: global-password and user-password
+
+	* rudel-session-initiation.el (rudel-configured-sessions):
+	improved documentation string
 
 	* ChangeLog: updated
 	* xmpp/rudel-xmpp.el: new file; XMPP transport backend
@@ -58,6 +144,10 @@
 	* xmpp/doc/rfc3920: new file; XMPP RFC
 	* xmpp/Project.ede: new file; project file for xmpp subproject
 	* Project.ede (target autoloads): added directory xmpp
+
+	* .bzrignore: new file; ignore byte-code (pattern *.elc)
+
+	* ChangeLog: fixed zapped content
 
 	* INSTALL (REQUIREMENTS): wording
 	(INSTALLING): mention other things that cause rudel to be

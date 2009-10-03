@@ -43,9 +43,9 @@
   (require 'cl))
 
 (require 'eieio)
-(require 'working)
 
 (require 'rudel-errors)
+(require 'rudel-compat) ;; for pulsing progress reporter
 
 
 ;;; Errors related to the state machine
@@ -296,21 +296,24 @@ when MACHINE deadlocks or cycles through states not in either
 list infinitely."
   ;; Wait until MACHINE enter a state in SUCCESS-STATES or
   ;; ERROR-STATES.
-  (let ((result
-	 (working-status-forms (concat message " (%s)") "done"
-	   (catch 'state-wait
-	     (while t
-	       ;; Retrieve current state.
-	       (destructuring-bind (symbol . state)
-		   (rudel-current-state machine t)
-		 ;; Check against success and error states.
-		 (when (memq symbol success-states)
-		   (throw 'state-wait (cons 'success (cons symbol state))))
-		 (when (memq symbol error-states)
-		   (throw 'state-wait (cons 'error   (cons symbol state))))
-		 ;; Update progress indicator and sleep.
-		 (working-dynamic-status nil symbol)
-		 (sleep-for 0.05)))))))
+  (let* ((reporter (make-pulsing-progress-reporter message))
+	 (result
+	  (catch 'state-wait
+	    (while t
+	      ;; Retrieve current state.
+	      (destructuring-bind (symbol . state)
+		  (rudel-current-state machine t)
+		;; Check against success and error states.
+		(when (memq symbol success-states)
+		  (throw 'state-wait (cons 'success (cons symbol state))))
+		(when (memq symbol error-states)
+		  (throw 'state-wait (cons 'error   (cons symbol state))))
+		;; Update progress indicator and sleep.
+		(progress-reporter-pulse 
+		 reporter (format "%s (%s)"  message symbol))
+		(sleep-for 0.05))))))
+    (progress-reporter-pulse reporter (concat message " "))
+    (progress-reporter-done reporter)
 
     ;; If MACHINE ended up in an error state, signal
     (unless (eq (car result) 'success)
