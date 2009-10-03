@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: XMPP, TLS, encryption, Rudel
+;; Keywords: rudel, xmpp, tls, encryption
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -46,11 +46,7 @@
 ;;; TLS state list
 ;;
 
-(setq rudel-xmpp-states
-      (append
-       rudel-xmpp-states
-       '(;; TLS states
-	 start-tls . rudel-xmlpp-start-tls-start)))
+(add-to-list 'rudel-xmpp-states '(start-tls . rudel-xmlpp-start-tls-start))
 
 (provide 'rudel-xmpp-tls)
 ;;; rudel-xmpp-starttls.el ends here
