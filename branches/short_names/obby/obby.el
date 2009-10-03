@@ -1,4 +1,4 @@
-;;; rudel-obby.el --- An obby backend for Rudel
+;;; obby.el --- An obby backend for Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -458,4 +458,4 @@ calling this function."
   '(rudel-zeroconf-register-service "_lobby._tcp" 'obby))
 
 (provide 'rudel/obby/obby)
-;;; rudel-obby.el ends here
+;;; obby.el ends here

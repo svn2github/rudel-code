@@ -1,4 +1,4 @@
-;;; rudel-obby-server.el --- Server component of the Rudel obby backend
+;;; server.el --- Server component of the Rudel obby backend
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -699,4 +699,4 @@ user. COLOR has to be sufficiently different from used colors."
       (list client-id doc-id))))
 
 (require 'rudel/obby/server)
-;;; rudel-obby-server.el ends here
+;;; server.el ends here

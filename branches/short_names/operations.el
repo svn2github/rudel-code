@@ -1,4 +1,4 @@
-;;; rudel-operations.el --- Rudel domain operations
+;;; operations.el --- Rudel domain operations
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -130,4 +130,4 @@ nil. nil means end of buffer")
   )
 
 (provide 'rudel/operations)
-;;; rudel-operations.el ends here
+;;; operations.el ends here

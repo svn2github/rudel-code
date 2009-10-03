@@ -9,6 +9,6 @@
 top=../
 ede_FILES=Project.ede Makefile
 
-zeroconf_LISP=rudel-zeroconf.el
+zeroconf_LISP=zeroconf.el
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file

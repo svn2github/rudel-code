@@ -1,4 +1,4 @@
-;;; rudel-obby-errors.el --- Error data used in the obby Rudel backend
+;;; errors.el --- Error data used in the obby Rudel backend
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -50,4 +50,4 @@
   "Error code for color already in use.")
 
 (require 'rudel/obby/errors)
-;;; rudel-obby-errors.el ends here
+;;; errors.el ends here

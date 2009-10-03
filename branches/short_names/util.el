@@ -1,4 +1,4 @@
-;;; rudel-util.el --- Miscellaneous functions for Rudel
+;;; util.el --- Miscellaneous functions for Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -252,4 +252,4 @@ rudel-dispatch-error is signalled."
   )
 
 (provide 'rudel/util)
-;;; rudel-util.el ends here
+;;; util.el ends here

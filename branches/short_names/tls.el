@@ -1,4 +1,4 @@
-;;; rudel-tls.el --- Start TLS protocol.
+;;; tls.el --- Start TLS protocol.
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -188,4 +188,4 @@ This only works if PROCESS has been created by
   )
 
 (provide 'rudel-tls)
-;;; rudel-tls.el ends here
+;;; tls.el ends here

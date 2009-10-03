@@ -1,4 +1,4 @@
-;;; rudel-zeroconf.el --- Zeroconf support for Rudel
+;;; zeroconf.el --- Zeroconf support for Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -250,4 +250,4 @@ type TYPE."
 		   'zeroconf 'rudel-zeroconf-backend)
 
 (provide 'rudel/zeroconf/zeroconf)
-;;; rudel-zeroconf.el ends here
+;;; zeroconf.el ends here

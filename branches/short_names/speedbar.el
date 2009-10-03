@@ -1,4 +1,4 @@
-;;; rudel-speedbar.el --- Speedbar rendering of Rudel objects
+;;; speedbar.el --- Speedbar rendering of Rudel objects
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -211,4 +211,4 @@ Argument DIR is the directory from which to derive the list of objects."
 
 (provide 'rudel-speedbar)
 
-;;; rudel-speedbar.el ends here
+;;; speedbar.el ends here

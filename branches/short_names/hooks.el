@@ -1,4 +1,4 @@
-;;; rudel-hooks.el --- Hooks for Rudel events
+;;; hooks.el --- Hooks for Rudel events
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -242,4 +242,4 @@ The arguments are the document and the buffer.")
 (rudel-hooks--install-handlers)
 
 (provide 'rudel/hooks)
-;;; rudel-hooks.el ends here
+;;; hooks.el ends here

@@ -1,4 +1,4 @@
-;;; rudel-errors.el --- Error data used in Rudel
+;;; errors.el --- Error data used in Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -63,4 +63,4 @@
      "Could not host session")
 
 (provide 'rudel/errors)
-;;; rudel-errors.el ends here
+;;; errors.el ends here

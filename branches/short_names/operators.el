@@ -1,4 +1,4 @@
-;;; rudel-operators.el --- Sets of modification operators for Rudel objects
+;;; operators.el --- Sets of modification operators for Rudel objects
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -169,4 +169,4 @@ be called.")
       (run-hook-with-args 'rudel-delete-hook buffer user position length))))
 
 (provide 'rudel/operators)
-;;; rudel-operators.el ends here
+;;; operators.el ends here

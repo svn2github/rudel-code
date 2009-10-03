@@ -1,4 +1,4 @@
-;;; rudel-obby-util.el --- Miscellaneous functions for the Rudel obby backend
+;;; util.el --- Miscellaneous functions for the Rudel obby backend
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -308,4 +308,4 @@ coding-system."
   )
 
 (require 'rudel/obby/util)
-;;; rudel-obby-util.el ends here
+;;; util.el ends here

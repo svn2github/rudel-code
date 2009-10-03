@@ -1,4 +1,4 @@
-;;; rudel-state-machine.el --- A simple state machine for Rudel
+;;; state-machine.el --- A simple state machine for Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -320,4 +320,4 @@ list infinitely."
   )
 
 (provide 'rudel-state-machine)
-;;; rudel-state-machine.el ends here
+;;; state-machine.el ends here

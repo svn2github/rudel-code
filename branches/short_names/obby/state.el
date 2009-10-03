@@ -1,4 +1,4 @@
-;;; rudel-obby-state.el --- Base class for states used in the obby backend
+;;; state.el --- Base class for states used in the obby backend
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -141,4 +141,4 @@ Display a warning if no such handler is found."
   )
 
 (require 'rudel/obby/state)
-;;; rudel-obby-state.el ends here
+;;; state.el ends here

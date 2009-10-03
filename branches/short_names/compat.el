@@ -1,4 +1,4 @@
-;;; rudel-compat.el --- Compatibility code for Rudel
+;;; compat.el --- Compatibility code for Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -43,4 +43,4 @@ You have to take care to only enter valid color names."
     (read-string prompt)))
 
 (provide 'rudel/compat)
-;;; rudel-compat.el ends here
+;;; compat.el ends here

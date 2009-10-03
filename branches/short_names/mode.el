@@ -1,4 +1,4 @@
-;;; rudel-mode.el --- Global and buffer-local Rudel minor modes
+;;; mode.el --- Global and buffer-local Rudel minor modes
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -571,4 +571,4 @@ otherwise, turn it off."
   )
 
 (provide 'rudel-mode)
-;;; rudel-mode.el ends here
+;;; mode.el ends here

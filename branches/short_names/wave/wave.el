@@ -1,4 +1,4 @@
-;;; rudel-wave.el --- A Wave backend for Rudel
+;;; wave.el --- A Wave backend for Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -74,4 +74,4 @@ connections.")
 		   'wave 'rudel-wave-backend)
 
 (provide 'rudel/wave/wave)
-;;; rudel-wave.el ends here
+;;; wave.el ends here

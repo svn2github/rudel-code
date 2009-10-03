@@ -1,4 +1,4 @@
-;;; rudel-overlay.el --- Overlay functions for Rudel
+;;; overlay.el --- Overlay functions for Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -271,4 +271,4 @@ latter case, FACE is returned unmodified."
       (mapc #'rudel-overlay-author-update (rudel-overlays)))))
 
 (provide 'rudel/overlay)
-;;; rudel-overlay.el ends here
+;;; overlay.el ends here

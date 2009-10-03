@@ -1,4 +1,4 @@
-;;; rudel-telepathy.el --- A telepathy backend for Rudel
+;;; telepathy.el --- A telepathy backend for Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -34,7 +34,7 @@
 
 (require 'eieio)
 
-(require 'rudel)
+(require 'rudel/rudel)
 
 
 ;;;  Class rudel-telepathy-backend
@@ -52,5 +52,5 @@
 (add-to-list 'rudel-backends
 	     (cons "telepathy" 'rudel-telepathy-backend))
 
-(provide 'rudel-telepathy)
-;;; rudel-telepathy.el ends here
+(provide 'rudel/telepathy/telepathy)
+;;; telepathy.el ends here

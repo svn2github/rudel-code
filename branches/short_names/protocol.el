@@ -1,4 +1,4 @@
-;;; rudel-protocol.el --- Interface implemented by Rudel protocol backends
+;;; protocol.el --- Interface implemented by Rudel protocol backends
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -80,4 +80,4 @@ Return a property list that contains the collected information.")
   "Create a new document object named NAME for SESSION.")
 
 (provide 'rudel/protocol)
-;;; rudel-protocol.el ends here
+;;; protocol.el ends here

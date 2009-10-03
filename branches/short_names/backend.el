@@ -1,4 +1,4 @@
-;;; rudel-backend.el --- A generic backend management mechanism for Rudel
+;;; backend.el --- A generic backend management mechanism for Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -299,4 +299,4 @@ available information available for the backends"
   )
 
 (provide 'rudel/backend)
-;;; rudel-backend.el ends here
+;;; backend.el ends here

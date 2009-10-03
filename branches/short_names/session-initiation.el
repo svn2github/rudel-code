@@ -1,4 +1,4 @@
-;;; rudel-session-initiation.el --- Session discovery and advertising functions
+;;; session-initiation.el --- Session discovery and advertising functions
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -212,4 +212,4 @@ required by the chosen backend.")
 		   'ask-protocol 'rudel-ask-protocol-backend)
 
 (provide 'rudel/session-initiation)
-;;; rudel-session-initiation.el ends here
+;;; session-initiation.el ends here

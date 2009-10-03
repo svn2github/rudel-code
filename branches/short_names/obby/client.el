@@ -1,4 +1,4 @@
-;;; rudel-obby-client.el --- Client functions of the Rudel obby backend
+;;; client.el --- Client functions of the Rudel obby backend
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -861,4 +861,4 @@ nothing else."
   )
 
 (require 'rudel/obby/client)
-;;; rudel-obby-client.el ends here
+;;; client.el ends here

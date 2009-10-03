@@ -1,4 +1,4 @@
-;;; rudel-interactive.el --- User interaction functions for Rudel.
+;;; interactive.el --- User interaction functions for Rudel.
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -178,4 +178,4 @@ return the name as string."
   (get-buffer-create (generate-new-buffer-name name)))
 
 (provide 'rudel/interactive)
-;;; rudel-interactive.el ends here
+;;; interactive.el ends here
