@@ -10,10 +10,10 @@ top=
 ede_FILES=Project.ede Makefile
 
 EMACS=emacs
-LOADPATH= ../../opt/emacs/share/emacs/site-lisp/cedet/common/
+LOADPATH= /home/jan/opt/emacs/share/emacs/site-lisp/cedet/common/
 LOADDEFS=rudel-loaddefs.el
 LOADDIRS=. jupiter obby wave zeroconf
-rudel_LISP=rudel.el rudel-util.el rudel-mode.el rudel-interactive.el rudel-overlay.el rudel-speedbar.el rudel-operators.el rudel-operations.el rudel-compat.el rudel-tls.el rudel-errors.el rudel-state-machine.el rudel-backend.el rudel-protocol.el rudel-session-initiation.el rudel-icons.el rudel-hooks.el
+rudel_LISP=rudel.el backend.el compat.el errors.el hooks.el icons.el interactive.el mode.el operations.el operators.el overlay.el protocol.el session-initiation.el speedbar.el state-machine.el tls.el util.el
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file
 VERSION=0.2

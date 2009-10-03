@@ -1,4 +1,4 @@
-;; Object rudel/obby
+;; Object rudel/zeroconf
 ;; EDE project file.
 (ede-proj-project "rudel/zeroconf"
   :name "zeroconf"
@@ -7,7 +7,7 @@
    (ede-proj-target-elisp "zeroconf"
     :name "zeroconf"
     :path ""
-    :source '("rudel-zeroconf.el")
+    :source '("zeroconf.el")
     :aux-packages '("rudel")
     )
    )

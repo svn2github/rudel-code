@@ -241,5 +241,5 @@ The arguments are the document and the buffer.")
 
 (rudel-hooks--install-handlers)
 
-(provide 'rudel-hooks)
+(provide 'rudel/hooks)
 ;;; rudel-hooks.el ends here

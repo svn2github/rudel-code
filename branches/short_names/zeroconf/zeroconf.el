@@ -47,8 +47,8 @@
 
 (require 'zeroconf)
 
-(require 'rudel-backend)
-(require 'rudel-session-initiation)
+(require 'rudel/backend)
+(require 'rudel/session-initiation)
 
 
 ;;; Constants and global variables
@@ -249,5 +249,5 @@ type TYPE."
 (rudel-add-backend (rudel-backend-get-factory 'session-initiation)
 		   'zeroconf 'rudel-zeroconf-backend)
 
-(provide 'rudel-zeroconf)
+(provide 'rudel/zeroconf/zeroconf)
 ;;; rudel-zeroconf.el ends here

@@ -48,7 +48,7 @@
 
 (require 'eieio)
 
-(require 'rudel-overlay)
+(require 'rudel/overlay)
 
 
 ;;; Class rudel-document-operators
@@ -127,7 +127,7 @@ buffer.")
       (unless position
 	(with-current-buffer buffer
 	  (setq position (- (point-max) (length data) 1))))
-	
+
 
       (rudel-update-author-overlay-after-insert
        buffer (+ position 1) (length data) user)))
@@ -148,7 +148,7 @@ buffer.")
   ((document :initarg  :document
 	     :type     rudel-document-child
 	     :documentation
-	     "The document object to which operations refer.")   
+	     "The document object to which operations refer.")
    (user     :initarg  :user
 	     :type     rudel-user-child
 	     :documentation
@@ -168,5 +168,5 @@ be called.")
     (with-slots (buffer) document
       (run-hook-with-args 'rudel-delete-hook buffer user position length))))
 
-(provide 'rudel-operators)
+(provide 'rudel/operators)
 ;;; rudel-operators.el ends here

@@ -3,11 +3,11 @@
 (ede-proj-project "rudel/wave"
   :name "wave"
   :file "Project.ede"
-  :targets (list
+  :targets (list 
    (ede-proj-target-elisp "wave"
     :name "wave"
     :path ""
-    :source '("rudel-wave.el")
+    :source '("wave.el")
     :aux-packages '("rudel")
     )
    )

@@ -1,4 +1,4 @@
-;;; rudel-icons.el --- Icons used by Rudel
+;;; icons.el --- Icons used by Rudel
 ;;
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
@@ -47,7 +47,7 @@
 (defconst rudel-icons-directory
   (file-name-as-directory
    (concat (file-name-directory
-	    (locate-library "rudel-icons.el"))
+	    (locate-library "rudel/icons.el"))
 	   "icons"))
   "Directory that holds Rudel icon files.")
 
@@ -86,5 +86,5 @@ associate with the image."
 (rudel-defimage "plaintext")
 (rudel-defimage "encrypted")
 
-(provide 'rudel-icons)
-;;; rudel-icons.el ends here
+(provide 'rudel/icons)
+;;; icons.el ends here

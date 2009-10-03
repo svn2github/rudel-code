@@ -298,5 +298,5 @@ available information available for the backends"
      (oref rudel-backend-factory factories)))
   )
 
-(provide 'rudel-backend)
+(provide 'rudel/backend)
 ;;; rudel-backend.el ends here

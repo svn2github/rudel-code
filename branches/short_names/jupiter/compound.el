@@ -1,4 +1,4 @@
-;;; jupiter-compound.el --- Jupiter compound operation
+;;; compound.el --- Jupiter compound operation
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -38,7 +38,7 @@
 
 (require 'eieio)
 
-(require 'jupiter-operation)
+(require 'rudel/jupiter/operation)
 
 
 ;;; Class jupiter-compound
@@ -78,5 +78,5 @@ number of child operation.")
       (setq other (jupiter-transform child other)))
     other))
 
-(provide 'jupiter-compound)
-;;; jupiter-compound.el ends here
+(provide 'rudel/jupiter/compound)
+;;; compound.el ends here

@@ -1,9 +1,9 @@
-;;; rudel-errors.el --- Error data used in Rudel
+;;; rudel-compat.el --- Compatibility code for Rudel
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, errors, conditions
+;; Keywords: Rudel, compatibility
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -24,12 +24,8 @@
 
 ;;; Commentary:
 ;;
-;; The following condition hierarchy is defined:
-;;
-;; error
-;; +- rudel-error
-;;    +- rudel-join-error
-;;    +- rudel-host-error
+;; This file contains compatibility code required to make Rudel work
+;; with different versions of Emacs.
 
 
 ;;; History:
@@ -40,27 +36,11 @@
 ;;; Code:
 ;;
 
-;; rudel-join-error
+(unless (fboundp 'read-color)
+  (defun read-color (prompt &rest ignored)
+    "Poor man's read color without completion.
+You have to take care to only enter valid color names."
+    (read-string prompt)))
 
-(intern "rudel-join-error")
-
-(put 'rudel-join-error 'error-conditions
-     '(error
-       rudel-error rudel-join-error))
-
-(put 'rudel-join-error 'error-message
-     "Could not join session")
-
-;; rudel-host-error
-
-(intern "rudel-host-error")
-
-(put 'rudel-host-error 'error-conditions
-     '(error
-       rudel-error rudel-host-error))
-
-(put 'rudel-host-error 'error-message
-     "Could not host session")
-
-(provide 'rudel-errors)
-;;; rudel-errors.el ends here
+(provide 'rudel/compat)
+;;; rudel-compat.el ends here

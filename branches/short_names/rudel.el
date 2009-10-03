@@ -46,18 +46,18 @@
 
 (require 'eieio-speedbar) ;; TODO required for now
 
-(require 'rudel-util)
-(require 'rudel-backend)
-(require 'rudel-session-initiation)
-(require 'rudel-operations)
-(require 'rudel-operators)
-(require 'rudel-overlay)
-(require 'rudel-hooks)
-(require 'rudel-interactive) ;; for `rudel-read-backend',
+(require 'rudel/util)
+(require 'rudel/backend)
+(require 'rudel/session-initiation)
+(require 'rudel/operations)
+(require 'rudel/operators)
+(require 'rudel/overlay)
+(require 'rudel/hooks)
+(require 'rudel/interactive) ;; for `rudel-read-backend',
 			     ;; `rudel-read-document',
 			     ;; `rudel-read-session'
-(require 'rudel-icons)
-(require 'rudel-compat) ;; for `read-color' replacement
+(require 'rudel/icons)
+(require 'rudel/compat) ;; for `read-color' replacement
 
 
 ;;; Global variables
@@ -838,13 +838,14 @@ interactively."
 	 (server))
 
     ;; Try to create the server
-    (condition-case error-data
+    ;(condition-case error-data
 	(setq server (rudel-host backend info))
-      ('error
-       (error "Could not host session using backend `%s' with %s: %s"
-	      (object-name-string backend)
-	      info
-	      (car error-data))))
+      ;; ('error
+      ;;  (error "Could not host session using backend `%s' with %s: %s"
+      ;; 	      (object-name-string backend)
+      ;; 	      info
+      ;; 	      (car error-data))))
+
     server))
 
 ;;;###autoload
@@ -984,5 +985,5 @@ If BUFFER is nil, the current is used."
       (rudel-unsubscribe-from connection document)))
   )
 
-(provide 'rudel)
+(provide 'rudel/rudel)
 ;;; rudel.el ends here

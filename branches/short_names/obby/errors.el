@@ -1,9 +1,9 @@
-;;; rudel-compat.el --- Compatibility code for Rudel
+;;; rudel-obby-errors.el --- Error data used in the obby Rudel backend
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, compatibility
+;; Keywords: Rudel, obby, errors
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -24,23 +24,30 @@
 
 ;;; Commentary:
 ;;
-;; This file contains compatibility code required to make Rudel work
-;; with different versions of Emacs.
+;; This file contains definitions of error conditions and numeric
+;; error codes used in the Rudel obby backend.
 
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision
+;; 0.1 - Initial revision.
 
 
 ;;; Code:
 ;;
 
-(unless (fboundp 'read-color)
-  (defun read-color (prompt &rest ignored)
-    "Poor man's read color without completion.
-You have to take care to only enter valid color names."
-    (read-string prompt)))
+
+;;; Obby protocol error codes
+;;
 
-(provide 'rudel-compat)
-;;; rudel-compat.el ends here
+(defconst rudel-obby-error-username-invalid #x0001
+  "Error code for invalid username.")
+
+(defconst rudel-obby-error-username-in-use #x0002
+  "Error code for username already in use.")
+
+(defconst rudel-obby-error-color-in-use #x0100
+  "Error code for color already in use.")
+
+(require 'rudel/obby/errors)
+;;; rudel-obby-errors.el ends here

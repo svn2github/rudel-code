@@ -36,8 +36,8 @@
 ;;; Code:
 ;;
 
-(require 'rudel-backend)
-(require 'rudel-protocol)
+(require 'rudel/backend)
+(require 'rudel/protocol)
 
 
 ;;; Constants
@@ -73,5 +73,5 @@ connections.")
 (rudel-add-backend (rudel-backend-get-factory 'protocol)
 		   'wave 'rudel-wave-backend)
 
-(provide 'rudel-wave)
+(provide 'rudel/wave/wave)
 ;;; rudel-wave.el ends here

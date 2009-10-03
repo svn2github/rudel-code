@@ -3,11 +3,11 @@
 (ede-proj-project "rudel/jupiter"
   :name "jupiter"
   :file "Project.ede"
-  :targets (list 
+  :targets (list
    (ede-proj-target-elisp "jupiter"
     :name "jupiter"
     :path ""
-    :source '("jupiter.el" "jupiter-operation.el" "jupiter-insert.el" "jupiter-delete.el" "jupiter-compound.el" "jupiter-nop.el")
+    :source '("jupiter.el" "operation.el" "insert.el" "delete.el" "compound.el" "nop.el")
     :aux-packages '("rudel")
     )
    )

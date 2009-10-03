@@ -35,7 +35,7 @@
 ;;; Code:
 ;;
 
-(require 'rudel-compat) ;; for `read-color' replacement
+(require 'rudel/compat) ;; for `read-color' replacement
 
 
 ;;; Function for reading Rudel objects from the user.
@@ -177,5 +177,5 @@ return the name as string."
   "When the requested buffer NAME exists, create another buffer."
   (get-buffer-create (generate-new-buffer-name name)))
 
-(provide 'rudel-interactive)
+(provide 'rudel/interactive)
 ;;; rudel-interactive.el ends here

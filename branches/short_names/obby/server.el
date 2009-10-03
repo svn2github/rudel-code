@@ -41,8 +41,8 @@
 
 (require 'jupiter)
 
-(require 'rudel-obby-errors)
-(require 'rudel-obby-util)
+(require 'rudel/obby/errors)
+(require 'rudel/obby/util)
 
 
 ;;; Class rudel-obby-client
@@ -698,5 +698,5 @@ user. COLOR has to be sufficiently different from used colors."
     (with-slots ((doc-id :id)) document
       (list client-id doc-id))))
 
-(provide 'rudel-obby-server)
+(require 'rudel/obby/server)
 ;;; rudel-obby-server.el ends here

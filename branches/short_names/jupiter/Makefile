@@ -9,7 +9,7 @@
 top=../
 ede_FILES=Project.ede Makefile
 
-jupiter_LISP=jupiter.el jupiter-operation.el jupiter-insert.el jupiter-delete.el jupiter-compound.el jupiter-nop.el
+jupiter_LISP=jupiter.el operation.el insert.el delete.el compound.el nop.el
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file
 LOADPATH= ../

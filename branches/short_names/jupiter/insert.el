@@ -1,4 +1,4 @@
-;;; jupiter-insert.el --- Jupiter insert operation
+;;; insert.el --- Jupiter insert operation
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -38,8 +38,8 @@
 
 (require 'eieio)
 
-(require 'rudel-operations)
-(require 'jupiter-operation)
+(require 'rudel/operations)
+(require 'rudel/upiter/operation)
 
 
 ;;; Class jupiter-insert
@@ -150,5 +150,5 @@
 	     (object-class other))))
   other)
 
-(provide 'jupiter-insert)
-;;; jupiter-insert.el ends here
+(provide 'rudel/jupiter/insert)
+;;; insert.el ends here

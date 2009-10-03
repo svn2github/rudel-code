@@ -1,4 +1,4 @@
-;;; jupiter-delete.el --- Jupiter delete operation
+;;; delete.el --- Jupiter delete operation
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
@@ -38,8 +38,8 @@
 
 (require 'eieio)
 
-(require 'rudel-operations)
-(require 'jupiter-operation)
+(require 'rudel/operations)
+(require 'rudel/jupiter/operation)
 
 
 ;;; Class jupiter-delete
@@ -62,7 +62,7 @@ OTHER is destructively modified or replaced."
     (with-slots ((this-from :from) (this-to :to) (this-length :length)) this
       (with-slots ((other-from :from) (other-to :to) (other-length :length)) other
 	(cond
-	 ;; 
+	 ;;
 	 ;; <other>
 	 ;;         <this>
 	 ;;
@@ -96,7 +96,7 @@ OTHER is destructively modified or replaced."
 	 ((> other-from this-to)
 	  (decf other-from this-length)
 	  (decf other-to   this-length))
-	 
+
 	 ;; <other>
 	 ;;         <this>
 	 ;; OTHER deleted a region before the region affected by
@@ -132,7 +132,7 @@ OTHER is destructively modified or replaced."
 	 ;; be executed.
 	 ((and (>= other-from this-from) (<= other-to this-to))
 	  (setq other (jupiter-nop "nop")))
-	 
+
 	 (t (error "logic error in jupiter-delete::transform(jupiter-delete)"))
 	 ))))
 
@@ -154,5 +154,5 @@ OTHER is destructively modified or replaced."
 	     (object-class other))))
   other)
 
-(provide 'jupiter-delete)
-;;; jupiter-delete.el ends here
+(provide 'rudel/jupiter/delete)
+;;; delete.el ends here

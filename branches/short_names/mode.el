@@ -51,8 +51,8 @@
 (require 'easy-mmode)
 (require 'easymenu)
 
-(require 'rudel)
-(require 'rudel-hooks)
+(require 'rudel/rudel)
+(require 'rudel/hooks)
 
 
 ;;; Customization Options

@@ -47,7 +47,7 @@
 
 (require 'eieio)
 
-(require 'rudel-backend)
+(require 'rudel/backend)
 
 
 ;;; Class rudel-protocol-backend
@@ -79,5 +79,5 @@ Return a property list that contains the collected information.")
 				 name session)
   "Create a new document object named NAME for SESSION.")
 
-(provide 'rudel-protocol)
+(provide 'rudel/protocol)
 ;;; rudel-protocol.el ends here

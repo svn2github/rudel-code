@@ -41,7 +41,7 @@
 (require 'eieio)
 
 (require 'rudel)
-(require 'rudel-util)
+(require 'rudel/util)
 
 (require 'jupiter)
 
@@ -307,5 +307,5 @@ coding-system."
        ,@forms))
   )
 
-(provide 'rudel-obby-util)
+(require 'rudel/obby/util)
 ;;; rudel-obby-util.el ends here

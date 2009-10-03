@@ -38,10 +38,10 @@
 
 (require 'eieio)
 
-(require 'rudel-util)
-(require 'rudel-state-machine)
+(require 'rudel/util)
+(require 'rudel/state/machine)
 
-(require 'rudel-obby-util)
+(require 'rudel/obby/util)
 
 
 ;;; Class rudel-obby-state
@@ -140,5 +140,5 @@ Display a warning if no such handler is found."
 	  nil))))
   )
 
-(provide 'rudel-obby-state)
+(require 'rudel/obby/state)
 ;;; rudel-obby-state.el ends here

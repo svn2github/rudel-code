@@ -1,9 +1,9 @@
-;;; jupiter-nop.el --- Jupiter no operation
+;;; operation.el --- Operation base class for jupiter algorithm
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Jupiter, operation, nop
+;; Keywords: Jupiter, operation, base
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -24,8 +24,8 @@
 
 ;;; Commentary:
 ;;
-;; Class jupiter-nop implements a no-operation for the Jupiter
-;; algorithm.
+;; The class jupiter-operation is a base class for Jupiter operation
+;; classes.
 
 
 ;;; History:
@@ -38,22 +38,24 @@
 
 (require 'eieio)
 
-(require 'jupiter-operation)
+(require 'rudel/operations)
 
 
-;;; Class jupiter-nop
+;;; Class jupiter-operation
 ;;
 
-(defclass jupiter-nop (jupiter-operation)
+(defclass jupiter-operation (rudel-operation)
   ()
-  "Operation, which does not change anything.")
+  "Objects of derived classes represent operations, which change documents.
+Objects can transform each other to produce sequences of
+operations, which produce identical changes than permutations of
+the same operations."
+  :abstract t)
 
-(defmethod rudel-apply ((this jupiter-nop) object)
-  "Applying THIS does not change OBJECT.")
+;; This one really could use multiple dispatch
+(defgeneric jupiter-transform ((this jupiter-operation) other)
+  "Transform OTHER such that the effect of applying it after THIS are equal to applying OTHER before THIS unmodified.
+In general, OTHER is destructively modified or replaced.")
 
-(defmethod jupiter-transform ((this jupiter-nop) other)
-  "Transforming OTHER with THIS simply returns OTHER."
-  other)
-
-(provide 'jupiter-nop)
-;;; jupiter-nop.el ends here
+(provide 'rudel/jupiter/operation)
+;;; operation.el ends here

@@ -1,9 +1,9 @@
-;;; rudel-obby-errors.el --- Error data used in the obby Rudel backend
+;;; nop.el --- Jupiter no operation
 ;;
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, obby, errors
+;; Keywords: Jupiter, operation, nop
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -24,8 +24,8 @@
 
 ;;; Commentary:
 ;;
-;; This file contains definitions of error conditions and numeric
-;; error codes used in the Rudel obby backend.
+;; Class jupiter-nop implements a no-operation for the Jupiter
+;; algorithm.
 
 
 ;;; History:
@@ -36,18 +36,24 @@
 ;;; Code:
 ;;
 
+(require 'eieio)
+
+(require 'rudel/jupiter/operation)
+
 
-;;; Obby protocol error codes
+;;; Class jupiter-nop
 ;;
 
-(defconst rudel-obby-error-username-invalid #x0001
-  "Error code for invalid username.")
+(defclass jupiter-nop (jupiter-operation)
+  ()
+  "Operation, which does not change anything.")
 
-(defconst rudel-obby-error-username-in-use #x0002
-  "Error code for username already in use.")
+(defmethod rudel-apply ((this jupiter-nop) object)
+  "Applying THIS does not change OBJECT.")
 
-(defconst rudel-obby-error-color-in-use #x0100
-  "Error code for color already in use.")
+(defmethod jupiter-transform ((this jupiter-nop) other)
+  "Transforming OTHER with THIS simply returns OTHER."
+  other)
 
-(provide 'rudel-obby-errors)
-;;; rudel-obby-errors.el ends here
+(provide 'rudel/jupiter/nop)
+;;; nop.el ends here

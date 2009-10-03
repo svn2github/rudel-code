@@ -270,5 +270,5 @@ latter case, FACE is returned unmodified."
     (with-current-buffer buffer
       (mapc #'rudel-overlay-author-update (rudel-overlays)))))
 
-(provide 'rudel-overlay)
+(provide 'rudel/overlay)
 ;;; rudel-overlay.el ends here

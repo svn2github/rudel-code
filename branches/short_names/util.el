@@ -40,7 +40,7 @@
 
 (require 'eieio)
 
-(require 'rudel-errors)
+(require 'rudel/errors)
 
 
 ;;; Errors
@@ -251,5 +251,5 @@ rudel-dispatch-error is signalled."
 	 (signal (car error) (cdr error))))))
   )
 
-(provide 'rudel-util)
+(provide 'rudel/util)
 ;;; rudel-util.el ends here

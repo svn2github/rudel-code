@@ -44,12 +44,12 @@
 
 (require 'eieio)
 
-(require 'rudel)
-(require 'rudel-backend)
-(require 'rudel-protocol)
-(require 'rudel-util)
-(require 'rudel-icons)
-(require 'rudel-compat) ;; for `read-color' replacement
+(require 'rudel/rudel)
+(require 'rudel/backend)
+(require 'rudel/protocol)
+(require 'rudel/util)
+(require 'rudel/icons)
+(require 'rudel/compat) ;; for `read-color' replacement
 
 
 ;;; Constants
@@ -114,7 +114,7 @@ connections and creates obby servers.")
   "Connect to an obby server using the information INFO.
 Return the connection object."
   ;; Before we start, load the client functionality.
-  (require 'rudel-obby-client)
+  (require 'rudel/obby/client)
 
   ;; Create the network process
   (let* ((session    (plist-get info :session))
@@ -125,7 +125,7 @@ Return the connection object."
 	 (socket     (funcall
 		      (if encryption
 			  (progn
-			    (require 'rudel-tls)
+			    (require 'rudel/tls)
 			    #'rudel-tls-make-process)
 			#'make-network-process)
 		      :name     host
@@ -175,7 +175,7 @@ Return the connection object."
   "Host an obby session using the information INFO.
 Return the created server."
   ;; Before we start, we load the server functionality.
-  (require 'rudel-obby-server)
+  (require 'rudel/obby/server)
 
   ;; Create the network process.
   (let* ((port   (plist-get info :port))
@@ -457,5 +457,5 @@ calling this function."
 (eval-after-load 'rudel-zeroconf
   '(rudel-zeroconf-register-service "_lobby._tcp" 'obby))
 
-(provide 'rudel-obby)
+(provide 'rudel/obby/obby)
 ;;; rudel-obby.el ends here

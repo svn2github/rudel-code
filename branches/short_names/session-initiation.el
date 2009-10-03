@@ -57,7 +57,7 @@
 
 (require 'eieio)
 
-(require 'rudel-backend)
+(require 'rudel/backend)
 
 
 ;;; Variables and customization options
@@ -211,5 +211,5 @@ required by the chosen backend.")
 (rudel-add-backend (rudel-backend-get-factory 'session-initiation)
 		   'ask-protocol 'rudel-ask-protocol-backend)
 
-(provide 'rudel-session-initiation)
+(provide 'rudel/session-initiation)
 ;;; rudel-session-initiation.el ends here

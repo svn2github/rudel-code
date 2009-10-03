@@ -129,5 +129,5 @@ nil. nil means end of buffer")
    (t (call-next-method)))
   )
 
-(provide 'rudel-operations)
+(provide 'rudel/operations)
 ;;; rudel-operations.el ends here

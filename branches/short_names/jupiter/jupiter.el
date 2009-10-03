@@ -46,11 +46,11 @@
 
 (require 'eieio)
 
-(require 'jupiter-operation)
-(require 'jupiter-insert)
-(require 'jupiter-delete)
-(require 'jupiter-compound)
-(require 'jupiter-nop)
+(require 'rudel/jupiter/operation)
+(require 'rudel/jupiter/insert)
+(require 'rudel/jupiter/delete)
+(require 'rudel/jupiter/compound)
+(require 'rudel/jupiter/nop)
 
 
 ;;; Class jupiter-context
@@ -122,5 +122,5 @@ site is referring to."
     transformed-operation)
   )
 
-(provide 'jupiter)
+(provide 'rudel/jupiter/jupiter)
 ;;; jupiter.el ends here

@@ -41,12 +41,12 @@
 
 (require 'jupiter)
 
-(require 'rudel-state-machine)
-(require 'rudel-operations)
+(require 'rudel/state/machine)
+(require 'rudel/operations)
 
-(require 'rudel-obby-errors)
-(require 'rudel-obby-util)
-(require 'rudel-obby-state)
+(require 'rudel/obby/errors)
+(require 'rudel/obby/util)
+(require 'rudel/obby/state)
 
 
 ;;; Class rudel-obby-client-state-new
@@ -860,5 +860,5 @@ nothing else."
     (rudel-remote-operation document user transformed))
   )
 
-(provide 'rudel-obby-client)
+(require 'rudel/obby/client)
 ;;; rudel-obby-client.el ends here
