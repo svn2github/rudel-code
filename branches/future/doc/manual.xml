@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE article [
+<!ENTITY rudel              "<application>Rudel</application>">
+<!ENTITY rudel-project-page "<uri>http://sourceforge.net/projects/rudel/</uri>">
+
+<!ENTITY emacs              "<application>GNU Emacs</application>">
+<!ENTITY xemacs             "<application>XEmacs</application>">
+<!ENTITY gnus               "<application>Gnus</application>">
+<!ENTITY gobby              "<application>Gobby</application>">
+<!ENTITY obby               "obby">
+<!ENTITY infinote           "infinote">
+<!ENTITY cedet              "<application>CEDET</application>">
+<!ENTITY gnutls             "<application>GnuTLS</application>">
+
+<!ENTITY control            "<keycap function='control'>C</keycap>">
+<!ENTITY enter              "<keycap function='enter'>RET</keycap>">
+<!ENTITY prefix             "<keycombo action='seq'><keycombo action='simul'>&control; <keycap>c</keycap></keycombo> <keycap>c</keycap></keycombo>">
+]>
+
+<!-- <reference xmlns="http://docbook.org/ns/docbook">
+  <title>Bla</title>
+  < -->
+
+<!-- <refentry xmlns="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle></refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>&rudel;</refname>
+    <refpurpose>A collaborative editing environment for &emacs;</refpurpose>
+  </refnamediv> -->
+
+<article xmlns="http://docbook.org/ns/docbook"
+	 xml:lang="en">
+
+  <title>
+    Rudel Reference Manual
+  </title>
+
+  <info>
+    <author>
+      <personname>
+	<surname>Moringen</surname>
+	<firstname>Jan</firstname>
+      </personname>
+      <email>scymtym@users.sourceforge.net</email>
+    </author>
+  </info>
+
+  <section>
+    <title>User Documentation</title>
+
+    <section>
+      <title>Introduction</title>
+      <para>
+	&rudel; is collaborative editing environment for &emacs;. Its
+	purpose is to share buffers with other users in order to edit
+	the contents of those buffers collaboratively. &rudel;
+	supports multiple backends to enable communication with other
+	collaborative editors using different protocols.
+      </para>
+
+      <para>
+	Since &rudel; is not an application, but an extension to
+	&emacs;, it is not started and used like most applications (not
+	even &emacs; applications like &gnus;). &rudel; mostly works
+	in the background to change the behavior of the set of &emacs;
+	buffers for which it has been activated.
+      </para>
+
+      <para>
+	The user interface consists of a set of key bindings, a menu
+	entry and some visual status indicators, which are added to
+	the text and mode line of buffers for which &rudel; has been
+	activated.
+      </para>
+
+      <screenshot>
+	<title>&rudel; client with Gobby server (and client)</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata
+		fileref="../screenshots/screenshot 1.png"
+		width="80%"
+		align="center"/>
+	  </imageobject>
+	</mediaobject>
+      </screenshot>
+    </section>
+
+    <section>
+      <title>Concepts</title>
+      <variablelist>
+	<varlistentry>
+	  <term>Session</term>
+	  <listitem>
+	    <para>
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Session Initialization</term>
+	  <listitem>
+	    <para>
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Backend</term>
+	  <listitem>
+	    <para>
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Document</term>
+	  <listitem>
+	    <para>
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>Installation</title>
+
+      <para>
+	&rudel; is developed and tested only with &emacs; and
+	therefore unlikely to run on other Emacs variants like
+	&xemacs;.
+      </para>
+
+      <section>
+	<title>Requirements</title>
+
+	<para>
+	  To use &rudel;, the following additional software is
+	  required:
+
+	  <variablelist>
+	    <varlistentry>
+	      <term>
+		<application>Collection of Emacs Development
+		Environment Tools</application>
+		<acronym>CEDET</acronym>
+	      </term>
+
+	      <listitem>
+		<para>
+		  &cedet; contains the object system
+		  <acronym>Eieio</acronym>, which is used in &rudel;'s
+		  object-oriented implementation. &cedet; can be
+		  obtained from
+		  <uri>"http://cedet.sourceforge.net/"</uri>
+		</para>
+
+		<important>
+		  <para>
+		    It is necessary to use at least the 1.0pre6
+		    version of &cedet; since it fixes a serious
+		    problem in the object system Eieio.
+		  </para>
+		</important>
+	      </listitem>
+	    </varlistentry>
+
+	    <varlistentry>
+	      <term>
+		<application>Emacs Lisp Regression
+		Testing</application> <acronym>ERT</acronym>
+		(optional)
+	      </term>
+
+	      <listitem>
+		<para>
+		  <application>ERT</application> is only used for
+		  regression tests and therefore an optional
+		  dependency. It can be obtained here:
+		  <uri>http://www.emacswiki.org/emacs/ErtTestLibrary</uri>
+		  or here: <uri>git://github.com/ohler/ert.git</uri>
+		</para>
+	      </listitem>
+	    </varlistentry>
+
+	    <varlistentry>
+	      <term>
+		&gnutls; (optional)
+	      </term>
+
+	      <listitem>
+		<para>
+		  Encrypted connections to Gobby servers require the
+		  <command>gnutls-cli</command> program.
+		</para>
+	      </listitem>
+	    </varlistentry>
+
+	  </variablelist>
+
+	</para>
+      </section>
+
+      <section>
+	<title>Download</title>
+
+	<para>
+	  To install &rudel;, download a releases version or the
+	  current development version from &rudel-project-page; and place
+	  the code in any directory you like.
+	</para>
+      </section>
+
+      <section xml:id="section_dot_file">
+	<title>Dot file</title>
+
+	<para>
+	  If your &emacs; load path does not already contain the
+	  directory in which the code resides, add the following to
+	  your <filename>.emacs</filename> file (assuming the code
+	  resides in a directory called
+	  <filename><replaceable>SOMEDIR</replaceable>/rudel</filename>):
+
+	  <programlisting language="Emacs Lisp" linenumbering="numbered">
+	    (<function>add-to-list</function> <varname>'load-path</varname> <constant>"<replaceable>SOMEDIR</replaceable>/rudel/"</constant>)
+	    (add-to-list 'load-path "<replaceable>SOMEDIR</replaceable>/rudel/jupiter/")
+	    (add-to-list 'load-path "<replaceable>SOMEDIR</replaceable>/rudel/obby/")
+	  </programlisting>
+
+	  This will allow &emacs; to load &rudel; code, but will not
+	  actually load &rudel;. To avoid loading all the &rudel; code
+	  in every &emacs; session, I recommend <phrase>auto
+	  loading</phrase>. Auto loading information is stored in a
+	  file called <filename>rudel-loaddefs.el</filename> which can
+	  be generated by executing
+
+	  <programlisting>
+	    <command>make autoloads</command>
+	  </programlisting>
+
+	  in the <filename>rudel</filename> directory (or equivalent)
+	  mentioned above. Once the file has been generated, auto
+	  loading of &rudel; can be activated permanently by executing
+
+	  <programlisting>
+	    (<function>load</function> <constant>"<replaceable>SOMEDIR</replaceable>/rudel/rudel-loaddefs.el"</constant>)
+	  </programlisting>
+
+	  in your <filename>.emacs</filename> file.
+	</para>
+      </section>
+
+      <section>
+	<title>Compiling</title>
+
+	<para>
+	  In order to achieve better performance, &emacs; can
+	  byte-compiled the &rudel; code. This can be done by executing
+
+	  <programlisting>
+	    <command>make rudel obby jupiter</command>
+	  </programlisting>
+
+	  or just (which will also generate auto loading information)
+
+	  <programlisting>
+	    <command>make</command>
+	  </programlisting>
+
+	  in the <filename>rudel</filename> directory (or equivalent)
+	  mentioned <xref linkend="section_dot_file"/>.
+	</para>
+
+      </section>
+
+    </section>
+
+    <section>
+      <title>Sessions</title>
+
+      <para>TODO</para>
+
+      <section>
+	<title>Joining</title>
+
+	<para>
+	  To join a session, use <keycombo
+	  action="seq">&prefix;<keycap>j</keycap></keycombo>
+	  (<function>rudel-join-session</function>)
+
+	  Depending on the installed &rudel; backends, system
+	  environment and configuration, a number of questions will be
+	  asked, followed by an attempt to join session described by
+	  your answers.
+	</para>
+
+	<para>
+	  A typical example of the questions asked when joining a
+	  session may look like this:
+
+	  <example xml:id="example_joining">
+	    <title>Joining a session.</title>
+	    <programlisting>
+	      <prompt>Server: </prompt><userinput>localhost &enter;</userinput>
+	      <prompt>Port (default 6522):</prompt> <userinput>&enter;</userinput>
+	      <prompt>Username: </prompt><userinput>jan &enter;</userinput>
+	      <prompt>Color: </prompt><userinput>light sky blue &enter;</userinput>
+	      <prompt>Use Encryption (y or n): </prompt><userinput>n &enter;</userinput>
+	    </programlisting>
+	  </example>
+
+	  <important>
+	    <para>
+	      For sessions using the TODO obby backend (like in <xref
+	      linkend="example_joining"/>), the following restriction
+	      has to be taken into account:
+	    </para>
+	    <itemizedlist>
+	      <listitem>
+		<para>
+		  When the server is &rudel; inside an &emacs;
+		  process: Encryption cannot be used currently in this
+		  case. Consequently the answer to the <prompt>Use
+		  Encryption (y or n): </prompt> prompt <xref
+		  linkend="example_joining"/> has to be <userinput>n
+		  &enter;</userinput>.
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>
+		  When the server is a &gobby; process: &gobby; only
+		  supports encrypted connections. So the answer has to
+		  be <userinput>y &enter;</userinput> is this case.
+		</para>
+	      </listitem>
+	    </itemizedlist>
+	  </important>
+	</para>
+
+      </section>
+
+      <section>
+	<title>Hosting</title>
+
+	<para>
+	  To host a session, use <keycombo action="seq">&prefix;
+	  <keycap>h</keycap></keycombo>
+	  (<function>rudel-join-session</function>)
+
+	  Note that the session starts out without any participating
+	  users (This is sometimes referred to as being a dedicated
+	  server). If you want to participate in the session you host,
+	  you have to join it as described above.
+	</para>
+
+      </section>
+
+    </section>
+
+  </section>
+
+  <section>
+    <title>Developer Documentation</title>
+
+    <section>
+      <title>Protocol backends</title>
+
+      <section>
+	<title>&obby; Backend</title>
+
+	<para>
+	  Bla
+
+	  <figure>
+	    <title>Client connection state machine</title>
+
+	    <mediaobject>
+	      <imageobject>
+		<imagedata fileref="obby-client-connection-states.png"
+			   align="center"
+			   width="50%"/>
+	      </imageobject>
+	    </mediaobject>
+	  </figure>
+	</para>
+      </section>
+
+      <section>
+	<title>&infinote; Backend</title>
+
+	<para>
+	  <figure>
+	    <title>Client connection state machine</title>
+
+	    <mediaobject>
+	      <imageobject>
+		<imagedata fileref="infinote-client-connection-states.png"
+			   align="center"
+			   width="50%"/>
+	      </imageobject>
+	    </mediaobject>
+	  </figure>
+
+	</para>
+      </section>
+
+      <section>
+	<title>Transport Backends</title>
+
+	<section>
+	  <title>TCP</title>
+
+	  <para>
+	  </para>
+	</section>
+
+	<section>
+	  <title>XMPP</title>
+
+	  <para>
+	    The XMPP <!-- entity? --> backend transports arbitrary
+	    messages, which can be strings or XML documents, through
+	    XMPP streams.
+	  </para>
+	</section>
+      </section>
+
+    </section>
+
+  </section>
+</article>
