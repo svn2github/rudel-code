@@ -1,0 +1,45 @@
+;; Object infinote client connection states
+;; EIEIO PERSISTENT OBJECT
+(cogre-base-graph "infinote client connection states"
+  :file "infinote-client-connection-states.cogre"
+  :name "infinote client connection states"
+  :elements (list 
+   (cogre-node "new"
+    :position [7 0]
+    )
+   (cogre-node "authenticated"
+    :position [7 18]
+    )
+   (cogre-node "established"
+    :position [7 24]
+    )
+   (cogre-node "we-finalize"
+    :position [22 0]
+    )
+   (cogre-node "they-finalize"
+    :position [41 0]
+    )
+   (cogre-node "sasl-start"
+    :position [7 6]
+    )
+   (cogre-node "sasl-handshake"
+    :position [7 12]
+    )
+   (cogre-arrow "Name"
+    :start "new"
+    :end "sasl-start"
+    )
+   (cogre-arrow "Name1"
+    :start "authenticated"
+    :end "established"
+    )
+   (cogre-arrow "Name2"
+    :start "sasl-start"
+    :end "sasl-handshake"
+    )
+   (cogre-arrow "Name3"
+    :start "sasl-handshake"
+    :end "authenticated"
+    )
+   )
+  )
