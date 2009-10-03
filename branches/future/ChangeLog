@@ -1,3 +1,45 @@
+2009-09-30  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/rudel-xmpp-socket-owner.el (header): downcased keywords
+	(rudel-xmpp-socket-owner::rudel-send): fixed documentation string
+
+	* xmpp/rudel-xmpp-state.el (header): downcased keywords
+	(rudel-xmpp-state::rudel-set-assembly-function): added a comment
+
+	* xmpp/rudel-xmpp-tls.el (header): downcased keywords
+	(rudel-xmpp-states): use `add-to-list' to add the state
+
+	* xmpp/rudel-xmpp-tunnel.el (header): downcased keywords
+	(rudel-xmpp-tunnel-transport): added documentation string
+
+	* xmpp/rudel-xmpp.el (header): downcased keywords
+	(rudel-xmpp-transport-version): new constant; version of the XMPP
+	transport backend
+	(rudel-xmpp-protocol-version): changed meaning; now XMPP protocol
+	version understood by the transport backend
+	(rudel-xmpp-backend::initialize-instance): use
+	rudel-xmpp-transport-version
+	(rudel-xmpp-backend::rudel-make-connection): renamed
+	`rudel-connect' -> `rudel-make-connection'
+	(rudel-xmpp-state-new): added documentation string
+	(rudel-xmpp-state-negotiate-stream::success-state): added documentation string
+	(rudel-xmpp-state-negotiate-stream): added documentation string
+	(rudel-xmpp-state-negotiate-stream::rudel-enter): fixed comment;
+	generate stream version from `rudel-xmpp-protocol-version'
+	(rudel-transport-set-handler): added documentation string
+
+	* xmpp/rudel-xmpp-sasl.el
+	(rudel-xmpp-state-sasl-start::rudel-enter): added documentation
+	string; cosmetic changes
+	(rudel-xmpp-state-sasl-try-one::rudel-enter): added documentation
+	string
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-enter): added
+	documentation string
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): added documentation
+	string; added some comments
+	(rudel-xmpp-sasl-states): new variable; list of states used by the
+	SASL implementation; states are added to `rudel-xmpp-states'
+
 2009-09-29  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* ChangeLog: updated
