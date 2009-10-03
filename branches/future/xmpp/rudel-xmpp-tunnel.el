@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, XMPP, tunnel, transport, backend
+;; Keywords: rudel, xmpp, tunnel, transport, backend
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -47,7 +47,8 @@
 
 (defclass rudel-xmpp-tunnel-transport (rudel-xmpp-transport)
   ()
-  "")
+  "Transport backend that tunnels any kind of data (not
+necessarily XML) through an XMPP connection.")
 
 (defmethod rudel-transport-send ((this rudel-xmpp-transport) data)
   ""
