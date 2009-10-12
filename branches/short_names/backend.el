@@ -79,6 +79,7 @@ symbol, that each describe one capability of the backend."))
 ;;; Class rudel-backend-factory
 ;;
 
+;;;###autoload
 (defclass rudel-backend-factory ()
   ((backends  :initarg   :backends
 	      :type       hash-table
@@ -97,6 +98,7 @@ category each.")
 (oset-default rudel-backend-factory factories
 	      (make-hash-table :test #'eq))
 
+;;;###autoload
 (defmethod initialize-instance ((this rudel-backend-factory) &rest slots)
   "Initialize slots of THIS with SLOTS."
   (when (next-method-p)
@@ -124,6 +126,7 @@ same name."
 	      replace)
       (puthash name class backends))))
 
+;;;###autoload
 (defmethod rudel-get-backend ((this rudel-backend-factory) name)
   "Return backend object for name NAME or nil if there is none.
 The returned backend is of the form (NAME . OBJECT).
@@ -139,6 +142,7 @@ Backends are loaded, if necessary."
 	(cons name backend))))
   )
 
+;;;###autoload
 (defmethod rudel-all-backends ((this rudel-backend-factory))
   "Return a list of all backends registered with THIS.
 Each list element is of the form (NAME . CLASS-OR-OBJECT)."
@@ -150,6 +154,7 @@ Each list element is of the form (NAME . CLASS-OR-OBJECT)."
     backend-list)
   )
 
+;;;###autoload
 (defmethod rudel-suitable-backends ((this rudel-backend-factory) predicate)
   "Return a list of backends which satisfy PREDICATE.
 Each list element is of the form (NAME . OBJECT).
@@ -168,6 +173,7 @@ Backends are loaded, if necessary."
     (rudel-all-backends this))
   )
 
+;;;###autoload
 (defmethod rudel-load-backends ((this rudel-backend-factory))
   "Load backends in THIS factory if necessary.
 Loading errors are not reported explicitly, but can be detected
