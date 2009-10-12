@@ -54,9 +54,9 @@
   "Extract the list of supported mechanisms from FEATURES.
 Then switch to the try one state to try them in order."
   ;; Find mechanism tags
-  (let ((mechanism-tags (remove* "mechanisms" features
-				 :test-not #'string=
-				 :key      #'xml-tag-name))
+  (let* ((mechanism-tags (remove* "mechanisms" features
+				  :test-not #'string=
+				  :key      #'xml-tag-name))
 	 ;; XML -> alist
 	 (mechanisms
 	  (apply #'append
@@ -279,7 +279,7 @@ mechanism.")
     (sasl-try-one         . rudel-xmpp-state-sasl-try-one)
     (sasl-mechanism-start . rudel-xmpp-state-sasl-mechanism-start)
     (sasl-mechanism-step  . rudel-xmpp-state-sasl-mechanism-step))
-  "")
+  "States used during SASL authentication.")
 
 (dolist (state rudel-xmpp-sasl-states)
   (add-to-list 'rudel-xmpp-states state))
