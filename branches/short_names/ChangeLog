@@ -1,3 +1,24 @@
+2009-10-11  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-compile.el: added parent directory of Rudel directory to
+	load-path; generate autoloads
+	* rudel-loaddefs.el: removed; now generated automatically
+
+	* obby/util.el (rudel/jupiter/jupiter): fixed require name
+	(rudel/rudel): fixed require name
+	(rudel/util): fixed require name
+	* obby/state.el (rudel/state-machine): fixed require name
+	* obby/server.el (rudel/jupiter/jupiter): fixed require name
+	* obby/errors.el (rudel/obby/errors): changed require to provide
+	* obby/client.el (rudel/jupiter/jupiter): fixed require name
+	(rudel/state-machine): fixed require name
+	* jupiter/insert.el (rudel/jupiter/operation): fixed require name
+
+	* obby/debug.el: added local variables to prevent compilation and
+	generation of autoloads
+	* debug.el: added local variables to prevent compilation and
+	generation of autoloads
+
 2009-10-08  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* jupiter/jupiter.el (header): downcased keywords

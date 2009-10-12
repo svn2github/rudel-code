@@ -35,12 +35,17 @@
 ;;; Code:
 ;;
 
-(let ((rudel-dir (file-name-directory
-		  (or (buffer-file-name) load-file-name))))
+(let* ((rudel-dir  (file-name-directory
+		    (or (buffer-file-name) load-file-name)))
+       (parent-dir (expand-file-name
+		    (file-name-as-directory
+		     (concat rudel-dir "..")))))
   ;; Adjust load path for compilation.
-  (dolist (dir '("." "jupiter" "obby" "zeroconf"))
-    (let ((d (concat rudel-dir "/" dir)))
-      (add-to-list 'load-path d)))
+  (add-to-list 'load-path parent-dir)
+
+  ;; Update autoloads
+  (let ((generated-autoload-file (concat rudel-dir "loaddefs.el")))
+    (update-directory-autoloads rudel-dir))
 
   ;; Byte compile everything.
   (byte-recompile-directory rudel-dir 0))
