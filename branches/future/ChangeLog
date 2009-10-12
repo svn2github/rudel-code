@@ -1,3 +1,120 @@
+2009-10-08  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* jupiter/jupiter.el (header): downcased keywords
+	(object-print): new method; add revisions and log length to string
+	* jupiter/jupiter-nop.el (header): downcased keywords; cosmetic
+	representation changes to "commentary" section
+	* jupiter/jupiter-insert.el (header): downcased keywords; cosmetic
+	changes to "commentary" section
+	(object-print): new method; add start, end, length and data to
+	string representation
+	* jupiter/jupiter-delete.el (header): downcased keywords; cosmetic
+	changes to "commentary" section
+	(jupiter-transform): cosmetic changes
+	(object-print): new method; add position and length to string
+	representation
+	* jupiter/jupiter-compound.el (header): downcased keywords;
+	cosmetic changes to "commentary" section
+	(object-print): new method; add number of children to string
+	representation
+
+2009-10-07  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* doc/card.tex (Session Initiation): mention configured sessions;
+	explain Zeroconf-advertised session in more detail
+
+2009-10-06  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* doc/card.tex (Joining a Session ...): added global and user
+	passwords
+
+	* rudel.el (rudel-version): use list representation instead of
+	float
+        (rudel-allocate-buffer-function): added documentation string
+
+	* INSTALL (COMPILING): fixed typo
+
+2009-10-06  Phil Hagelberg  <phil@enigma>
+
+        * README (JOINING): Mention `rudel-configured-sessions'
+	customization.
+
+	* README (INTRODUCTION): emphasize obby backend being the only
+	supported one so far
+	(JOINING): update example session with passwords.
+
+	* rudel-loaddefs.el: Add autoloads for rudel-host-session and
+	rudel-speedbar
+
+2009-10-05  Phil Hagelberg  <phil@enigma>
+
+	* README: Mention Eshell issue and license.
+
+2009-10-03  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-compat.el (make-pulsing-progress-reporter): removed;
+	`make-progress-reporter' is sufficient
+	(progress-reporter-pulse): store index in the car of the reporter;
+	set last update time of the reporter
+	* obby/rudel-obby.el (rudel-connect): use `make-progress-reporter'
+	instead of `make-pulsing-progress-reporter'
+	* obby/rudel-obby-client.el
+	(rudel-obby-connection::rudel-subscribe-to): cosmetic changes in
+	status messages
+
+	* ChangeLog: updated
+
+2009-10-02  Phil Hagelberg  <phil@enigma>
+
+	* INSTALL: Mention CEDET's inclusion in Emacs
+
+	* rudel-state-machine.el (rudel-state-wait): update progress
+	reporter usage to match rudel-compat.el
+
+	* rudel-compat.el: Use updated progress reporters
+	(progress-reporter-update): may be used by pulsing reporters too
+	(make-progress-reporter): nil max value returns pulsing reporter
+	(progress-reporter-force-update): may be used by pulsing reporters
+	too
+	(progress-reporter-pulsing-p): added
+	(progress-reporter-pulse): removed message change option
+
+2009-10-02  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-state-machine.el (rudel-state-wait): accept callback
+	function instead of message; adjusted documentation string
+        * obby/rudel-obby.el (rudel-obby-backend::rudel-connect): when
+	calling `rudel-state-wait', provide a callback; the callback
+	controls a progress reporter
+        * obby/rudel-obby-client.el
+        (rudel-obby-connection::rudel-subscribe-to): when calling
+	`rudel-state-wait', provide a callback; the callback controls a
+	progress reporter
+
+        * rudel-compat.el (progress-reporter-pulse): store index as float
+
+	* obby/rudel-obby-client.el
+	(rudel-obby-client-state-idle::rudel-obby/obby_document_create):
+	cosmetic changes of printed messages
+	(rudel-obby-client-state-idle::rudel-obby/obby_document_remove):
+	cosmetic changes of printed messages
+
+	* rudel.el (rudel-session::rudel-remove-document): when necessary,
+	detach document first; added documentation string
+	(rudel-document::rudel-attached-p): new method; return non-nil
+	when document is attached to a buffer
+
+	* obby/rudel-obby-client.el
+	(rudel-obby-client-state-idle::rudel-obby/net6_client_part):
+	promoted warning severity to :warning
+	(rudel-obby-client-state-idle::rudel-obby/obby_document_remove):
+	fixed lookup of document; added warning message in case it is not
+	found
+	(rudel-obby-client-state-idle::rudel-obby/obby_document/rename):
+	promoted warning severity to :warning
+	(rudel-obby-connection::rudel-unpublish): new method; ask server
+	to remove a document
+
 2009-10-01  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* xmpp/rudel-xmpp-tls.el (header): added commentary
@@ -153,7 +270,6 @@
 	(INSTALLING): mention other things that cause rudel to be
 	autoloaded; minor cosmetic changes
 	(COMPILING): fixed filename compile.el -> rudel-compile.el
-	* ChangeLog: updated
 
 	* rudel-compile.el (header): added copyright and meta data
 	(code): let-bind rudel-dir; call `byte-recompile-directory' just
@@ -617,8 +733,6 @@
 	(rudel-session::rudel-add-user): run add user hook
 	(rudel-session::rudel-remove-user): run remove user hook
 
-	* ChangeLog (whole file): updated
-
 	* rudel.el (rudel-session-start-hook): new variable; session start
 	hook function list
 	(rudel-session-end-hook): new variable; session end hook function
@@ -847,8 +961,6 @@
 
 2009-08-13  Jan Moringen  <scymtym@users.sourceforge.net>
 
-	* ChangeLog (whole file): updated
-
 	* rudel.el (include rudel-session-initiation): required for
 	`rudel-join-session'
 	(rudel-join-session): mostly rewritten; moved user interaction to
@@ -1004,8 +1116,6 @@
 
 	* rudel-speedbar.el (eieio-speedbar-object-buttonname): use
 	`rudel-unique-name' instead of `object-name-string'
-
-	* ChangeLog (whole file): updated
 
 	* obby/rudel-obby-state.el (rudel-enter): return nil
 

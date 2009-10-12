@@ -63,7 +63,7 @@
 ;;; Global variables
 ;;
 
-(defconst rudel-version 0.1
+(defconst rudel-version '(0 1)
   "Version of the Rudel framework.")
 
 (defvar rudel-current-session nil
@@ -91,7 +91,10 @@ It would be nice to find another way to do this.")
 
 (defcustom rudel-allocate-buffer-function
   'rudel-allocate-buffer-clear-existing
-  "*"
+  "A function used to find or create buffers to associate to documents.
+The function is called with the document name as the sole
+argument and has to return a buffer object which will be attached
+to the document in question."
   :group   'rudel
   :type    '(choice (const :tag "Clear content of existing buffer"
 			   rudel-allocate-buffer-clear-existing )
@@ -216,7 +219,11 @@ WHICH is compared to the result of KEY using TEST."
   (object-run-hook-with-args this 'add-document-hook document))
 
 (defmethod rudel-remove-document ((this rudel-session) document)
-  ""
+  "Remove DOCUMENT from THIS session, detaching it if necessary."
+  ;; Detach document from its buffer when necessary.
+  (when (rudel-attached-p document)
+    (rudel-detach-from-buffer document))
+
   ;; Remove DOCUMENT from the list of documents in THIS session.
   (object-remove-from-list this :documents document)
 
@@ -424,6 +431,10 @@ collaborative editing session can subscribe to."
 (defmethod rudel-suggested-buffer-name ((this rudel-document))
   "Returns a suggested name for the buffer attached to THIS document."
   (rudel-unique-name this))
+
+(defmethod rudel-attached-p ((this rudel-document))
+  (with-slots (buffer) this
+    buffer))
 
 (defmethod rudel-attach-to-buffer ((this rudel-document) buffer)
   "Attach THIS document to BUFFER"
