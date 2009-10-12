@@ -310,5 +310,5 @@ coding-system."
        ,@forms))
   )
 
-(require 'rudel/obby/util)
+(provide 'rudel/obby/util)
 ;;; util.el ends here
