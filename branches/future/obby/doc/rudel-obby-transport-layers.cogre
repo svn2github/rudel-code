@@ -1,0 +1,32 @@
+;; Object rudel-obby-transport-layers
+;; EIEIO PERSISTENT OBJECT
+(cogre-base-graph "rudel-obby-transport-layers"
+  :file "rudel-obby-transport-layers.cogre"
+  :name "rudel-obby-transport-layers"
+  :elements (list 
+   (cogre-node "tcp-transport"
+    :position [17 36]
+    )
+   (cogre-node "assembling-transport-filter"
+    :position [10 20]
+    )
+   (cogre-node "progress-reporting-filter"
+    :position [11 28]
+    )
+   (cogre-node "obby-message-transport-filter"
+    :position [9 12]
+    )
+   (cogre-arrow "Name"
+    :start "progress-reporting-filter"
+    :end "tcp-transport"
+    )
+   (cogre-arrow "Name1"
+    :start "assembling-transport-filter"
+    :end "progress-reporting-filter"
+    )
+   (cogre-arrow "Name2"
+    :start "obby-message-transport-filter"
+    :end "assembling-transport-filter"
+    )
+   )
+  )
