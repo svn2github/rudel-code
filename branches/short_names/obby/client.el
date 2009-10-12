@@ -969,5 +969,5 @@ nothing else."
     (rudel-remote-operation document user transformed))
   )
 
-(require 'rudel/obby/client)
+(provide 'rudel/obby/client)
 ;;; client.el ends here

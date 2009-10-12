@@ -165,5 +165,5 @@ Display a warning if no such handler is found."
 	  nil))))
   )
 
-(require 'rudel/obby/state)
+(provide 'rudel/obby/state)
 ;;; state.el ends here
