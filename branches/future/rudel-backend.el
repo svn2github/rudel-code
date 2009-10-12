@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, backend, factory
+;; Keywords: rudel, backend, factory
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -335,4 +335,88 @@ available information available for the backends"
   )
 
 (provide 'rudel-backend)
+
+
+;;; Unit tests
+;;
+
+(eval-when-compile
+  (when (require 'ert nil t)
+
+    ;; Helper functions
+
+    (defmacro save-factories (&rest forms)
+      "Save the state of the backend factory around executing FORMS."
+      (declare (indent 0)
+	       (debug (&rest form)))
+      `(let ((factories
+	      (when (slot-boundp rudel-backend-factory 'factories)
+		(copy-hash-table
+		 (oref-default rudel-backend-factory factories)))))
+	 (unwind-protect
+	     (progn
+	       ,@forms)
+	   (if factories
+	       (oset-default rudel-backend-factory factories factories)
+	     (slot-makeunbound rudel-backend-factory 'factories))))
+      )
+
+    (defclass rudel-dummy-backend (rudel-backend)
+      ((version :initform '(0 1)))
+      "Mock backend class.")
+
+    ;; Test cases
+
+    (ert-deftest rudel-backend-test-get-factory ()
+      "Test retrieving backend for specified categories."
+      (save-factories
+	(should (rudel-backend-factory-p
+		 (rudel-backend-get-factory 'protocol)))
+	(should (rudel-backend-factory-p
+		 (rudel-backend-get-factory 'transport)))))
+
+    (ert-deftest rudel-backend-test-add-backend ()
+      "Test adding backends to a factory."
+      (save-factories
+	;; Add some backends, then make sure they are there.
+	(let ((dummy-factory (rudel-backend-get-factory 'dummy)))
+	  (rudel-add-backend dummy-factory 'dummy1 'rudel-dummy-backend)
+	  (rudel-add-backend dummy-factory 'dummy2 'rudel-dummy-backend)
+
+	  (should (equal (rudel-all-backends dummy-factory)
+			 '((dummy2 . rudel-dummy-backend)
+			   (dummy1 . rudel-dummy-backend))))))
+      )
+
+    (ert-deftest rudel-backend-test-get-backend ()
+      "Test getting a specific backend."
+      (save-factories
+	;; Try to retrieve non-existing backend.
+	(should (eq (rudel-backend-get 'dummy 'dummy-invalid)
+		    nil))
+
+	(let ((dummy-factory (rudel-backend-get-factory 'dummy)))
+	  (should (eq (rudel-get-backend dummy-factory 'dummy-invalid)
+		      nil)))
+
+	;; Retrieve existing backend.
+	(let ((dummy-factory (rudel-backend-get-factory 'dummy)))
+	  (rudel-add-backend dummy-factory 'dummy 'rudel-dummy-backend))
+
+	(let ((result (rudel-backend-get 'dummy 'dummy)))
+	  (should (consp result))
+	  (should (eq (car result) 'dummy))
+	  (should (or (eq (cdr result) 'rudel-dummy-backend)
+		      (rudel-backend-child-p (cdr result))))))
+      )
+
+    (ert-deftest rudel-backend-test-dump-backends ()
+      "Smoke test for the `rudel-backend-dump' function."
+      (save-factories
+	(let ((buffer (rudel-backend-dump)))
+	  (should (bufferp buffer))
+	  (kill-buffer buffer))))
+
+    ))
+
 ;;; rudel-backend.el ends here
