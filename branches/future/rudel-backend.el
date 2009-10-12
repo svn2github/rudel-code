@@ -52,6 +52,34 @@
 (require 'eieio)
 
 
+;;; Errors to backend registration and retrieval
+;;
+
+;; rudel-backend-error
+
+(intern "rudel-backend-error")
+
+(put 'rudel-backend-error 'error-conditions
+     '(error
+       rudel-error
+       rudel-backend-error))
+
+(put 'rudel-backend-error 'error-message
+     "A backend-related error")
+
+;; rudel-no-backend
+
+(intern "rudel-no-backend")
+
+(put 'rudel-no-backend 'error-conditions
+     '(error
+       rudel-error
+       rudel-backend-error rudel-no-backend))
+
+(put 'rudel-no-backend 'error-message
+     "No backends available for category")
+
+
 ;;; Class rudel-backend
 ;;
 
@@ -101,6 +129,7 @@ category each.")
   "Initialize slots of THIS with SLOTS."
   (when (next-method-p)
     (call-next-method))
+
   (oset this :backends (make-hash-table :test #'eq)))
 
 ;;;###autoload
@@ -225,7 +254,7 @@ The returned backend is of the form (NAME . CLASS-OR-OBJECT)."
   (let ((backends (rudel-backend-suitable-backends
 		   category predicate)))
     (unless backends
-      (error "No backends available"))
+      (signal 'rudel-no-backend (list category)))
 
     (if (= (length backends) 1)
 	;; If there is only one backend, we can choose that one right
@@ -252,53 +281,57 @@ available information available for the backends"
   (interactive "p")
   (save-excursion
     ;; Setup a new buffer.
-    (set-buffer (get-buffer-create "*Rudel Backends*"))
-    (erase-buffer)
-    (set-window-buffer nil (current-buffer))
-    (maphash
-     (lambda (category factory)
-       ;; Load backends if requested.
-       (unless (zerop load)
-	 (rudel-load-backends factory))
+    (let ((buffer (get-buffer-create "*Rudel Backends*")))
+      (set-buffer buffer)
+      (erase-buffer)
+      (set-window-buffer nil buffer)
+      (maphash
+       (lambda (category factory)
+	 ;; Load backends if requested.
+	 (unless (and (numberp load) (zerop load))
+	   (rudel-load-backends factory))
 
-       ;; Insert header for this category.
-       (insert (propertize
-		(format "Category %s\n" category)
-		'face 'bold))
-       (insert (apply #'format
-		      "  %-20s %-6s %-7s %s\n"
-		      (mapcar
-		       (lambda (header)
-			 (propertize header 'face 'italic))
-		       '("name" "loaded" "version" "capabilities"))))
+	 ;; Insert header for this category.
+	 (insert (propertize
+		  (format "Category %s\n" category)
+		  'face 'bold))
+	 (insert (apply #'format
+			"  %-20s %-6s %-7s %s\n"
+			(mapcar
+			 (lambda (header)
+			   (propertize header 'face 'italic))
+			 '("name" "loaded" "version" "capabilities"))))
 
-       ;; Insert all backends provided by this factory.
-       (dolist (backend (rudel-all-backends factory))
-	 (insert (format "  %-20s %-6s %-7s (%s)\n"
-			 (propertize
-			  (symbol-name (car backend))
-			  'face 'font-lock-type-face)
-			 (propertize
-			  (prin1-to-string (object-p (cdr backend)))
-			  'face 'font-lock-variable-name-face)
-			 (propertize
-			  (if (object-p (cdr backend))
-			      (mapconcat #'prin1-to-string
-					 (oref (cdr backend) :version)
-					 ".")
-			    "?")
-			  'face 'font-lock-constant-face)
-			 (propertize
-			  (if (object-p (cdr backend))
-			      (mapconcat #'prin1-to-string
-					 (oref (cdr backend) :capabilities)
-					 " ")
-			    "?")
-			  'face 'font-lock-constant-face))))
+	 ;; Insert all backends provided by this factory.
+	 (dolist (backend (rudel-all-backends factory))
+	   (insert (format "  %-20s %-6s %-7s (%s)\n"
+			   (propertize
+			    (symbol-name (car backend))
+			    'face 'font-lock-type-face)
+			   (propertize
+			    (prin1-to-string (object-p (cdr backend)))
+			    'face 'font-lock-variable-name-face)
+			   (propertize
+			    (if (object-p (cdr backend))
+				(mapconcat #'prin1-to-string
+					   (oref (cdr backend) :version)
+					   ".")
+			      "?")
+			    'face 'font-lock-constant-face)
+			   (propertize
+			    (if (object-p (cdr backend))
+				(mapconcat #'prin1-to-string
+					   (oref (cdr backend) :capabilities)
+					   " ")
+			      "?")
+			    'face 'font-lock-constant-face))))
 
-       ;; One empty line between backend categories.
-       (insert "\n"))
-     (oref rudel-backend-factory factories)))
+	 ;; One empty line between backend categories.
+	 (insert "\n"))
+       (oref rudel-backend-factory factories))
+
+    ;; Return the created buffer object
+    buffer))
   )
 
 (provide 'rudel-backend)

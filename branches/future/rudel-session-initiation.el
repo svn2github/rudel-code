@@ -267,13 +267,20 @@ required by the chosen backend.")
 
 (defmethod rudel-discover ((this rudel-ask-protocol-backend))
   "\"Discover\" sessions by asking the user about the backend to use and the connect info."
-  (let ((backend (rudel-backend-choose
-		  'protocol
-		  (lambda (backend)
-		    (rudel-capable-of-p backend 'join)))))
-    (list (append (list :name    "asked"
-			:backend backend)
-		  (rudel-ask-connect-info (cdr backend)))))
+  (condition-case error
+      (let ((protocol-backend  (rudel-backend-choose
+				'protocol
+				(lambda (backend)
+				  (rudel-capable-of-p backend 'join))))
+	    (transport-backend (rudel-backend-choose 'transport)))
+	(list (append (list :name              "asked"
+			    :protocol-backend  protocol-backend
+			    :transport-backend transport-backend)
+		      (rudel-ask-connect-info (cdr protocol-backend)))))
+    ;; When there is no backend in the protocol or transport
+    ;; categories, return nil.
+    (rudel-no-backend
+     nil))
   )
 
 ;;;###autoload
