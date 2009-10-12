@@ -221,6 +221,7 @@
 		   ("parent" . ,(format "%d" parent))
 		   ("type"   . ,type)
 		   ("name"   . ,name)))))
+  ;; TODO should be a method of the directory group
   )
 
 (defmethod rudel-subscribe-to ((this rudel-infinote-client-connection)
@@ -229,20 +230,30 @@
   ;; Create a new adopted context for DOCUMENT.
   ;; TODO (rudel-add-context this document)
 
-  ;;
-  (let ((group (rudel-get-group this "InfDirectory"))) ;; TODO (with-group?
-    ;; Announce the subscription to the server.
-    (with-slots (id) document
-      (rudel-switch group 'subscribing id))
+  ;; Subscribe to DOCUMENT's group in the directory group and then
+  ;; join the session group associated to DOCUMENT.
+  (lexical-let ((stage)
+		(reporter (make-progress-reporter "Subscribing " 0.0 nil)))
+    (flet ((display-progress (state)
+	      (progress-reporter-force-update
+	       reporter 0.5
+	       (format "%s (%s) " stage (car state)))))
 
-    ;; Wait until the subscription is finished
-    (rudel-state-wait group '(idle) nil "Subscribing"))
+      ;; Announce the subscription to the server.
+      (setq stage "Subscribing")
+      (let ((group (rudel-get-group this "InfDirectory")))
+	(with-slots (id) document
+	  (rudel-switch group 'subscribing id))
+	(rudel-state-wait group '(idle) nil #'display-progress))
+      ;; TODO responsibility of the group?
 
-  ;;
-  (with-slots (group) document
-    (rudel-switch group 'joining)
-
-    (rudel-state-wait group '(idle) nil "Joining"))
+      ;; Join the group of the document.
+      (setq stage "Joining")
+      (with-slots (group) document
+	(rudel-switch group 'joining)
+	(rudel-state-wait group '(idle) nil #'display-progress))
+      ;; TODO responsibility of the document?
+      ))
 
   ;; We receive a notification of our own subscription from the
   ;; server. TODO Or, do we? Consequently we do not add SELF to the
