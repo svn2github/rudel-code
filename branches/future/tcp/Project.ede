@@ -1,0 +1,13 @@
+;; Object rudel/xmpp
+;; EDE project file.
+(ede-proj-project "rudel/tcp"
+  :name "tcp"
+  :file "Project.ede"
+  :targets (list
+   (ede-proj-target-elisp "tcp"
+    :name "tcp"
+    :path ""
+    :source '("rudel-tcp.el")
+    )
+   )
+  )
