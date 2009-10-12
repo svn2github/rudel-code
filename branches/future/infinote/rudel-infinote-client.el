@@ -58,7 +58,6 @@
 
 ;; TODO make this a base class for client and server
 (defclass rudel-infinote-client-connection (;;rudel-state-machine
-					    ;;rudel-infinote-socket-owner
 					    rudel-connection)
   ((transport       :initarg  :transport
 		    :type     rudel-transport
@@ -170,11 +169,6 @@
   (with-slots (transport) this
     (rudel-send transport xml)))
 
-;; (defmethod rudel-message ((this rudel-infinote-client-connection) data) ;; TODO transport backend handles this
-;;   ""
-;;   (let ((xml (string->xml data)))
-;;     (rudel-accept this xml)))
-
 (defmethod rudel-receive ((this rudel-infinote-client-connection) xml)
   ""
   (let ((name (xml-tag-name xml)))
@@ -205,7 +199,7 @@
 
 (defmethod rudel-publish ((this rudel-infinote-client-connection) document)
   ""
-  ;; Create a new jupiter context for DOCUMENT.
+  ;; Create a new adopted context for DOCUMENT.
   ;(rudel-add-context this document)
 
   ;;<add-node
@@ -232,8 +226,8 @@
 (defmethod rudel-subscribe-to ((this rudel-infinote-client-connection)
 			       document)
   ""
-  ;; Create a new jupiter context for DOCUMENT.
-  ;(rudel-add-context this document)
+  ;; Create a new adopted context for DOCUMENT.
+  ;; TODO (rudel-add-context this document)
 
   ;;
   (let ((group (rudel-get-group this "InfDirectory"))) ;; TODO (with-group?
@@ -307,8 +301,8 @@
 		  nil)))
 
 	;;
-	(rudel-add-node     session node)
-	(rudel-add-child    parent  node)
+	(rudel-add-node  session node)
+	(rudel-add-child parent  node)
 	(when is-document
 	  (rudel-add-document session node)))))
   )
