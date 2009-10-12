@@ -24,6 +24,10 @@
 
 ;;; Commentary:
 ;;
+;; This file contains the classes `rudel-infinote-group' which is a
+;; base class for other infinote group classes and
+;; `rudel-infinote-group-state' which is a base class for infinote
+;; group state classes.
 
 
 ;;; History:
@@ -152,29 +156,30 @@
 ;;; Unit tests
 ;;
 
-;; TODO write some testes
-;; (pp
-;;  (macroexpand
-;;   '(rudel-infinote-add-group (rudel-infinote-group "bla" :publisher "a")
-;;      '(("bla" ("a" . "1")))))
-;;  #'insert)
-;; (let*
-;;     ((group
-;;       (rudel-infinote-group "bla" :publisher "a"))
-;;      (name
-;;       (object-name-string group))
-;;      (publisher
-;;       (oref group :publisher)))
-;;   `(("group"
-;;      ("name" \, name)
-;;      ("publisher" \, publisher))
-;;     ,'(("bla"
-;; 	("a" . "1")))))
+(eval-when-compile
 
+  (require 'ert)
 
-;; (xml->string
-;;  (rudel-infinote-add-group (rudel-infinote-group "bla" :publisher "a")
-;;    '(("bla" ("a" . "1"))))
-;;  t)
+  (defclass rudel-infinote-test-group-state (rudel-infinote-group-state)
+    ())
+
+  (ert-deftest rudel-infinote-test-embed-in-group ()
+    (let* ((state (rudel-infinote-test-group-state "test-state"))
+	   (group (rudel-infinote-group
+		  "test-group"
+		  :publisher "test-publisher"
+		  :states    `(test . state)
+		  :start     state)))
+      (should
+       (equal
+	(rudel-infinote-embed-in-group group
+	  '(("bla" ("a" . "1"))))
+	'(("group"
+	   ("name" .      "test-group")
+	   ("publisher" . "test-publisher"))
+	  (("bla" ("a" . "1")))))))
+    )
+
+  )
 
 ;;; rudel-infinote-group.el ends here
