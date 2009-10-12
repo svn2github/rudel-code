@@ -1,9 +1,9 @@
-;;; nop.el --- Jupiter no operation
+;;; rudel-compile.el --- Byte-compile Rudel
 ;;
-;; Copyright (C) 2009 Jan Moringen
+;; Copyright (C) 2009 Phil Hagelberg
 ;;
-;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: jupiter, operation, nop
+;; Author: Phil Hagelberg <phil@enigma>
+;; Keywords: Rudel, compile
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -24,36 +24,23 @@
 
 ;;; Commentary:
 ;;
-;; Class `jupiter-nop' implements a no-operation for the Jupiter
-;; algorithm.
+;; Press M-x eval-buffer to byte-compile Rudel.
 
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.1 - Initial revision
 
 
 ;;; Code:
 ;;
 
-(require 'eieio)
+(let ((rudel-dir (file-name-directory
+		  (or (buffer-file-name) load-file-name))))
+  ;; Adjust load path for compilation.
+  (dolist (dir '("." "jupiter" "obby" "zeroconf"))
+    (let ((d (concat rudel-dir "/" dir)))
+      (add-to-list 'load-path d)))
 
-(require 'rudel/jupiter/operation)
-
-
-;;; Class jupiter-nop
-;;
-
-(defclass jupiter-nop (jupiter-operation)
-  ()
-  "Operation, which does not change anything.")
-
-(defmethod rudel-apply ((this jupiter-nop) object)
-  "Applying THIS does not change OBJECT.")
-
-(defmethod jupiter-transform ((this jupiter-nop) other)
-  "Transforming OTHER with THIS simply returns OTHER."
-  other)
-
-(provide 'rudel/jupiter/nop)
-;;; nop.el ends here
+  ;; Byte compile everything.
+  (byte-recompile-directory rudel-dir 0))

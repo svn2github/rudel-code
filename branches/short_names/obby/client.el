@@ -43,6 +43,7 @@
 
 (require 'rudel/state/machine)
 (require 'rudel/operations)
+(require 'rudel/chat)
 
 (require 'rudel/obby/errors)
 (require 'rudel/obby/util)
@@ -94,11 +95,11 @@
   ((this rudel-obby-client-state-encryption-start))
   "Handle net6 'encryption_begin' message."
   ;; Start TLS encryption for the connection.
-  (require 'rudel-tls)
   (with-slots (connection) this
     (with-slots (socket) connection
-      (rudel-tls-start-tls socket)
-      (sit-for 1)))
+      (when (rudel-process-object socket :supports-tls)
+	(rudel-tls-start-tls socket)
+	(sit-for 1))))
 
   ;; The connection is now established
   'joining)
@@ -124,11 +125,18 @@
   ;; (resulting in response 'net6_login_failed') if the username or
   ;; color is already taken.
   (with-slots (info) (oref this connection)
-    (let ((username (plist-get info :username))
-	  (color    (plist-get info :color)))
-      (rudel-send this
-		  "net6_client_login"
-		  username (rudel-obby-format-color color))))
+    (let ((username        (plist-get info :username))
+	  (color           (plist-get info :color))
+	  (global-password (plist-get info :global-password))
+	  (user-password   (plist-get info :user-password)))
+      (apply #'rudel-send
+	     this
+	     "net6_client_login"
+	     username (rudel-obby-format-color color)
+	     (append (when global-password
+		       (list global-password))
+		     (when (and global-password user-password)
+		       (list user-password))))))
   nil)
 
 (defmethod rudel-obby/obby_sync_init
@@ -155,6 +163,12 @@
 	      ;; Color in use
 	      ((= reason rudel-obby-error-color-in-use)
 	       (cons 'rudel-obby-color-in-use nil))
+	      ;; Wrong global password
+	      ((= reason rudel-obby-error-wrong-global-password)
+	       (cons 'rudel-obby-wrong-global-password nil))
+	      ;; Wrong user password
+	      ((= reason rudel-obby-error-wrong-user-password)
+	       (cons 'rudel-obby-wrong-user-password nil))
 	      ;; Otherwise, signal a generic join error
 	      (t (cons 'rudel-join-error nil)))))
 
@@ -172,12 +186,12 @@
 		 :type    symbol
 		 :documentation
 		 "Error symbol describing the reason for the
-		 login failure.")
+login failure.")
    (error-data   :initarg :error-data
 		 :type    list
 		 :documentation
 		 "Additional error data describing the login
-		 failure."))
+failure."))
   "State for failed login attempts.")
 
 (defmethod rudel-enter ((this rudel-obby-client-state-join-failed)
@@ -207,15 +221,31 @@
 			  (color     color))
     (with-slots (connection) this
       (with-slots (session) connection
-	(let ((user (rudel-obby-user
-		     name
-		     :client-id  client-id
-		     :user-id    user-id
-		     :connected  t
-		     :encryption (string= encryption "1")
-		     :color      color)))
-	  (rudel-add-user session user))))
-      (message "Client joined: %s %s" name color))
+	(let ((user (rudel-find-user session user-id
+				     #'eq #'rudel-id)))
+	  (if user
+	      ;; If we have such a user object, update its state.
+	      (with-slots ((client-id1  client-id)
+			   (color1      color)
+			   connected
+			   (encryption1 encryption)) user
+		(setq client-id1  client-id
+		      color1      color
+		      connected   t
+		      encryption1 (string= encryption "1"))
+
+		;; Run the change hook of the user object.
+		(object-run-hook-with-args user 'change-hook))
+	    ;; Otherwise, create a new user object.
+	    (let ((user (rudel-obby-user
+			 name
+			 :client-id  client-id
+			 :user-id    user-id
+			 :connected  t
+			 :encryption (string= encryption "1")
+			 :color      color)))
+	      (rudel-add-user session user))))))
+    (message "Client joined: %s %s" name color))
   nil)
 
 (defmethod rudel-obby/net6_client_part
@@ -236,8 +266,11 @@
 
 		;; Run the change hook of the user object.
 		(object-run-hook-with-args user 'change-hook))
-	    (warn "Cannot find user for client id: %d"
-		  client-id))))))
+	    (display-warning
+	     '(rudel obby)
+	     (format "Cannot find user for client id: %d"
+		     client-id)
+	     :warning))))))
   nil)
 
 (defmethod rudel-obby/obby_user_colour
@@ -281,14 +314,27 @@
 				       :id         doc-id
 				       :owner-id   owner-id
 				       :suffix     suffix))))
-      (message "New document %s" name)))
+      (message "New document: %s" name)))
   nil)
 
 (defmethod rudel-obby/obby_document_remove
   ((this rudel-obby-client-state-idle) doc-id)
   "Handle obby 'document_remove' message."
-  (with-parsed-arguments ((doc-id number))
-    (message "Document removed %d" doc-id))
+  (with-parsed-arguments ((doc-id document-id))
+    (with-slots (connection) this
+      (with-slots (session) connection
+	(let ((document (rudel-find-document
+			 session doc-id
+			 #'equal #'rudel-both-ids)))
+	  (if document
+	      (progn
+		(rudel-remove-document session document)
+		(with-slots ((name :object-name)) document
+		  (message "Document removed: %s" name)))
+	    (display-warning
+	     '(rudel obby)
+	     (format "Document not found: %s" doc-id)
+	     :warning))))))
   nil)
 
 (defmethod rudel-obby/obby_document/rename
@@ -350,13 +396,19 @@
 	    ;; current state.
 	    (rudel-dispatch-error
 	     (progn
-	       (warn "%s: no method (%s: %s): `%s:%s'; arguments: %s"
-		     (object-print this) (car error) (cdr error)
-		     "rudel-obby/obby_document/record/" action arguments)
-	       nil)))
+	       (display-warning
+		'(rudel obby)
+		(format "%s: no method (%s: %s): `%s:%s'; arguments: %s"
+			(object-print this) (car error) (cdr error)
+			"rudel-obby/obby_document/record/" action arguments)
+		:debug)
+		nil)))
 	;; If we did not find the user, warn.
 	(progn
-	  (warn "User not found: %d" user-id)
+	  (display-warning
+	   '(rudel obby)
+	   (format "User not found: %d" user-id)
+	   :warning)
 	  nil))))
   )
 
@@ -424,6 +476,15 @@
 			      document user
 			      remote-revision local-revision
 			      operation)))
+  nil)
+
+(defmethod rudel-obby/obby_message ((this rudel-obby-client-state-idle)
+				    sender text)
+  "Handle obby 'message' message"
+  (with-parsed-arguments ((sender number))
+    (with-slots (session) (oref this :connection)
+      (let ((sender (rudel-find-user session sender #'eq #'rudel-id)))
+	(rudel-chat-dispatch-message sender text))))
   nil)
 
 
@@ -643,6 +704,15 @@
     (call-next-method this (format " remaining: %d" remaining-bytes))))
 
 
+;;; Class rudel-obby-client-state-they-finalized
+;;
+
+(defclass rudel-obby-client-state-they-finalized
+  (rudel-obby-client-connection-state)
+  ()
+  "State used to indicate that the connection was closed by the peer.")
+
+
 ;;; Client connection states.
 ;;
 
@@ -655,7 +725,8 @@
     (idle                 . rudel-obby-client-state-idle)
     (session-synching     . rudel-obby-client-state-session-synching)
     (subscribing          . rudel-obby-client-state-subscribing)
-    (document-synching    . rudel-obby-client-state-document-synching))
+    (document-synching    . rudel-obby-client-state-document-synching)
+    (they-finalized       . rudel-obby-client-state-they-finalized))
   "Name symbols and classes of connection states.")
 
 
@@ -708,6 +779,10 @@ documents."))
 
 (defmethod rudel-close ((this rudel-obby-connection))
   ""
+  ;; Move the state machine into an error state.
+  (rudel-switch this 'they-finalized)
+
+  ;; Terminate the session.
   (with-slots (session) this
     (rudel-end session)))
 
@@ -757,6 +832,17 @@ nothing else."
 		  (buffer-string))))
   )
 
+(defmethod rudel-unpublish ((this rudel-obby-connection) document)
+  "Remove DOCUMENT from the obby session THIS is connected to."
+  ;; Request removal of DOCUMENT.
+  (with-slots ((doc-id :id) owner-id) document
+      (rudel-send this "obby_document_remove"
+		  (format "%x %x" owner-id doc-id)))
+
+  ;; Remove the jupiter context for DOCUMENT.
+  (rudel-remove-context this document)
+  )
+
 (defmethod rudel-subscribe-to ((this rudel-obby-connection) document)
   ""
   ;; Create a new jupiter context for DOCUMENT.
@@ -767,7 +853,30 @@ nothing else."
   (with-slots (session) this
     (with-slots (self) session
       (rudel-switch this 'subscribing self document)))
-  (rudel-state-wait this '(idle) nil "Subscribing")
+
+  (lexical-let ((reporter (make-progress-reporter "Subscribing " 0.0 1.0)))
+    (flet ((display-progress (state)
+	     (cond
+	      ;; Syncing document content, we can provide detailed progress.
+	      ((and (consp state)
+		    (eq (car state) 'document-synching))
+	       (with-slots (all-bytes remaining-bytes) (cdr state)
+		 (progress-reporter-force-update
+		  reporter
+		  (- 1.0 (/ (float remaining-bytes) (float all-bytes)))
+		  (format "Subscribing (%s) " (car state)))))
+
+	      ;; For other states, we just spin.
+	      ((consp state)
+	       (progress-reporter-force-update
+	        reporter 0.5
+	        (format "Subscribing (%s) " (car state))))
+
+	      ;; Done
+	      (t
+	       (progress-reporter-force-update reporter 1.0 "Subscribing ")
+	       (progress-reporter-done reporter)))))
+      (rudel-state-wait this '(idle) '(they-finalized) #'display-progress)))
 
   ;; We receive a notification of our own subscription from the
   ;; server. Consequently we do not add SELF to the list of subscribed
@@ -854,7 +963,7 @@ nothing else."
     ;; since the obby protocol works with byte positions, but Emacs
     ;; uses character positions.
     (with-slots (buffer) document
-      (rudel-obby-byte->char transformed buffer))
+      (rudel-obby-byte->char transformed buffer))  ;; TODO operation's responsibility?
 
     ;; Apply the transformed operation to the document.
     (rudel-remote-operation document user transformed))

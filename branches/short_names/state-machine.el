@@ -43,9 +43,9 @@
   (require 'cl))
 
 (require 'eieio)
-(require 'working)
 
-(require 'rudel-errors)
+(require 'rudel/errors)
+(require 'rudel/compat) ;; for pulsing progress reporter
 
 
 ;;; Errors related to the state machine
@@ -283,8 +283,8 @@ NEXT can nil, a list or a `rudel-state' object."
 ;;
 
 (defun rudel-state-wait (machine success-states
-			 &optional error-states message)
-  "Display MESSAGE until MACHINE is in a state in SUCCESS-STATES or ERROR-STATES.
+			 &optional error-states callback)
+  "Repeatedly call CALLBACK until MACHINE is in a state in SUCCESS-STATES or ERROR-STATES.
 MACHINE should be of type rudel-state-machine-child or at least
 have a method `rudel-get-state'.
 
@@ -293,24 +293,32 @@ names (as symbols) of success and error states respectively.
 This function does not return when MACHINE enters states not in
 SUCCESS-STATES or ERROR-STATES. As a result, a deadlock can occur
 when MACHINE deadlocks or cycles through states not in either
-list infinitely."
+list infinitely.
+
+When non-nil, CALLBACK has to be a function that accepts one
+argument of the form (SYMBOL . STATE) where SYMBOL is the name
+symbol of the current state and STATE is the state object."
   ;; Wait until MACHINE enter a state in SUCCESS-STATES or
   ;; ERROR-STATES.
   (let ((result
-	 (working-status-forms (concat message " (%s)") "done"
-	   (catch 'state-wait
-	     (while t
-	       ;; Retrieve current state.
-	       (destructuring-bind (symbol . state)
-		   (rudel-current-state machine t)
-		 ;; Check against success and error states.
-		 (when (memq symbol success-states)
-		   (throw 'state-wait (cons 'success (cons symbol state))))
-		 (when (memq symbol error-states)
-		   (throw 'state-wait (cons 'error   (cons symbol state))))
-		 ;; Update progress indicator and sleep.
-		 (working-dynamic-status nil symbol)
-		 (sleep-for 0.05)))))))
+	 (catch 'state-wait
+	   (while t
+	     ;; Retrieve current state.
+	     (destructuring-bind (symbol . state)
+		 (rudel-current-state machine t)
+
+	       ;; Check against success and error states.
+	       (when (memq symbol success-states)
+		 (throw 'state-wait (cons 'success (cons symbol state))))
+	       (when (memq symbol error-states)
+		 (throw 'state-wait (cons 'error   (cons symbol state))))
+
+	       ;; Update progress indicator and sleep.
+	       (when callback
+		 (funcall callback (cons symbol state)))
+	       (sleep-for 0.05))))))
+    (when callback
+      (funcall callback t))
 
     ;; If MACHINE ended up in an error state, signal
     (unless (eq (car result) 'success)
@@ -319,5 +327,5 @@ list infinitely."
     (cdr result))
   )
 
-(provide 'rudel-state-machine)
+(provide 'rudel/state-machine)
 ;;; state-machine.el ends here

@@ -90,23 +90,33 @@ connections and creates obby servers.")
 (defmethod rudel-ask-connect-info ((this rudel-obby-backend) &optional info)
   "Ask user for the information required to connect to an obby server."
   ;; Read server host and port.
-  (let ((host       (or (and info (plist-get info :host))
-			(read-string "Server: ")))
-	(port       (or (and info (plist-get info :port))
-			(read-number "Port: " 6522)))
+  (let ((host            (or (and info (plist-get info :host))
+			     (read-string "Server: ")))
+	(port            (or (and info (plist-get info :port))
+			     (read-number "Port: " 6522)))
 	;; Read desired username and color
-	(username   (or (and info (plist-get info :username))
-			(read-string "Username: " user-login-name)))
-	(color      (or (and info (plist-get info :color))
-			(read-color  "Color: " t)))
-	(encryption (if (and info (member :encryption info))
-			(plist-get info :encryption)
-		      (y-or-n-p "Use encryption? "))))
-    (append (list :host       host
-		  :port       port
-		  :username   username
-		  :color      color
-		  :encryption encryption)
+	(username        (or (and info (plist-get info :username))
+			     (read-string "Username: " user-login-name)))
+	(color           (or (and info (plist-get info :color))
+			     (read-color  "Color: " t)))
+	(encryption      (if (and info (member :encryption info))
+			     (plist-get info :encryption)
+			   (y-or-n-p "Use encryption? ")))
+	(global-password (if (and info (member :global-password info))
+			     (plist-get info :global-password)
+			   (read-string "Global password: " "")))
+	(user-password   (if (and info (member :user-password info))
+			     (plist-get info :user-password)
+			   (read-string "User password: " ""))))
+    (append (list :host            host
+		  :port            port
+		  :username        username
+		  :color           color
+		  :encryption      encryption
+		  :global-password (unless (string= global-password "")
+				     global-password)
+		  :user-password   (unless (string= user-password "")
+				     user-password))
 	    info))
   )
 
@@ -150,17 +160,33 @@ Return the connection object."
     ;; complete.
     (continue-process socket)
 
-    ;; Wait for the connection to reach one of the states idle and
-    ;; join-failed.
+    ;; Wait for the connection to reach one of the states idle,
+    ;; join-failed and they-finalized.
     (condition-case error
-	(rudel-state-wait connection
-			  '(idle) '(join-failed)
-			  "Joining")
+	(lexical-let ((reporter (make-progress-reporter "Joining ")))
+	  (flet ((display-progress (state)
+	           (cond
+		    ;; For all states, just spin.
+		    ((consp state)
+		     (progress-reporter-force-update
+                      reporter nil (format "Joining (%s)" (car state))))
+
+		    ;; Done
+		    (t
+		     (progress-reporter-force-update reporter nil "Joining ")
+		     (progress-reporter-done reporter)))))
+
+	    (rudel-state-wait connection
+			      '(idle) '(join-failed they-finalized)
+			      #'display-progress)))
+
       (rudel-entered-error-state
        (destructuring-bind (symbol . state) (cdr error)
-	 (with-slots (error-symbol error-data) state
-	   (signal 'rudel-join-error
-		   (append (list error-symbol) error-data))))))
+	 (if (eq (rudel-find-state connection 'join-failed) state)
+	     (with-slots (error-symbol error-data) state
+	       (signal 'rudel-join-error
+		       (append (list error-symbol) error-data)))
+	   (signal 'rudel-join-error nil)))))
 
     ;; The connection is now usable; return it.
     connection)
@@ -433,14 +459,15 @@ calling this function."
     (if (>= (length message) rudel-obby-long-message-threshold)
 	;; For huge messages, chunk the message data and transmit the
 	;; chunks
-	(let ((total   (/ (length message)
-			  rudel-obby-long-message-chunk-size ))
-	      (current 0))
-	  (working-status-forms "Sending data" "done"
-	    (rudel-loop-chunks message chunk rudel-obby-long-message-chunk-size
-	      (working-status (* 100.0 (/ (float current) total)))
-	      (process-send-string socket chunk)
-	      (incf current))))
+	(let ((total    (/ (length message)
+			   rudel-obby-long-message-chunk-size))
+	      (current  0)
+	      (reporter (make-progress-reporter "Sending data " 0.0 1.0)))
+	  (rudel-loop-chunks message chunk rudel-obby-long-message-chunk-size
+	    (progress-reporter-update reporter (/ (float current) total))
+	    (process-send-string socket chunk)
+	    (incf current))
+	  (progress-reporter-done reporter))
       ;; Send small messages in one chunk
       (process-send-string socket message)))
   )

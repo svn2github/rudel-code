@@ -63,7 +63,7 @@
 ;;; Global variables
 ;;
 
-(defconst rudel-version 0.1
+(defconst rudel-version '(0 1)
   "Version of the Rudel framework.")
 
 (defvar rudel-current-session nil
@@ -91,7 +91,10 @@ It would be nice to find another way to do this.")
 
 (defcustom rudel-allocate-buffer-function
   'rudel-allocate-buffer-clear-existing
-  "*"
+  "A function used to find or create buffers to associate to documents.
+The function is called with the document name as the sole
+argument and has to return a buffer object which will be attached
+to the document in question."
   :group   'rudel
   :type    '(choice (const :tag "Clear content of existing buffer"
 			   rudel-allocate-buffer-clear-existing )
@@ -127,6 +130,11 @@ session.")
 			 "This list of documents available in
 this session.")
    ;; Hooks
+   (end-hook             :initarg  :end-hook
+			 :type     list
+			 :initform nil
+			 :documentation
+			 "")
    (add-user-hook        :initarg  :add-user-hook
 			 :type     list
 			 :initform nil
@@ -161,7 +169,9 @@ to client and server sessions."
   :abstract t)
 
 (defmethod rudel-end ((this rudel-session))
-  "Terminate THIS session performing all necessary cleanup.")
+  "Terminate THIS session performing all necessary cleanup."
+  ;; Run the hook.
+  (object-run-hook-with-args this 'end-hook))
 
 (defmethod rudel-add-user ((this rudel-session) user)
   "Add USER to the user list of THIS session.
@@ -209,7 +219,11 @@ WHICH is compared to the result of KEY using TEST."
   (object-run-hook-with-args this 'add-document-hook document))
 
 (defmethod rudel-remove-document ((this rudel-session) document)
-  ""
+  "Remove DOCUMENT from THIS session, detaching it if necessary."
+  ;; Detach document from its buffer when necessary.
+  (when (rudel-attached-p document)
+    (rudel-detach-from-buffer document))
+
   ;; Remove DOCUMENT from the list of documents in THIS session.
   (object-remove-from-list this :documents document)
 
@@ -245,9 +259,11 @@ WHICH is compared to the result of KEY using TEST."
 ;;
 (defclass rudel-client-session (rudel-session)
   ((connection :initarg  :connection
-	       :type     rudel-connection-child
+	       :type     (or null rudel-connection-child)
+	       :initform nil
 	       :documentation
-	       "")
+	       "The connection used for communication by this
+session.")
    (self       :initarg  :self
 	       :type     rudel-user-child
 	       :documentation
@@ -260,10 +276,13 @@ client perspective.")
   ;; Clean everything up
   (with-slots (connection users documents) this
     ;; Detach all documents from their buffers
-    (mapc 'rudel-detach-from-buffer documents)
+    (mapc #'rudel-detach-from-buffer documents)
 
     ;; Terminate the connection
-    (rudel-disconnect connection))
+    (when connection
+      (condition-case nil
+	  (rudel-disconnect connection)
+	(error nil))))
 
   ;;
   (when (next-method-p)
@@ -412,6 +431,10 @@ collaborative editing session can subscribe to."
 (defmethod rudel-suggested-buffer-name ((this rudel-document))
   "Returns a suggested name for the buffer attached to THIS document."
   (rudel-unique-name this))
+
+(defmethod rudel-attached-p ((this rudel-document))
+  (with-slots (buffer) this
+    buffer))
 
 (defmethod rudel-attach-to-buffer ((this rudel-document) buffer)
   "Attach THIS document to BUFFER"
@@ -819,6 +842,11 @@ will be prompted for."
     (oset session :connection connection)
     (setq rudel-current-session session)
 
+    ;; Reset the global session variable when the session ends.
+    (object-add-hook session 'end-hook
+		     (lambda (session)
+		       (setq rudel-current-session nil)))
+
     ;; Run the hook.
     (run-hook-with-args 'rudel-session-start-hook session))
   )
@@ -838,14 +866,13 @@ interactively."
 	 (server))
 
     ;; Try to create the server
-    ;(condition-case error-data
+    (condition-case error-data
 	(setq server (rudel-host backend info))
-      ;; ('error
-      ;;  (error "Could not host session using backend `%s' with %s: %s"
-      ;; 	      (object-name-string backend)
-      ;; 	      info
-      ;; 	      (car error-data))))
-
+      ('error
+       (error "Could not host session using backend `%s' with %s: %s"
+	      (object-name-string backend)
+	      info
+	      (car error-data))))
     server))
 
 ;;;###autoload
@@ -855,12 +882,8 @@ interactively."
   (unless rudel-current-session
     (error "No active Rudel session"))
 
-  ;; Run the hook.
-  (run-hook-with-args 'rudel-session-end-hook rudel-current-session)
-
   ;; Actually end the session.
   (rudel-end rudel-current-session)
-  (setq rudel-current-session nil)
   )
 
 ;;;###autoload

@@ -76,9 +76,12 @@ Display a warning if no such handler is found."
       ;; in this case, so we remain in the current state.
       (rudel-dispatch-error
        (progn
-	 (warn "%s: no method (%s: %s): `%s/%s'; arguments: %s"
-	       (object-print this) (car error) (cdr error)
-	       "rudel-obby" name arguments)
+	 (display-warning
+	  '(rudel obby)
+	  (format "%s: no method (%s: %s): `%s/%s'; arguments: %s"
+		  (object-print this) (car error) (cdr error)
+		  "rudel-obby" name arguments)
+	  :debug)
 	 nil))))
   )
 
@@ -98,7 +101,23 @@ Display a warning if no such handler is found."
 
 (defmethod rudel-obby/net6_ping ((this rudel-obby-client-connection-state))
   "Handle net6 'ping' message."
-  (rudel-send this "net6_pong"))
+  (rudel-send this "net6_pong")
+  nil)
+
+
+;;; Class rudel-obby-server-connection-state
+;;
+
+(defclass rudel-obby-server-connection-state (rudel-obby-state)
+  ()
+  "Base class for server connection states."
+  :abstract t)
+
+(defmethod rudel-broadcast ((this rudel-obby-server-connection-state)
+			    receivers name &rest arguments)
+  "Broadcast message NAME with arguments ARGUMENTS to RECEIVERS."
+  (with-slots (connection) this
+    (apply #'rudel-broadcast connection receivers name arguments)))
 
 
 ;;; Class rudel-obby-document-handler
@@ -130,13 +149,19 @@ Display a warning if no such handler is found."
 	    ;; current state.
 	    (rudel-dispatch-error
 	     (progn
-	       (warn "%s: no method (%s: %s): `%s:%s'; arguments: %s"
-		     (object-print this) (car error) (cdr error)
-		     "rudel-obby/obby_document/" action arguments)
+	       (display-warning
+		'(rudel obby)
+		(format "%s: no method (%s: %s): `%s:%s'; arguments: %s"
+			(object-print this) (car error) (cdr error)
+			"rudel-obby/obby_document/" action arguments)
+		:debug)
 	       nil)))
 	;; If we did not find the document, warn.
 	(progn
-	  (warn "Document not found: %s" doc-id)
+	  (display-warning
+	   '(rudel obby)
+	   (format "Document not found: %s" doc-id)
+	   :debug)
 	  nil))))
   )
 

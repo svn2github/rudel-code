@@ -14,7 +14,7 @@
    (ede-proj-target-elisp "compile"
     :name "rudel"
     :path ""
-    :source '("rudel.el" "backend.el" "compat.el" "errors.el" "hooks.el" "icons.el" "interactive.el" "mode.el" "operations.el" "operators.el" "overlay.el" "protocol.el" "session-initiation.el" "speedbar.el" "state-machine.el" "tls.el" "util.el")
+    :source '("rudel.el" "util.el" "backend.el" "compat.el" "errors.el" "hooks.el" "icons.el" "interactive.el" "mode.el" "operations.el" "operators.el" "overlay.el" "protocol.el" "transport.el" "session-initiation.el" "chat.el" "speedbar.el" "state-machine.el" "tls.el")
     )
    )
   :mailinglist "rudel-devel@lists.sourceforge.net"
