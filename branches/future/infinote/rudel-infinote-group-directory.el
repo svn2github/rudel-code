@@ -32,7 +32,7 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.1 - Initial revision
 
 
 ;;; Code:
@@ -49,7 +49,7 @@
 (defclass rudel-infinote-directory-state-idle
   (rudel-infinote-group-state)
   ()
-  "")
+  "Idle state of the directory group.")
 
 (defmethod rudel-infinote/add-node
   ((this rudel-infinote-directory-state-idle) xml)
@@ -75,11 +75,11 @@
     nil))
 
 (defmethod rudel-infinote/sync-in
-  ((this rudel-infinote-directory-state-idle)
-   xml)
+  ((this rudel-infinote-directory-state-idle) xml)
   ""
   ;; TODO can contain child <subscribe group="group_name" method="method_name" />
-  (with-tag-attrs (id parent name type group method) xml) ;; optional? seq
+  (with-tag-attrs (id parent name type group method) xml ;; optional? seq
+    nil)
   )
 
 
@@ -92,7 +92,8 @@
 		       :type    (integer 0)
 		       :documentation
 		       ""))
-  "")
+  "Directory group state entered when the children of a node are
+explored.")
 
 (defmethod rudel-enter
   ((this rudel-infinote-directory-state-exploring) id)
@@ -141,7 +142,7 @@
 (defclass rudel-infinote-directory-state-subscribing
   (rudel-infinote-group-state)
   ()
-  "")
+  "Directory group state entered when subscribing to a session.")
 
 (defmethod rudel-enter
   ((this rudel-infinote-directory-state-subscribing) id)
@@ -175,7 +176,7 @@
 
 
 
-;;;
+;;; Directory group states
 ;;
 
 (defvar rudel-infinote-group-directory-states
@@ -193,7 +194,7 @@
   "")
 
 (defmethod initialize-instance ((this rudel-infinote-group-directory)
-				&rest slots)
+				slots)
   ""
   ;; Initialize slots of THIS.
   (when (next-method-p)
@@ -202,11 +203,6 @@
   ;; Register states.
   (rudel-register-states
    this rudel-infinote-group-directory-states)
-
-  ;; TODO temp; this should be in initialize-instance :after of state-machine
-  (with-slots (states state) this
-    (setq state (cdr (nth 0 states)))
-    (rudel-enter state))
   )
 
 (defmethod rudel-add-document ((this rudel-infinote-group-directory)
