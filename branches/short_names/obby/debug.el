@@ -119,4 +119,10 @@
   )
 
 (provide 'rudel/obby/debug)
+
+;; Local Variables:
+;; no-byte-compile: t
+;; no-update-autoloads: t
+;; End:
+
 ;;; debug.el ends here
