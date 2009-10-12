@@ -40,10 +40,10 @@
 
 (require 'eieio)
 
-(require 'rudel)
-(require 'rudel/util)
+(require 'rudel/jupiter/jupiter)
 
-(require 'jupiter)
+(require 'rudel/rudel)
+(require 'rudel/util)
 
 
 ;;; Class rudel-obby-socket-owner

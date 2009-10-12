@@ -39,7 +39,7 @@
 (require 'eieio)
 
 (require 'rudel/operations)
-(require 'rudel/upiter/operation)
+(require 'rudel/jupiter/operation)
 
 
 ;;; Class jupiter-insert

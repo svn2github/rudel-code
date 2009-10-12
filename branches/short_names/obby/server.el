@@ -51,7 +51,7 @@
 
 (require 'eieio)
 
-(require 'jupiter)
+(require 'rudel/jupiter/jupiter)
 
 (require 'rudel/state-machine)
 

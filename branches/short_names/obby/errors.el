@@ -61,5 +61,5 @@
 (defconst rudel-obby-error-not-encrypted  #x0104
   "Error code for not encrypted.")
 
-(require 'rudel/obby/errors)
+(provide 'rudel/obby/errors)
 ;;; errors.el ends here

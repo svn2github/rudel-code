@@ -39,9 +39,9 @@
 
 (require 'eieio)
 
-(require 'jupiter)
+(require 'rudel/jupiter/jupiter)
 
-(require 'rudel/state/machine)
+(require 'rudel/state-machine)
 (require 'rudel/operations)
 (require 'rudel/chat)
 

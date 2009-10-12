@@ -39,7 +39,7 @@
 (require 'eieio)
 
 (require 'rudel/util)
-(require 'rudel/state/machine)
+(require 'rudel/state-machine)
 
 (require 'rudel/obby/util)
 
