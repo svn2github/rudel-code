@@ -215,7 +215,7 @@ mechanism.")
       (let* ((response-data-raw (sasl-step-data step))
 	     (response-data     (when response-data-raw
 				  (base64-encode-string
-				   response-data-raw t)))) ;; "amFU"
+				   response-data-raw t))))
 	(rudel-send this
 		    `(("response"
 		       ,@(when schema
