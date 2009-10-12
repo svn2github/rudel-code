@@ -24,6 +24,17 @@
 
 ;;; Commentary:
 ;;
+;; Conversion functions:
+;; + `xml->string'
+;; + `string->xml'
+;;
+;; XML Macros:
+;; + `with-tag-attrs'
+;; + `do-tag-children'
+;;
+;; Stream parsing functions:
+;; + `rudel-xml-toplevel-tag-positions'
+;; + `rudel-xml-toplevel-tags'
 
 
 ;;; History:
@@ -73,9 +84,11 @@ tag name. TYPE can be 'number."
 	  (mapcar
 	   (lambda (attr)
 	     (cond
+
 	      ;; Simple form
 	      ((symbolp attr)
 	       `(,attr (xml-tag-attr ,tag-var ,(symbol-name attr))))
+
 	      ;; Variable name, attribute name and type
 	      ((= (length attr) 3)
 	       (let* ((attr-var     (nth 0 attr))
@@ -89,12 +102,14 @@ tag name. TYPE can be 'number."
 				  `(when ,value-string
 				     (string-to-number ,value-string)))
 				 (t value))))))
+
 	      ;; Variable name and attribute name
 	      ((= (length attr) 2)
 	       (let* ((attr-var (nth 0 attr))
 		      (name     (symbol-name (nth 1 attr)))
 		      (value    `(xml-tag-attr ,tag-var ,name)))
 		 `(,attr-var ,value)))
+
 	      ;; Invalid form
 	      (t (error "Invalid tag clause: %s" attr)))) ;; TODO define a proper condition or use signal?
 	   attrs)))
@@ -108,8 +123,8 @@ tag name. TYPE can be 'number."
   ""
   (declare (indent 1)
 	   (debug ((symbolp form) &rest form)))
-  (let ((var      (car  var-and-tag))
-	(tag      (cadr var-and-tag))
+  (let ((var      (first  var-and-tag))
+	(tag      (second var-and-tag))
 	(children (make-symbol "children")))
     `(let ((,children (xml-tag-children ,tag)))
        (dolist (,var ,children)
@@ -121,7 +136,7 @@ tag name. TYPE can be 'number."
 ;;
 
 (defun rudel-xml-toplevel-tag-positions (string)
-  ""
+  "Return positions of top-level XML tags in STRING."
   (let ((depth       0)
 	(tag-opening nil)
 	(start)
@@ -146,7 +161,7 @@ tag name. TYPE can be 'number."
     (nreverse tags)))
 
 (defun rudel-xml-toplevel-tags (string)
-  ""
+  "Parse STRING as partial XML document, return complete and partial tags."
   (let ((tags (rudel-xml-toplevel-tag-positions string)))
     (list
 
@@ -192,14 +207,14 @@ tag name. TYPE can be 'number."
   (ert-deftest rudel-test-do-tag-children ()
     ""
     (let ((cases
-	   '(((("a")) . nil)
+	   '(((("a"))                 . nil)
 	     ((("a") (("b")) (("c"))) . ((("b")) (("c")))))))
       (dolist (case cases)
 	(destructuring-bind (tag . expected) case
 	  (let ((children))
 	    (do-tag-children (child tag)
 	      (push child children))
-	    (should (equal children expected))))))
+	    (should (equal (reverse children) expected))))))
     )
 
   (ert-deftest rudel-test-xml-toplevel-tag-positions ()
@@ -220,11 +235,13 @@ tag name. TYPE can be 'number."
   (ert-deftest rudel-test-xml-toplevel-tags ()
     ""
     (let ((cases
-	   '((""                   . (nil ""))
-	     ("<a/>"               . (("<a/>") ""))
-	     ("<a><b/></a><c/>"    . (("<a><b/></a>" "<c/>") ""))
-	     ("<a><b/><c/>"        . (nil "<a><b/><c/>"))
-	     ("<a><b/></a><c><d/>" . (("<a><b/></a>") "<c><d/>")))))
+	   '((""                             . (nil ""))
+	     ("<a/>"                         . (("<a/>") ""))
+	     ("<a><b/></a><c/>"              . (("<a><b/></a>" "<c/>") ""))
+	     ("<a><b/><c/>"                  . (nil "<a><b/><c/>"))
+	     ("<a><b/></a><c><d/>"           . (("<a><b/></a>") "<c><d/>"))
+	     ("<a><b/></a><a/><b><c></c><d>" . (("<a><b/></a>" "<a/>")
+						"<b><c></c><d>")))))
       (dolist (case cases)
 	(destructuring-bind (data . expected) case
 	  (should (equal
@@ -232,22 +249,6 @@ tag name. TYPE can be 'number."
 		   expected)))))
     )
 
-;(let ((string "<hallo><bla/></hallo><hallo/><bla><blup></blup><bli>"))
-;  (rudel-xml-toplevel-tags string))
-
-;; (pp
-;;  (macroexpand
-;;   '(with-tag-attrs ((id id number)
-;; 		    (bla bla number))
-;;        '(("unsubscribe" ("id" . "0")))
-;;      id))
-;;  #'insert)
-
-;; (with-tag-attrs ((id id number)
-;; 		 (bla bla number))
-;;        '(("unsubscribe" ("id" . "0")))
-;;   (list id bla))
-
-   )
+  )
 
 ;;; rudel-xml.el ends here
