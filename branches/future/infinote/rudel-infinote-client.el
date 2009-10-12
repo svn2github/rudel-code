@@ -4,7 +4,7 @@
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
 ;; Keywords: rudel, infinote, client
-;; X-RCS: $Id:#
+;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
 ;;
@@ -43,7 +43,6 @@
 (require 'rudel-infinote-util)
 
 (require 'rudel-infinote-states)
-(require 'rudel-infinote-sasl)
 
 (require 'rudel-infinote-group) ;; TODO temp?
 (require 'rudel-infinote-group-directory)
@@ -52,206 +51,6 @@
 (require 'rudel-infinote-text-document) ;; TODO temp
 
 (require 'adopted)
-
-;; 
-;; ;;; Class rudel-infinote-state-new
-;; ;;
-;;
-;; ;; TODO this should be in the jabber backend
-;; (defclass rudel-infinote-state-new (rudel-infinote-state)
-;;   ()
-;;   "")
-;;
-;; (defmethod rudel-enter ((this rudel-infinote-state-new))
-;;   ""
-;;   (with-slots (connection) this
-;;     ;; The first message will be an incomplete <stream:stream ... XML
-;;     ;; tree.
-;;     (rudel-set-assembly-function connection #'rudel-assemble-stream)
-;;
-;;     ;; We cannot generate this message by serializing an XML infoset
-;;     ;; since the document is incomplete. We construct it as a string
-;;     ;; instead.
-;;     (rudel-send connection
-;; 		(format "<?xml version=\"1.0\"?>
-;; <stream:stream
-;;   xmlns:stream=\"http://etherx.jabber.org/streams\"
-;;   xmlns=\"jabber:client\"
-;;   version=\"1.0\"
-;;   to=\"%s\">"
-;; 			"gunhead")))
-;;   nil)
-;;
-;; (defmethod rudel-leave ((this rudel-infinote-state-new))
-;;   ""
-;;   (with-slots (connection) this
-;;     ;; TODO explain
-;;     (rudel-set-assembly-function connection #'rudel-assemble-xml)))
-;;
-;; (defmethod rudel-accept ((this rudel-infinote-state-new) xml)
-;;   ""
-;;   (if (not (string= (xml-tag-name xml) "stream:stream"))
-;;       nil ;; TODO send error
-;;     (let ((features (xml-tag-children
-;; 		     (xml-tag-child xml "stream:features"))))
-;;       (dolist (feature features)
-;; 	(let ((schema (xml-tag-attr feature "xmlns"))
-;; 	      (name   (car (xml-tag-children
-;; 			    (xml-tag-child feature "mechanism")))))
-;; 	  )))
-;;     'sasl-start)
-;;   )
-;;
-;; 
-;; ;;; Class rudel-infinote-state-authenticated
-;; ;;
-;;
-;; ;; TODO similar to new state; could use common base class
-;; (defclass rudel-infinote-state-authenticated (rudel-infinote-state)
-;;   ()
-;;   "")
-;;
-;; (defmethod rudel-enter ((this rudel-infinote-state-authenticated))
-;;   ""
-;;   (with-slots (connection) this
-;;
-;;     ;; Since we open a new stream, the first message will be an
-;;     ;; incomplete <stream:stream ... XML tree.
-;;     (rudel-set-assembly-function connection #'rudel-assemble-stream)
-;;
-;;     ;; TODO explain
-;;     (rudel-send connection
-;; 		(format "<?xml version=\"1.0\"?>
-;; <stream:stream
-;;   xmlns:stream=\"http://etherx.jabber.org/streams\"
-;;   xmlns=\"jabber:client\"
-;;   version=\"1.0\"
-;;   to=\"%s\">"
-;; 			"gunhead"))) ;; TODO
-;;   nil)
-;;
-;; (defmethod rudel-leave ((this rudel-infinote-state-authenticated))
-;;   ""
-;;   (with-slots (connection) this
-;;
-;;     ;; TODO explain
-;;     (rudel-set-assembly-function connection #'rudel-assemble-xml)))
-;;
-;; (defmethod rudel-accept ((this rudel-infinote-state-authenticated) xml)
-;;   ""
-;;   ;; TODO can we receive stream:error here?
-;;   (if (not (string= (xml-tag-name xml) "stream:stream"))
-;;       nil ;; TODO send error
-;;     (let ((features (xml-tag-children
-;; 		     (xml-tag-child xml "stream:features"))))
-;;       (dolist (feature features)
-;; 	(let ((schema (xml-tag-attr feature "xmlns")))
-;;
-;; 	  )))
-;;     'established)
-;;   )
-;;
-;; 
-;; ;;; Class rudel-infinote-state-established
-;; ;;
-;;
-;; (defclass rudel-infinote-state-established (rudel-infinote-state)
-;;   ()
-;;   "")
-;;
-;; (defmethod rudel-enter ((this rudel-infinote-state-established))
-;;   ""
-;;   (with-slots (connection) this
-;;     (with-slots (session) connection
-;;
-;;       ;;
-;;       (let ((user (rudel-user "scymtym" :color "red"))) ;(plist-get info ;; TODO
-;;
-;; 	(with-slots (self) session
-;; 	  (setq self user))) ;; TODO temp
-;;
-;;       ;; The special 'InfDirectory' group is there from the beginning.
-;;       (let ((group (rudel-infinote-group-directory
-;; 		    "InfDirectory"
-;; 		    :publisher "you"))) ;; TODO use correct publisher name
-;; 	(rudel-add-group connection group)
-;;
-;; 	(require 'rudel-infinote-directory-document)
-;; 	(rudel-add-document session
-;; 			    (rudel-infinote-directory-document
-;; 			     "root"
-;; 			     :id     0
-;; 			     :parent nil
-;; 			     :group  group))))) ;; TODO temp
-;;   nil)
-;;
-;; (defmethod rudel-accept ((this rudel-infinote-state-established) xml)
-;;   ""
-;;   (let ((name (xml-tag-name xml)))
-;;     (cond
-;;      ;;
-;;      ((string= name "group")
-;;       (with-slots (connection) this
-;; 	(let* ((name  (xml-tag-attr xml "name"))
-;; 	       (xml   (xml-tag-children xml))
-;; 	       (group (rudel-get-group connection name))) ;; TODO handle group not found
-;; 	  (if group
-;; 	      (rudel-accept group (car xml))
-;; 	    (warn "Group not found: %s" name)))) ;; TODO pass list or single element?
-;;       ;; Our own state does not change
-;;       nil)
-;;
-;;      ;;
-;;      (t
-;;       (call-next-method)))) ;; TODO what is actually called here?
-;;   )
-;;
-;; 
-;; ;;; Class rudel-infinote-state-we-finalize
-;; ;;
-;;
-;; (defclass rudel-infinote-state-we-finalize (rudel-infinote-state)
-;;   ()
-;;   "")
-;;
-;; (defmethod rudel-enter ((this rudel-infinote-state-we-finalize))
-;;   ""
-;;   (with-slots (connection) this
-;;     (rudel-send connection "</stream:stream>")
-;;
-;;     ;(rudel-close connection))
-;;     )
-;;   nil)
-;;
-;; 
-;; ;;; Class rudel-infinote-state-they-finalize
-;; ;;
-;;
-;; (defclass rudel-infinote-state-they-finalize (rudel-infinote-state)
-;;   ()
-;;   "")
-;;
-;; (defmethod rudel-enter ((this rudel-infinote-state-they-finalize))
-;;   ""
-;;   (with-slots (connection) this
-;;     (rudel-close connection))
-;;   nil)
-;;
-;; 
-;; ;;;
-;; ;;
-;;
-;; (defvar rudel-infinote-client-states
-;;   '((new            . rudel-infinote-state-new)
-;;     (authenticated  . rudel-infinote-state-authenticated)
-;;     (established    . rudel-infinote-state-established)
-;;     (we-finalize    . rudel-infinote-state-we-finalize)
-;;     (they-finalize  . rudel-infinote-state-they-finalize)
-;;
-;;     ;; SASL
-;;     (sasl-start     . rudel-infinote-state-sasl-start)
-;;     (sasl-handshake . rudel-infinote-state-sasl-handshake))
-;;   "")
 
 
 ;;; Class rudel-infinote-client-connection
@@ -282,7 +81,7 @@
   "TODO")
 
 (defmethod initialize-instance ((this rudel-infinote-client-connection)
-				&rest slots)
+				slots)
   ""
   ;; Initialize slots of THIS.
   (when (next-method-p)
@@ -387,7 +186,10 @@
 	     (group (rudel-get-group this name))) ;; TODO handle group not found
 	(if group
 	    (rudel-accept group (car xml))
-	  (warn "Group not found: %s" name))) ;; TODO pass list or single element?
+	  (display-warning
+	   '(rudel infinote)
+	   (format "Group not found: %s" "name")
+	   :warning))) ;; TODO pass list or single element?
       ;; Our own state does not change
       nil)
 
