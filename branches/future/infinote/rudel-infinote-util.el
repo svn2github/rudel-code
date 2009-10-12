@@ -30,7 +30,7 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.1 - Initial revision
 
 
 ;;; Code:
@@ -100,76 +100,6 @@
 
 ;;; Miscellaneous functions
 ;;
-
-;; TODO same code is in rudel-obby-util
-;; (defun rudel-infinote-dispatch (object name arguments &optional prefix)
-;;   "Call method starting with PREFIX and ending in NAME of OBJECT with ARGUMENTS.
-;; When PREFIX is not specified, \"rudel-infinote/\" is used."
-;;   ;; Fallback prefix.
-;;   (unless prefix
-;;     (setq prefix "rudel-infinote/"))
-;;
-;;   ;; Construct a matching symbol.
-;;   (let ((method (intern-soft (concat prefix name)))
-;; 	(failed))
-;;     ;; If we found a suitable method, run it; Otherwise warn and do
-;;     ;; nothing.
-;;     (prog1
-;; 	(if (not method) ;; TODO the code is ugly and hard to read
-;; 	    (progn
-;; 	      (setq failed 'method-symbol-unbound)
-;; 	      nil)
-;; 	  (condition-case error
-;; 	      ;; Try to call METHOD.
-;; 	      (apply method object arguments)
-;; 	    ;; Warn only when the condition is
-;; 	    ;; 'no-method-definition' and refers to METHOD,
-;; 	    ;; otherwise continue unwinding.
-;; 	    (no-method-definition
-;; 	     (if (eq method (cadr error))
-;; 		 (progn
-;; 		   (setq failed 'no-method-for-object)
-;; 		   nil)
-;; 	       (apply #'signal error)))))
-;;
-;;       ;; Warn if we failed to locate of execute the method.
-;;       (when failed
-;; 	(warn "%s: in context `%s': no method: `%s'; arguments:  %s"
-;; 	      (object-name-string object) prefix name arguments))))
-;;   )
-
-;; TODO same code is in rudel-obby-util
-;; (defun rudel-infinote-dispatch (object name arguments &optional prefix)
-;;   "Call method starting with PREFIX and ending in NAME of OBJECT with ARGUMENTS.
-;; When PREFIX is not specified, \"rudel-infinote/\" is used."
-;;   ;; Default prefix.
-;;   (unless prefix
-;;     (setq prefix "rudel-infinote/"))
-;;
-;;   ;; Construct a matching symbol.
-;;   (let* ((method (intern-soft (concat prefix name)))
-;; 	 (result
-;; 	  ;; If we found a suitable method, run it; Otherwise warn and
-;; 	  ;; do nothing.
-;; 	  (if (not method)
-;; 	      '(nil . method-symbol-unbound)
-;; 	    (condition-case error
-;; 		;; Try to call METHOD.
-;; 		(cons t (apply method object arguments))
-;; 	      ;; Warn only when the condition is
-;; 	      ;; 'no-method-definition' and refers to METHOD,
-;; 	      ;; otherwise continue unwinding.
-;; 	      (no-method-definition
-;; 	       (if (eq method (cadr error))
-;; 		   '(nil . no-method-for-object)
-;; 	       (signal (car error) (cdr error))))))))
-;;     ;; Warn if we failed to locate or execute the method.
-;;     (if (car result)
-;; 	(cdr result)
-;;       (warn "%s: in context `%s': no method (%s): `%s'; arguments: %s"
-;; 	    (object-name-string object) prefix (cdr result)
-;; 	    name arguments)))
-;;   )
 
 (defmacro rudel-infinote-embed-in-request (user &rest forms)
   ""
