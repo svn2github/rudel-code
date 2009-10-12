@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, obby, state machine
+;; Keywords: rudel, obby, state machine
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -42,16 +42,18 @@
 (require 'rudel-state-machine)
 
 (require 'rudel-obby-util)
+(require 'rudel-state-util)
 
 
 ;;; Class rudel-obby-state
 ;;
 
-(defclass rudel-obby-state (rudel-state)
-  ((connection :initarg :connection
-	       :type    rudel-obby-socket-owner
-	       :documentation
-	       "Connection object that uses the state."))
+(defclass rudel-obby-state (rudel-impersonating-state)
+  ((master-slot :initform 'connection)
+   (connection  :initarg  :connection
+		:type     rudel-obby-socket-owner
+		:documentation
+		"Connection object that uses the state."))
   "Base class for state classes used in the obby backend."
   :abstract t)
 
@@ -85,7 +87,7 @@ Display a warning if no such handler is found."
 	 nil))))
   )
 
-(defmethod rudel-send ((this rudel-obby-state) &rest args)
+(defmethod rudel-send ((this rudel-obby-state) &rest args) ;; TODO delegating state?
   "Send ARGS through the connection associated with THIS."
   (with-slots (connection) this
     (apply #'rudel-send connection args)))
@@ -124,9 +126,15 @@ Display a warning if no such handler is found."
 ;;
 
 (defclass rudel-obby-document-handler ()
-  ()
+  ((document-container-slot :type       symbol
+			    :allocation :class
+			    :documentation
+			    "A symbol specifying the name of the
+slot that holds an object on which `rudel-find-document' can be
+called to retrieved document object by their ids."))
   "Mixin class that provides ability to process submessages of
-  obby 'document' messages.")
+obby 'document' messages."
+  :abstract t)
 
 (defmethod rudel-obby/obby_document
   ((this rudel-obby-document-handler) doc-id action &rest arguments)
@@ -135,10 +143,9 @@ Display a warning if no such handler is found."
   ;; warn.
   (with-parsed-arguments ((doc-id document-id))
     ;; Locate the document based on owner id and document id.
-    (let ((document (with-slots (connection) this
-		      (with-slots (session) connection
-			(rudel-find-document session doc-id
-					     #'equal #'rudel-both-ids)))))
+    (let* ((container (slot-value this (oref this document-container-slot)))
+	   (document  (rudel-find-document container doc-id
+					   #'equal #'rudel-both-ids)))
       (if document
 	  (condition-case error
 	      ;; Try to dispatch
@@ -151,7 +158,7 @@ Display a warning if no such handler is found."
 	     (progn
 	       (display-warning
 		'(rudel obby)
-		(format "%s: no method (%s: %s): `%s:%s'; arguments: %s"
+		(format "%s: no method (%s: %s): `%s/%s'; arguments: %s"
 			(object-print this) (car error) (cdr error)
 			"rudel-obby/obby_document/" action arguments)
 		:debug)
@@ -163,7 +170,7 @@ Display a warning if no such handler is found."
 	   (format "Document not found: %s" doc-id)
 	   :debug)
 	  nil))))
-  )
+)
 
 (provide 'rudel-obby-state)
 ;;; rudel-obby-state.el ends here
