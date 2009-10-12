@@ -378,7 +378,7 @@
 
 	    <mediaobject>
 	      <imageobject>
-		<imagedata fileref="obby-client-connection-states.png"
+		<imagedata fileref="images/obby-client-connection-states.png"
 			   align="center"
 			   width="50%"/>
 	      </imageobject>
@@ -396,7 +396,7 @@
 
 	    <mediaobject>
 	      <imageobject>
-		<imagedata fileref="infinote-client-connection-states.png"
+		<imagedata fileref="images/infinote-client-connection-states.png"
 			   align="center"
 			   width="50%"/>
 	      </imageobject>
