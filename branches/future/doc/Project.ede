@@ -4,6 +4,28 @@
   :name "doc"
   :file "Project.ede"
   :targets (list
+    (ede-proj-target-makefile-miscelaneous "manual"
+    :name "manual"
+    :path ""
+    :source '("manual.xml")
+    :auxsource '("manual.pdf")
+    :rules (list
+     (ede-makefile-rule "fop"
+      :target "manual.pdf"
+      :dependencies "manual.fo"
+      :rules '("fop -fo $< -pdf $@")
+      )
+     (ede-makefile-rule "xsltproc"
+      :target "manual.fo"
+      :dependencies "manual.xml"
+      :rules '("xsltproc \\
+--output $@ \\
+--stringparam use.extensions 0 \\
+/usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl \\
+$<")
+      )
+     )
+    )
    (ede-proj-target-makefile-miscelaneous "card.pdf"
     :name "card.pdf"
     :path ""
