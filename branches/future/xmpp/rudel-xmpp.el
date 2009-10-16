@@ -332,8 +332,7 @@ negotiation."))
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'transport)
-		   'xmpp 'rudel-xmpp-backend)
+(rudel-backend-register 'transport 'xmpp 'rudel-xmpp-backend)
 
 (provide 'rudel-xmpp)
 

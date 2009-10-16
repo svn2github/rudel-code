@@ -477,8 +477,7 @@ calling this function."
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'protocol)
-		   'obby 'rudel-obby-backend)
+(rudel-backend-register 'protocol 'obby 'rudel-obby-backend)
 
 ;;;###autoload
 (eval-after-load 'rudel-zeroconf

@@ -246,8 +246,7 @@ type TYPE."
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'session-initiation)
-		   'zeroconf 'rudel-zeroconf-backend)
+(rudel-backend-register 'session-initiation 'zeroconf 'rudel-zeroconf-backend)
 
 (provide 'rudel-zeroconf)
 ;;; rudel-zeroconf.el ends here

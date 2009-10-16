@@ -176,8 +176,7 @@ Return the connection object."
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'protocol)
-		   'infinote 'rudel-infinote-backend)
+(rudel-backend-register 'protocol 'infinote 'rudel-infinote-backend)
 
 ;;;###autoload
 (eval-after-load 'rudel-zeroconf

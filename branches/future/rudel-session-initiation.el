@@ -103,7 +103,7 @@ backend:
 
 The programmatic equivalent looks like this:
 
-(add-to-list 
+(add-to-list
  'rudel-configured-sessions
  (list :name            \"myserver\"
        :backend         'obby
@@ -111,7 +111,7 @@ The programmatic equivalent looks like this:
        :username        user-login-name
        ;; Use M-x list-colors-display to see color choices.
        :color           \"white\"
-       :encryption      t 
+       :encryption      t
        :port            6522
        ;; empty string means no password
        :global-password \"\"
@@ -284,8 +284,9 @@ required by the chosen backend.")
   )
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'session-initiation)
-		   'ask-protocol 'rudel-ask-protocol-backend)
+(rudel-backend-register
+ 'session-initiation
+ 'ask-protocol 'rudel-ask-protocol-backend)
 
 
 ;;; Class rudel-configured-sessions-backend
@@ -318,8 +319,9 @@ configured using customization.")
 	  rudel-configured-sessions))
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'session-initiation)
-		   'configured-sessions 'rudel-configured-sessions-backend)
+(rudel-backend-register
+ 'session-initiation
+ 'configured-sessions 'rudel-configured-sessions-backend)
 
 
 ;;; Miscellaneous functions

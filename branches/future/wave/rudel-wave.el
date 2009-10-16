@@ -70,8 +70,7 @@ connections.")
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'protocol)
-		   'wave 'rudel-wave-backend)
+(rudel-backend-register 'protocol 'wave 'rudel-wave-backend)
 
 (provide 'rudel-wave)
 ;;; rudel-wave.el ends here
