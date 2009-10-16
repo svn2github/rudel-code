@@ -38,6 +38,8 @@
 
 (require 'eieio)
 
+(require 'rudel-util) ;; for rudel-hook-object
+
 
 ;;; Class rudel-user
 ;;
