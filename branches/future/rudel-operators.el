@@ -142,6 +142,23 @@ buffer.")
 	 buffer (+ position 1) length user))))
   )
 
+(defmethod rudel-move-cursor ((this rudel-overlay-operators) position)
+  "Move the cursor overlay associated to THIS to POSITION."
+  (with-slots (document user) this
+    (when user
+      (with-slots (buffer) document
+	(rudel-update-cursor-overlay buffer user (+ position 1))))))
+
+(defmethod rudel-move-selection ((this rudel-overlay-operators)
+				 position length)
+  "Move the selection overlay associated to THIS to POSITION, LENGTH."
+  (with-slots (document user) this
+    (when user
+      (with-slots (buffer) document
+	(rudel-update-selection-overlay
+	 buffer user (+ position 1) length))))
+  )
+
 
 ;;; Class rudel-hook-operators
 ;;
