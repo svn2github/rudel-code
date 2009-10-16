@@ -141,5 +141,18 @@ change the displayed message."
                      (aref progress-spinner-values (mod index 4))
                      (aref parameters 3))))))
 
+(unless (functionp 'string-match-p)
+  (defsubst string-match-p (regexp string &optional start)
+    "Same as `string-match' except this function does not change the match data"
+    (let ((inhibit-changing-match-data t))
+      (string-match regexp string start))))
+
+(defun rudel-get-coding-system (name)
+  (if (functionp 'coding-system-from-name)
+      (coding-system-from-name name)
+    ;; May need to try a little harder here for Emacs 22 depending on
+    ;; what kind of encoding names are given us.
+    (intern name)))
+
 (provide 'rudel-compat)
 ;;; rudel-compat.el ends here
