@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, Gobby, infinote protocol
+;; Keywords: rudel, gobby, infinote protocol
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -86,7 +86,8 @@
   )
 
 (defmethod rudel-connect ((this rudel-infinote-backend) transport info)
-  ""
+  "Connect to an infinote server using the information INFO.
+Return the connection object."
   ;; Before we start, load the client functionality.
   (require 'rudel-infinote-client)
 
