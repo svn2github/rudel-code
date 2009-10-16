@@ -15,8 +15,13 @@
   (add-to-list 'load-path (concat rudel-dir "/" dir)))
 
 (eval-after-load 'rudel
-  '(progn (global-rudel-minor-mode)
-          (require 'rudel-obby)
-          (require 'rudel-zeroconf)))
+  '(progn
+     (require 'rudel-obby)
+     (when (and (require 'dbus nil t)
+		(require 'zeroconf nil t)
+		(dbus-get-name-owner :system "org.freedesktop.Avahi"))
+       (require 'rudel-zeroconf))
+     ;; Enable global minor mode
+     (global-rudel-minor-mode 1)))
 
 (provide 'rudel-loaddefs)
