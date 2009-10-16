@@ -130,15 +130,17 @@ buffer.")
 	    (setq position (- (point-max) (length data) 1))))
 
 	(rudel-update-author-overlay-after-insert
-	 buffer (+ position 1) (length data) user)))
-    )
+	 buffer (+ position 1) (length data) user))))
+  )
 
 (defmethod rudel-delete ((this rudel-overlay-operators) position length)
   "Update the overlays associated to THIS to incorporate a deletion of LENGTH at POSITION."
   (with-slots (document user) this
-    (with-slots (buffer) document
-      (rudel-update-author-overlay-after-delete
-       buffer (+ position 1) length user))))
+    (when user
+      (with-slots (buffer) document
+	(rudel-update-author-overlay-after-delete
+	 buffer (+ position 1) length user))))
+  )
 
 
 ;;; Class rudel-hook-operators
