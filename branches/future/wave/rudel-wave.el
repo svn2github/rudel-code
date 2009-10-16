@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, Wave protocol, backend
+;; Keywords: rudel, wave, protocol, backend
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
