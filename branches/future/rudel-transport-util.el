@@ -73,6 +73,16 @@ transport changes."))
 transform a bidirectional data stream as it passes through them."
   :abstract t)
 
+(defmethod slot-missing ((this rudel-transport-filter)
+			 slot-name operation &optional new-value)
+  "Make slots of underlying transport available as virtual slots of THIS."
+  (cond
+   ((eq operation 'oref)
+    (slot-value (oref this :transport) slot-name))
+   ((eq operation 'oset)
+    (set-slot-value (oref this :transport) slot-name new-value)))
+  )
+
 (defmethod rudel-set-filter ((this rudel-transport-filter) filter)
   "Install FILTER as dispatcher for messages received by THIS."
   (oset this :filter filter))
@@ -131,7 +141,6 @@ complete messages by calling an assembly function.")
   (with-slots (transport) this
     (rudel-send transport data)))
 
-
 
 ;;; Class rudel-parsing-transport-filter
 ;;
@@ -185,7 +194,7 @@ a pair of one parse and one generate function.")
 
 ;; TODO have a callback instead of the actual reporter
 (defclass rudel-progress-reporting-transport-filter (rudel-transport-filter)
-  ((reporter :initarg reporter
+  ((reporter :initarg :reporter
 	     :documentation
 	     "TODO"))
   "TODO")
@@ -247,7 +256,57 @@ being the \"bottom\")."
 			       args))))
     current))
 
-(rudel-transport-make-filter-stack (rudel-tcp-transport "bla") '((rudel-progress-reporting-transport-filter :reporter nil)))
-
 (provide 'rudel-transport-util)
+
+
+;;; Unit tests
+;;
+
+(eval-when-compile
+
+  (require 'ert )
+
+  ;; Dummy transport class for tests
+
+  (defclass rudel-dummy-transport (rudel-transport)
+    ((test :initarg :test)))
+
+  (defmethod rudel-set-filter ((this rudel-dummy-transport) filter)
+    )
+
+  ;; Test cases
+
+  (ert-deftest rudel-transport-util-test-transport-filter ()
+    "Tests for class `rudel-transport-filter'.
+In fact, `rudel-assembling-transport-filter' is used for the test
+since `rudel-transport-filter' is abstract. However, only
+properties of `rudel-transport-filter' are tested."
+    (let* ((transport (rudel-dummy-transport
+		       "bla"
+		       :test 'test))
+	   (filter    (rudel-assembling-transport-filter
+		       "bla"
+		       :transport transport)))
+      (should       (eq (oref filter :transport) transport))
+      (should       (eq (oref filter :test) 'test))
+      (should-error (oref filter :invalid)
+		    :type 'invalid-slot-name))
+    )
+
+  (ert-deftest rudel-transport-util-test-make-filter-stack ()
+    "Tests for `rudel-transport-make-filter-stack'."
+    (let* ((transport (rudel-dummy-transport
+		       "bla"
+		       :test 'test))
+	   (top       (rudel-transport-make-filter-stack
+		       transport
+		       '((rudel-progress-reporting-transport-filter
+			  :reporter nil)))))
+      (should (eq (oref top :transport) transport))
+      (should (eq (object-class top)
+		  rudel-progress-reporting-transport-filter)))
+    )
+
+  )
+
 ;;; rudel-transport-util.el ends here
