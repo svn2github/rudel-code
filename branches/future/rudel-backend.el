@@ -107,6 +107,7 @@ symbol, that each describe one capability of the backend."))
 ;;; Class rudel-backend-factory
 ;;
 
+;;;###autoload
 (defclass rudel-backend-factory ()
   ((backends  :initarg   :backends
 	      :type       hash-table
