@@ -24,7 +24,8 @@
 
 ;;; Commentary:
 ;;
-;; Functions for user interactions commonly used in Rudel components.
+;; Functions for user interactions, like choosing objects from several
+;; possibilities, commonly used in Rudel components.
 
 
 ;;; History:
@@ -35,13 +36,17 @@
 ;;; Code:
 ;;
 
+(eval-when-compile
+  (require 'cl)) ;; for flet, find
+
 (require 'rudel-compat) ;; for `read-color' replacement
+(require 'rudel-display) ;; for rudel-display-string
 
 
 ;;; Function for reading Rudel objects from the user.
 ;;
 
-(defun rudel-read-backend (backends &optional prompt return)
+(defun rudel-read-backend (backends &optional prompt return) ;; TODO should not be in this file
   "Read a backend name from BACKENDS and return that name or the actual backend depending on RETURN.
 If RETURN is 'object, return the backend object which is of the
 form (NAME . CLASS-OR-OBJECT); Otherwise return the name as
@@ -90,7 +95,19 @@ The default is taken from `rudel-default-username'."
 
 (defun rudel-read-user-color ()
   "Read a color."
-  (read-color "Color: " t))
+  (let ((color)
+	(default  (propertize
+		   rudel-default-color
+		   'face (list :background rudel-default-color))) ;; TODO at least with idom, this face property is ignored
+	(accepted))
+    (while (not accepted)
+      (setq color (read-color (format "Color (%s): " default)
+			      t t))
+      (when (string= color "")
+	(setq color rudel-default-color))
+      (setq accepted t))
+    color)
+  )
 
 (defun rudel-read-user (&optional users prompt return)
   "Read a user name from USERS and return that name or the actual user depending on RETURN.
@@ -107,12 +124,12 @@ the name as string."
     (setq prompt "User: "))
   ;; Construct a list of user name, read a name with completion and
   ;; return a user name of object.
-  (let* ((user-names (mapcar 'object-name-string users))
+  (let* ((user-names (mapcar #'object-name-string users))
 	 (user-name  (completing-read prompt user-names nil t)))
     (cond
      ((eq return 'object)
       (find user-name users
-	    :test 'string= :key 'object-name-string))
+	    :test #'string= :key #'object-name-string))
      (t user-name)))
   )
 
