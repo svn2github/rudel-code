@@ -66,8 +66,7 @@ necessarily XML) through an XMPP connection.")
 ;;
 
 ;;;###autoload
-(rudel-add-backend (rudel-backend-get-factory 'transport)
-		   'xmpp 'rudel-xmpp-tunnel-backend)
+(rudel-backend-register 'transport 'xmpp-tunnel 'rudel-xmpp-tunnel-backend)
 
 (provide 'rudel-xmpp-tunnel)
 
