@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, telepathy, backend
+;; Keywords: rudel, telepathy, backend
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -39,6 +39,8 @@
 
 (require 'eieio)
 
+(require 'dbus)
+
 (require 'rudel-backend)
 (require 'rudel-transport)
 
@@ -55,14 +57,18 @@
 
 (defclass rudel-telepathy-backend (rudel-transport-backend)
   ((capabilities :initform '()))
-  "Class rudel-telepathy-backend ")
+  "Objects of this class realise transport through instant
+messaging protocols by using the telepathy framework.")
 
-(defmethod initialize-instance ((this rudel-telepathy-backend) &rest slots)
+(defmethod initialize-instance ((this rudel-telepathy-backend) slots)
   "Initialize slots of THIS according to SLOTS."
   (when (next-method-p)
     (call-next-method))
 
   (oset this :version rudel-telepathy-version))
+
+(defmethod rudel-make-connection ((this rudel-telepathy-backend))
+  "")
 
 
 ;;; Autoloading
