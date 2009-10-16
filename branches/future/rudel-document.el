@@ -100,6 +100,11 @@ collaborative editing session can subscribe to."
   "Returns a suggested name for the buffer attached to THIS document."
   (rudel-unique-name this))
 
+(defmethod rudel-attached-p ((this rudel-document))
+  "Return non-nil when THIS is attached to a buffer."
+  (with-slots (buffer) this
+    buffer))
+
 (defmethod rudel-attach-to-buffer ((this rudel-document) buffer)
   "Attach THIS document to BUFFER"
   (with-slots ((doc-buffer :buffer)) this
@@ -304,7 +309,7 @@ null rudel-user-child)."
 				     (- (overlay-end   overlay) 1)
 				     (rudel-overlay-user overlay)))
 			     (sort* (rudel-author-overlays)
-				    '< :key 'overlay-start)))
+				    #'< :key #'overlay-start)))
 	    (last)
 	    (augmented-chunks))
 
