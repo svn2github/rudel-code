@@ -231,15 +231,23 @@ objects."
        (object-p (cdr cell))))
 
 ;;;###autoload
+(defun rudel-backend-get-factory (category)
+  "A shortcut for getting the factory object for CATEGORY."
+  (rudel-get-factory rudel-backend-factory category))
+
+;;;###autoload
 (defun rudel-backend-get (category name)
   "A shortcut for getting backend NAME of category CATEGORY.
 The returned backend is of the form (NAME . OBJECT)."
   (rudel-get-backend (rudel-backend-get-factory category) name))
 
 ;;;###autoload
-(defun rudel-backend-get-factory (category)
-  "A shortcut for getting the factory object for CATEGORY."
-  (rudel-get-factory rudel-backend-factory category))
+(defun rudel-backend-register (category name class &optional replace)
+  "Register backend described by NAME, CLASS in CATEGORY overwriting when REPLACE.
+NAME is a symbol that names the backend.
+CLASS is the symbol under which the backend class is stored."
+  (rudel-add-backend (rudel-backend-get-factory category)
+		     name class replace))
 
 (defun rudel-backend-suitable-backends (category predicate)
   "Return backends from category CATEGORY that satisfy PREDICATE.
