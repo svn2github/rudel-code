@@ -110,7 +110,7 @@ connection.")
 	     "The document to the overlays of which the
 operations are applied")
    (user     :initarg  :user
-	     :type     rudel-user-child
+	     :type     (or null rudel-user-child)
 	     :documentation
 	     "The user object associated to operations."))
   "Provides operation methods which affect the overlays of a
@@ -119,19 +119,19 @@ buffer.")
 (defmethod rudel-insert ((this rudel-overlay-operators) position data)
   "Update the overlays associated to THIS to incorporate an insertion of DATA at POSITION."
   (with-slots (document user) this
-    (with-slots (buffer) document
+    (when user
+      (with-slots (buffer) document
 
-      ;; Since we inserted something, (point-max) is at least the
-      ;; length of the insertion + 1. So we can safely subtract the
-      ;; length of the insertion and 1.
-      (unless position
-	(with-current-buffer buffer
-	  (setq position (- (point-max) (length data) 1))))
-	
+	;; Since we inserted something, (point-max) is at least the
+	;; length of the insertion + 1. So we can safely subtract the
+	;; length of the insertion and 1.
+	(unless position
+	  (with-current-buffer buffer
+	    (setq position (- (point-max) (length data) 1))))
 
-      (rudel-update-author-overlay-after-insert
-       buffer (+ position 1) (length data) user)))
-  )
+	(rudel-update-author-overlay-after-insert
+	 buffer (+ position 1) (length data) user)))
+    )
 
 (defmethod rudel-delete ((this rudel-overlay-operators) position length)
   "Update the overlays associated to THIS to incorporate a deletion of LENGTH at POSITION."
@@ -148,9 +148,9 @@ buffer.")
   ((document :initarg  :document
 	     :type     rudel-document-child
 	     :documentation
-	     "The document object to which operations refer.")   
+	     "The document object to which operations refer.")
    (user     :initarg  :user
-	     :type     rudel-user-child
+	     :type     (or null rudel-user-child)
 	     :documentation
 	     "The user object associated to operations."))
   "Provides operation methods which cause corresponding hooks to
