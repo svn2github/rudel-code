@@ -78,7 +78,12 @@
   (require 'rudel-subetha-client)
 
   ;;
-  (rudel-subetha-client-connection "bla"))
+  (let ((connection (rudel-subetha-client-connection
+		     "bla"
+		     :transport transport)))
+
+    (rudel-state-wait connection '(established))
+    connection))
 
 (defmethod rudel-make-document ((this rudel-subetha-backend)
 				name encoding session)
