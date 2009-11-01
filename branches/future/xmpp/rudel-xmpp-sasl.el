@@ -50,7 +50,7 @@
   "Start state of the SASL negotiation.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-sasl-start)
-			features)
+			name server features)
   "Extract the list of supported mechanisms from FEATURES.
 Then switch to the try one state to try them in order."
   ;; Find mechanism tags
@@ -72,7 +72,7 @@ Then switch to the try one state to try them in order."
 		  mechanism-tags))))
 
     ;; Try the first mechanism
-    (list 'sasl-try-one mechanisms))
+    (list 'sasl-try-one name server mechanisms))
   )
 
 
@@ -85,7 +85,7 @@ Then switch to the try one state to try them in order."
 start state for that mechanism.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-sasl-try-one)
-			mechanisms)
+			name server mechanisms)
   "If Emacs support the first mechanism in MECHANISMS, try it, otherwise skip it.
 Mechanism are tried by switching to the mechanism start state.
 When no mechanisms are left, switch to the authentication failed state."
@@ -97,8 +97,8 @@ When no mechanisms are left, switch to the authentication failed state."
 	(let ((mechanism (sasl-find-mechanism (list mechanism-name))))
 	  (if mechanism
 	      (list 'sasl-mechanism-start
-		    schema mechanism (cdr mechanisms))
-	    (list 'sasl-try-one (cdr mechanisms)))))
+		    name server schema mechanism (cdr mechanisms))
+	    (list 'sasl-try-one name server (cdr mechanisms)))))
     'authentication-failed)
   )
 
@@ -122,18 +122,14 @@ When no mechanisms are left, switch to the authentication failed state."
   "Start state of the negotiation for the selected mechanism.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-sasl-mechanism-start)
-			schema1 mechanism1 rest1)
+			name1 server1 schema1 mechanism1 rest1)
   ""
   (with-slots (schema mechanism rest) this
     (setq schema    schema1
 	  mechanism mechanism1
 	  rest      rest1)
 
-    (let* ((client (sasl-make-client mechanism
-				     "admin" ;;"scymtym" ;; TODO name
-				     "xmpp"
-				     "gunhead.local" ;; "jabber.org";; TODO server
-				     ))
+    (let* ((client (sasl-make-client mechanism name1 "xmpp" server1))
 	   (step   (sasl-next-step client nil))
 	   (name   (sasl-mechanism-name mechanism)))
 
@@ -145,7 +141,7 @@ When no mechanisms are left, switch to the authentication failed state."
 
       ;; Construct the initial SASL step for the mechanism and start
       ;; the challenge/response sequence.
-      (list 'sasl-mechanism-step schema client step rest)))
+      (list 'sasl-mechanism-step name1 server1 schema client step rest)))
   )
 
 
@@ -153,30 +149,40 @@ When no mechanisms are left, switch to the authentication failed state."
 ;;
 
 (defclass rudel-xmpp-state-sasl-mechanism-step (rudel-xmpp-state)
-  ((schema :initarg :schema
+  ((name   :initarg :name
 	   :type    string
 	   :documentation
-	   "")
+	   "Username used in SASL authentication mechanism.")
+   (server :initarg :server
+	   :type    string
+	   :documentation
+	   "Server name used in SASL authentication mechanism.")
+   (schema :initarg :schema
+	   :type    string
+	   :documentation
+	   "Schema URN identifying the SASL mechanism.")
    (client :initarg :client
 	   :type    vector
 	   :documentation
-	   "")
+	   "SASL mechanism data.")
    (step   :initarg :step
 	   :type    vector
 	   :documentation
-	   "")
+	   "SASL mechanism state data.")
    (rest   :initarg :rest
 	   :type    list
 	   :documentation
-	   ""))
+	   "List of remaining mechanisms to try."))
   "Intermediate step of the negotiation for the selected
 mechanism.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-sasl-mechanism-step)
-			schema1 client1 step1 rest1)
+			name1 server1 schema1 client1 step1 rest1)
   "Store SCHEMA1, CLIENT1, STEP1 and REST1 for later use."
-  (with-slots (schema client step rest) this
-    (setq schema schema1
+  (with-slots (name server schema client step rest) this
+    (setq name   name1
+	  server server1
+	  schema schema1
 	  client client1
 	  step   step1
 	  rest   rest1))
@@ -187,8 +193,8 @@ mechanism.")
   (cond
    ;; Authentication mechanism failed. Try next.
    ((string= (xml-tag-name xml) "failure")
-    (with-slots (rest) this
-      (list 'sasl-try-one rest)))
+    (with-slots (name server rest) this
+      (list 'sasl-try-one name server rest)))
    ;; TODO Handle <not-authorized/> differently? We could retry with
    ;; the same mechanism
 
@@ -201,7 +207,7 @@ mechanism.")
    ;; Emacs SASL implementation does the heavy lifting for us.
    ((string= (xml-tag-name xml) "challenge")
     ;; TODO is the challenge data always there?
-    (with-slots (schema client step rest) this
+    (with-slots (name server schema client step rest) this
       ;; TODO assert string= schema (xml-tag-attr xml "xmlns")
 
       ;; Pass challenge data, if any, to current step.
@@ -223,7 +229,7 @@ mechanism.")
 		      ,@(when response-data
 			  (list response-data)))))
 
-      (list 'sasl-mechanism-step schema client step rest)))
+      (list 'sasl-mechanism-step name server schema client step rest)))
 
    ;; Unknown message.
    (t
