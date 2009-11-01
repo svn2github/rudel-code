@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 ;;
-;; This contains a simple implementation of the so calls Start TLS
+;; This contains a simple implementation of the so called Start TLS
 ;; protocol, which means enabling TLS encryption for an existing
 ;; network connection.
 
