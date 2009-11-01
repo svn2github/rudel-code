@@ -97,9 +97,8 @@ supported by the initiating peer."
     (rudel-start beep-transport)
 
     (rudel-state-wait
-     (with-slots (channels) beep-transport
-       (gethash 0 channels))
-     '(established) nil ;;'(we-finalize they-finalize)
+     (rudel-get-channel beep-transport 0)
+     '(idle) nil ;;'(we-finalize they-finalize)
      callback)
 
     ;; Return the transport.
@@ -109,6 +108,8 @@ supported by the initiating peer."
 ;;; Class rudel-beep-transport
 ;;
 
+;; TODO store a mapping between profiles and channel-protocol classes?
+;; would be useful when receiving </start> requests
 (defclass rudel-beep-transport (rudel-transport-filter)
   ((profiles     :initarg :profiles
 		 :type list
@@ -174,12 +175,12 @@ supported by the initiating peer."
 ;;		  ("xml:lang" . "en"))
 ;;		 "Bla")))))
 
-(defmethod rudel-dispatch-frame ((this rudel-beep-transport) frame)
+(defmethod rudel-dispatch-frame ((this rudel-beep-transport) frame) ;; TODO name
   ""
   (with-slots (channels) this
     (with-slots ((frame-channel :channel)) frame
       (let ((channel (gethash frame-channel channels)))
-	(rudel-accept channel frame)))))
+	(rudel-handle channel frame))))) ;; TODO name
 
 (defmethod rudel-get-channel ((this rudel-beep-transport) id)
   ""
@@ -204,16 +205,29 @@ of a BEEP profile."
   ;; Request the allocation of a new channel on channel 0.
   (with-slots (channel-zero) this
     (rudel-switch channel-zero 'starting profiles)
-    (rudel-state-wait channel-zero '(established)))
+    (rudel-state-wait channel-zero '(idle)))
 
   ;; Create the channel object and it to the channel hash-table.
   (let ((channel (rudel-beep-channel
 		  (format "%d" id)
 		  :id        id
-		  :transport this
-		  :start     'established)))
+		  :transport this)))
     (rudel-add-channel this channel))
   )
+
+(defmethod rudel-remove-channel ((this rudel-beep-transport) channel)
+  "TODO"
+  )
+
+(defmethod rudel-close-channel ((this rudel-beep-transport) channel)
+  "TODO"
+  ;; Request closing CHANNEL on channel 0.
+  (with-slots (channel-zero) this
+    (rudel-switch channel-zero 'closing channel)
+    (rudel-state-wait channel-zero '(idle))) ;; TODO handle errors
+
+  ;;
+  (rudel-remove-channel this channel))
 
 
 ;;; Autoloading
