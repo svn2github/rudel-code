@@ -41,7 +41,8 @@
 
 (require 'rudel-util)
 
-(require 'rudel-beep-util)
+(require 'rudel-beep-util) ;; TODO why
+(require 'rudel-beep-channel)
 
 
 ;;; Constants
@@ -55,10 +56,10 @@
 ;;
 
 (defclass rudel-beep-backend (rudel-transport-backend)
-  ()
+  ((capabilities :initform (connect)))
   "")
 
-(defmethod initialize-instance ((this rudel-beep-backend) &rest slots)
+(defmethod initialize-instance ((this rudel-beep-backend) slots)
   ""
   (when (next-method-p)
     (call-next-method))
@@ -67,11 +68,15 @@
 
 (defmethod rudel-make-connection ((this rudel-beep-backend) info
 				  &optional callback)
-  "Connect to an BEEP server using the information in INFO.
+  "Connect to a BEEP peer using the information in INFO.
 INFO has to be a property list containing at least the
-keys :host, :port and :jid."
+keys :host, :port and :profiles.
+
+The value of the :profile property should be a list of string
+each of which should be an uri identifying one the profiles
+supported by the initiating peer."
   (let* ((host           (plist-get info :host))
-	 (profiles       (plist-get info :profiles)) ;; TODO use these
+	 (profiles       (plist-get info :profiles))
 	 ;; Create the underlying transport.
 	 ;; TODO handle errors
 	 (tcp-transport  (rudel-make-connection
@@ -83,8 +88,9 @@ keys :host, :port and :jid."
 			  tcp-transport))
 	 ;; Create the actual BEEP transport.
 	 (beep-transport (rudel-beep-transport
-			  host
-			  :transport stack))) ;; TODO use profiles here
+			  (format "to %s" host)
+			  :transport stack
+			  :profiles  profiles)))
 
     ;; Now start the transport and wait until the connection has been
     ;; established.
@@ -93,9 +99,8 @@ keys :host, :port and :jid."
     (rudel-state-wait
      (with-slots (channels) beep-transport
        (gethash 0 channels))
-     '(established) ;;'(we-finalize they-finalize)
-     ;;callback)
-     )
+     '(established) nil ;;'(we-finalize they-finalize)
+     callback)
 
     ;; Return the transport.
     beep-transport))
@@ -105,10 +110,18 @@ keys :host, :port and :jid."
 ;;
 
 (defclass rudel-beep-transport (rudel-transport-filter)
-  ((channels :initarg :channels
-	     :type hash-table
-	     :documentation
-	     "")) ;; TODO put the channels into a separate dispatcher class?
+  ((profiles     :initarg :profiles
+		 :type list
+		 :documentation
+		 "")
+   (channels     :initarg :channels
+		 :type hash-table
+		 :documentation
+		 "")
+   (channel-zero :initarg :channel-zero
+		 :type rudel-beep-channel-zero
+		 :documentation
+		 "")) ;; TODO put the channels into a separate dispatcher class?
   "")
 
 (defmethod initialize-instance ((this rudel-beep-transport) slots)
@@ -117,23 +130,16 @@ keys :host, :port and :jid."
   (when (next-method-p)
     (call-next-method))
 
-  ;; Register states.
-  (rudel-register-states this rudel-beep-states)
-
-  ;;
-  (with-slots (channels) this
+  ;; Create channel list and channel 0
+  (with-slots (profiles channels channel-zero) this
     (setq channels (make-hash-table))
-    (puthash
-     0
-     (rudel-beep-channel-zero
-      "0"
-      :transport this
-      :start '(greeting
-	       ("http://iana.org/beep/TLS"
-		"http://www.codingmonkeys.de/BEEP/SubEthaEditHandshake"
-		"http://www.codingmonkeys.de/BEEP/TCMMMStatus"
-		"http://www.codingmonkeys.de/BEEP/SubEthaEditSession")))
-     channels)) ;; TODO get these through an initarg
+
+    (let ((channel-0 (rudel-beep-channel-zero
+		      "0"
+		      :transport this
+		      :start     `(greeting ,profiles))))
+      (rudel-add-channel this channel-0)
+      (setq channel-zero channel-0)))
 
   ;; Install a handler that passes received data to the user-provided
   ;; handler.
@@ -175,23 +181,38 @@ keys :host, :port and :jid."
       (let ((channel (gethash frame-channel channels)))
 	(rudel-accept channel frame)))))
 
-(defmethod rudel-create-channel ((this rudel-beep-transport) id profiles)
+(defmethod rudel-get-channel ((this rudel-beep-transport) id)
   ""
   (with-slots (channels) this
+    (gethash id channels)))
 
-    (rudel-switch
-     (gethash 0 channels)
-     'starting profiles)
+(defmethod rudel-add-channel ((this rudel-beep-transport) channel)
+  ""
+  (with-slots (channels) this
+    (with-slots (id) channel
+      (when (gethash id channels)
+	(signal 'duplicate-channel-id id))
 
-    (rudel-state-wait (gethash 0 channels) '(established))
+      (puthash id channel channels))))
 
-    (let ((channel (rudel-beep-channel
-		    (format "%d" id)
-		    :id id
-		    :transport this
-		    :start 'established)))
-      (puthash id channel channels)
-      channel))
+(defmethod rudel-create-channel ((this rudel-beep-transport) id profiles) ;; TODO allow (null id) for auto-allocation?
+  "Create a new channel with id ID on THIS connection using one of PROFILES.
+ID should be an integer. The set of integers that are permissible
+as channel ids depends on role of THIS.
+PROFILES should be a list of strings each of which being the uri
+of a BEEP profile."
+  ;; Request the allocation of a new channel on channel 0.
+  (with-slots (channel-zero) this
+    (rudel-switch channel-zero 'starting profiles)
+    (rudel-state-wait channel-zero '(established)))
+
+  ;; Create the channel object and it to the channel hash-table.
+  (let ((channel (rudel-beep-channel
+		  (format "%d" id)
+		  :id        id
+		  :transport this
+		  :start     'established)))
+    (rudel-add-channel this channel))
   )
 
 

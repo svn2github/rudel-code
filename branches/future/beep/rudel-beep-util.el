@@ -143,7 +143,7 @@
       (let ((type     (match-string 1 frame))
 	    (channel  (string-to-number (match-string 2 frame)))
 	    (message  (string-to-number (match-string 3 frame)))
-	    (more     (match-string 4 frame))
+	    (more     (match-string 4 frame)) ;; TODO . -> last part of message; * -> message continues
 	    (sequence (string-to-number (match-string 5 frame)))
 	    (size     (string-to-number (match-string 6 frame))))
 	(setq header         (list :type     type
@@ -218,19 +218,19 @@
 (defun rudel-beep-parse-payload (frame)
   ""
   (with-slots (entities payload) frame
-    (let ((type (plist-get entities :content-type)))
+    (let ((type (plist-get entities :Content-Type)))
       (cond
-       ((string= type " application/beep+xml")
-	(setq payload (string->xml (replace-regexp-in-string "'" "\"" payload)))))))
+       ((string= type " application/beep+xml") ;; TODO
+	(setq payload (string->xml (replace-regexp-in-string "'" "\"" payload))))))) ;; TODO
   frame
   )
 
 (defun rudel-beep-generate-payload (frame)
   ""
   (with-slots (entities payload) frame
-    (let ((type (plist-get entities :content-type)))
+    (let ((type (plist-get entities :Content-Type)))
       (cond
-       (t ;;(string= type " application/beep+xml")
+       (t ;;(string= type " application/beep+xml") ;; TODO
 	(setq payload (xml->string payload))))))
   frame)
 
@@ -239,14 +239,19 @@
 ;;
 
 (defun rudel-beep-make-transport-filter-stack (transport)
-  "Construct an BEEP protocol filter stack on top of TRANSPORT."
+  "Construct a BEEP protocol filter stack on top of TRANSPORT."
   (rudel-transport-make-filter-stack
    transport
-   '((rudel-assembling-transport-filter
+   '(;; Assemble complete frames
+     (rudel-assembling-transport-filter
       :assembly-function rudel-beep-assemble-frame)
+
+     ;; Parse frames, leaving payload alone
      (rudel-parsing-transport-filter
       :parse-function    rudel-beep-parse-frame
       :generate-function rudel-beep-generate-frame)
+
+     ;; Parse payloads
      (rudel-parsing-transport-filter
       :parse-function    rudel-beep-parse-payload
       :generate-function rudel-beep-generate-payload))))
