@@ -27,7 +27,7 @@
 ;; This file contains the function `rudel-notify' which dispatches
 ;; notification events to configured handler functions.
 ;;
-;; Certain object like Rudel documents and users are automatically
+;; Certain objects like Rudel documents and users are automatically
 ;; converted to suitable textual or graphical representations for the
 ;; notification.
 ;;
@@ -50,6 +50,8 @@
 
 (require 'rudel-user)
 (require 'rudel-document)
+
+(require 'rudel-display)
 
 
 ;;; Customization
@@ -78,43 +80,30 @@
 ;;; Interface
 ;;
 
-(defun rudel-notify (summary text &rest args) ;; TODO importance argument?
+;; TODO Something like this would work with libnotify:
+;; '(:default (lambda () (message "default")))
+;; '(:subscribe "subscribe" (lambda () (message "subscribe"))
+
+(defun rudel-notify (summary text &rest args) ;; TODO importance argument? action arguments?
   "Do a notification with SUMMARY and detailed text TEXT with replacements ARGS.
 TEXT has to have a number of format specifications equal the
 number of args in ARGS."
-  (apply rudel-notify-function summary text args))
+  (funcall rudel-notify-function summary text args))
 
 
-;;; Notification functions
+;;; Notification backend functions
 ;;
 
-(defun rudel-notify-emacs-message (summary text &rest args)
+(defun rudel-notify-emacs-message (summary text args)
   ""
   (apply #'message
 	 text
-	 (mapcar
-	  (lambda (object)
-	    (cond
-	     ((rudel-user-child-p object)
-	      (object-name-string object)) ;(rudel-user-string object))
-	     ((rudel-document-child-p object)
-	      (object-name-string object))
-	     (t object)))
-	  args))
-  )
+	 (mapcar #'rudel-notify-format-object args)))
 
-(defun rudel-notify-libnotify (summary text &rest args)
+(defun rudel-notify-libnotify (summary text args)
   ""
   (require 'libnotify)
-  (let* ((formatted (mapcar
-		     (lambda (object)
-		       (cond
-			((rudel-user-child-p object)
-			 (object-name-string object))
-			((rudel-document-child-p object)
-			 (object-name-string object))
-			(t object)))
-		     args))
+  (let* ((formatted (mapcar #'rudel-notify-format-object args))
 	 (summary   (apply #'format summary formatted))
 	 (text      (apply #'format text
 			   (mapcar
@@ -124,9 +113,18 @@ number of args in ARGS."
     (libnotify-notify summary text "info" "Rudel"))
   )
 
-;; TODO Something like this would work with libnotify:
-;; '(:default (lambda () (message "default")))
-;; '(:subscribe "subscribe" (lambda () (message "subscribe"))
+
+;;; Helper functions
+;;
+
+(defun rudel-notify-format-object (object)
+  ""
+  (cond
+   ((or (rudel-user-child-p object)
+	(rudel-document-child-p object))
+    (rudel-display-string object))
+
+   (t object)))
 
 (provide 'rudel-notification)
 ;;; rudel-notification.el ends here
