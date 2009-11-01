@@ -327,7 +327,7 @@ client protocols have to obey."
 (defgeneric rudel-publish ((this rudel-connection) document)
   "")
 
-(defgeneric rudel-subscribe-to ((this rudel-connection) document)
+(defgeneric rudel-subscribe-to ((this rudel-connection) document) ;; TODO name should be rudel-subscribe
   "")
 
 (defgeneric rudel-unsubscribe-from ((this rudel-connection) document) ; TODO name should be rudel-unsubscribe
@@ -346,331 +346,35 @@ client protocols have to obey."
   "")
 
 
-;;; Class rudel-user
-;;
-
-(defclass rudel-user (eieio-named
-		      eieio-speedbar-file-button
-		      rudel-hook-object)
-  ((color       :initarg  :color
-		:accessor rudel-color
-		:documentation
-		"Color used to indicate ownership or authorship
-by the user. Examples includes text written by the user or the
-user name itself.")
-   (change-hook :initarg  :change-hook
-		:type     list
-		:initform nil
-		:documentation
-		"This hook is run when this user object
-changes."))
-  "Objects of this class represent users participating in
-collaborative editing session. Note that a participating user
-does not have to be connected to the session at any given time."
-  :abstract t)
-
-(defmethod rudel-display-string ((this rudel-user)
-				 &optional use-images align)
-  "Return a textual representation of THIS for user interface stuff."
-  (with-slots ((name :object-name) color) this
-    (propertize
-     (concat
-      (when use-images
-	(propertize "*" 'display rudel-icon-person))
-      name)
-     'face (list :background color)))
-  )
-
-
-;;; Class rudel-document
-;;
-
-(defclass rudel-document (eieio-named
-			  eieio-speedbar-file-button
-			  rudel-hook-object)
-  ((session          :initarg  :session
-		     :type     rudel-session
-		     :documentation
-		     "")
-   (buffer           :initarg  :buffer
-		     :type     (or null buffer)
-		     :initform nil
-		     :documentation
-		     "")
-   (subscribed       :initarg  :subscribed
-		     :type     list
-		     :initform nil
-		     :documentation
-		     "")
-   ;; Hooks
-   (subscribe-hook   :initarg  :subscribe-hook
-		     :type     list
-		     :initform nil
-		     :documentation
-		     "This hook is run when a user subscribes to
-this document object.")
-   (unsubscribe-hook :initarg  :unsubscribe-hook
-		     :type     list
-		     :initform nil
-		     :documentation
-		     "This hook is run when a user unsubscribes
-from this document object.")
-   (attach-hook      :initarg  :attach-hook
-		     :type     list
-		     :initform nil
-		     :documentation
-		     "This hook is run when a buffer is attached
-to this document object.")
-   (detach-hook      :initarg  :detach-hook
-		     :type     list
-		     :initform nil
-		     :documentation
-		     "This hook is run when the attached buffer
-is detached from this document object."))
-  "This class represents a document, which participants of a
-collaborative editing session can subscribe to."
-  :abstract t)
-
-(defmethod rudel-unique-name ((this rudel-document))
-  "Returns a suggested name for the buffer attached to THIS document."
-  (object-name-string this))
-
-(defmethod rudel-suggested-buffer-name ((this rudel-document))
-  "Returns a suggested name for the buffer attached to THIS document."
-  (rudel-unique-name this))
-
-(defmethod rudel-attached-p ((this rudel-document))
-  (with-slots (buffer) this
-    buffer))
-
-(defmethod rudel-attach-to-buffer ((this rudel-document) buffer)
-  "Attach THIS document to BUFFER"
-  (with-slots ((doc-buffer :buffer)) this
-    ;; Set buffer slot of THIS to BUFFER and associated THIS with
-    ;; BUFFER.
-    (setq doc-buffer buffer)
-    (rudel-set-buffer-document this buffer)
-
-    (with-current-buffer doc-buffer
-      ;; Add the handler function for buffer changes to the buffer's
-      ;; change hook.
-      (add-hook 'after-change-functions
-		#'rudel-handle-buffer-change
-		nil t)
-
-      ;; Store change data before the change a done. This is necessary
-      ;; because the number of bytes (not characters) cannot otherwise
-      ;; be recovered after a deletion.
-      (add-hook 'before-change-functions
-		#'rudel-buffer-change-workaround
-		nil t)
-
-      ;; Add a handler to the kill-buffer hook to unsubscribe from the
-      ;; document when the buffer gets killed.
-      (add-hook 'kill-buffer-hook
-		#'rudel-unpublish-buffer
-		nil t)
-
-      ;;
-      (add-hook 'change-major-mode-hook
-		#'rudel-handle-major-mode-change
-		nil t))
-
-    ;; Run the hook.
-    (object-run-hook-with-args this 'attach-hook doc-buffer))
-  )
-
-(defmethod rudel-detach-from-buffer ((this rudel-document))
-  "Detach document THIS from its buffer.
-Do nothing, if THIS is not attached to any buffer."
-  (with-slots (buffer) this
-    (let ((buffer-save buffer))
-
-      ;; Only try to detach from BUFFER, if it is non-nil. BUFFER can
-      ;; be nil, if the user did not subscribe to the document, or
-      ;; unsubscribed after subscribing.
-      (when buffer
-
-	(with-current-buffer buffer
-	  ;; Remove our handler function from the kill-buffer hook.
-	  (remove-hook 'kill-buffer-hook
-		       #'rudel-unpublish-buffer
-		       t)
-
-	  ;; Remove our handler function from the after-change hook.
-	  (remove-hook 'after-change-functions
-		       #'rudel-handle-buffer-change
-		       t)
-
-	  ;; Remove our handler function from the before-change hook.
-	  (remove-hook 'before-change-functions
-		       #'rudel-buffer-change-workaround
-		       t)
-
-	  ;; Remove all overlays.
-	  (rudel-overlays-remove-all)
-
-	  ;; Remove the major mode change handler.
-	  (remove-hook 'change-major-mode-hook
-		       #'rudel-handle-major-mode-change
-		       t))
-
-	;; Unset buffer slot of THIS and delete association of THIS with
-	;; BUFFER.
-	(rudel-set-buffer-document nil buffer)
-	(setq buffer nil))
-
-      ;; Run the hook.
-      (object-run-hook-with-args this 'detach-hook buffer-save)))
-  )
-
-(defmethod rudel-add-user ((this rudel-document) user)
-  "Add USER to the list of subscribed users of THIS.
-
-Runs object hook (see `rudel-hook-object') `subscribe-hook' with
-arguments THIS and USER."
-  ;; Add USER to list.
-  (object-add-to-list this :subscribed user)
-
-  ;; Run the hook.
-  (object-run-hook-with-args this 'subscribe-hook user))
-
-(defmethod rudel-remove-user ((this rudel-document) user)
-  "Remove USER from the list of subscribed users of THIS.
-
-Runs object hook (see `rudel-hook-object') `unsubscribe-hook'
-with arguments THIS and USER."
-  ;; Remove USER from list.
-  (object-remove-from-list document :subscribed user)
-
-  ;; Run the hook.
-  (object-run-hook-with-args this 'unsubscribe-hook user))
-
-(defmethod rudel-insert ((this rudel-document) position data)
-  "Insert DATA at POSITION into the buffer attached to THIS.
-When POSITION is nil `point-max' is used to determine the
-insertion position.
-Modification hooks are disabled during the insertion."
-  (with-slots (buffer) this
-    (save-excursion
-      (set-buffer buffer)
-
-      (unless position
-	(setq position (- (point-max) 1)))
-
-      (let ((inhibit-modification-hooks t))
-	(goto-char (+ position 1))
-	(insert data))))
-  )
-
-(defmethod rudel-delete ((this rudel-document) position length)
-  "Delete a region of LENGTH character at POSITION from the buffer attached to THIS.
-Modification hooks are disabled during the insertion."
-  (with-slots (buffer) this
-    (save-excursion
-      (set-buffer buffer)
-
-      (let ((inhibit-modification-hooks t))
-	(delete-region (+ position 1) (+ position length 1)))))
-  )
-
-(defmethod rudel-local-operation ((this rudel-document) operation)
-  "Apply the local operation OPERATION to THIS."
-  (with-slots (session buffer) this
-    (with-slots (connection (user :self)) session
-      (dolist (operators (list
-
-			   ;; Update overlays
-			   (rudel-overlay-operators
-			    "overlay-operators"
-			    :document this
-			    :user     user)
-
-			   ;; Notify connection
-			   (rudel-connection-operators
-			    "connection-operators"
-			    :connection connection
-			    :document   this)))
-
-	;; Apply the operation using each set of operators
-	(rudel-apply operation operators))))
-  )
-
-(defmethod rudel-remote-operation ((this rudel-document) user operation)
-  "Apply the remote operation OPERATION performed by USER to THIS."
-  (dolist (operators (append
-
-		       ;; Update buffer contents
-		       (list (rudel-document-operators
-			      "document-operators"
-			      :document this))
-
-		       ;; Update overlays
-		       (when user
-			 (list (rudel-overlay-operators
-				"overlay-operators"
-				:document this
-				:user     user)))))
-
-    ;; Apply the operation using each set of operators
-    (rudel-apply operation operators))
-  )
-
-(defmethod rudel-chunks ((this rudel-document))
-  "Return a list of text chunks of the associated buffer.
-Each element in the chunk is a list structured like this (START
-END AUTHOR). START and END are numbers, AUTHOR is of type (or
-null rudel-user-child)."
-  (with-slots (buffer) this
-    ;; Extract buffer string and a list of chunks partitioning the
-    ;; string according to the respective author (or nil).
-    (with-current-buffer buffer
-      (let ((string         (buffer-string)) ;; TODO no-properties?
-	    (overlay-chunks (mapcar
-			     (lambda (overlay)
-			       (list (- (overlay-start overlay) 1)
-				     (- (overlay-end   overlay) 1)
-				     (rudel-overlay-user overlay)))
-			     (sort* (rudel-author-overlays)
-				    '< :key 'overlay-start)))
-	    (last)
-	    (augmented-chunks))
-
-	;; Iterate through the list of chunks to find gaps between
-	;; chunks (also before the first) and insert entries with
-	;; author nil accordingly.
-	(dolist (chunk overlay-chunks)
-	  (when (or (and (not last)
-			 (> (nth 0 chunk) 0))
-		    (and last
-			 (/= (nth 1 last)
-			     (nth 0 chunk))))
-	    (push (list (if last (nth 1 last) 0)
-			(nth 0 chunk)
-			nil)
-		  augmented-chunks))
-	  (push chunk augmented-chunks)
-	  (setq last chunk))
-
-	;; If there is text after the last chunk, create another one
-	;; with author nil. If there were no chunks at all, this chunk
-	;; can also cover the whole buffer string.
-	(when (or (and (not last)
-		       (/= (length string) 0))
-		  (and last
-		       (/= (nth 1 last) (length string))))
-	  (push (list (if last (nth 1 last) 0)
-		      (length string)
-		      nil)
-		augmented-chunks))
-
-	;; Sort chunks according to the start position.
-	(sort* augmented-chunks '< :key 'car))))
-  )
-
-
 ;;; Buffer-related functions
 ;;
+
+;;;###autoload
+(defun rudel-buffer-has-document-p (&optional buffer)
+  "Return non-nil if a document object is attached to BUFFER.
+If BUFFER is nil, use the current buffer."
+  (unless buffer
+    (setq buffer (current-buffer)))
+
+  (with-current-buffer buffer
+    rudel-buffer-document))
+
+(defun rudel-buffer-document (&optional buffer)
+  "Return the document object attached to BUFFER.
+If BUFFER is nil, use the current buffer."
+  (unless buffer
+    (setq buffer (current-buffer)))
+
+  (with-current-buffer buffer
+    rudel-buffer-document))
+
+(defun rudel-set-buffer-document (document &optional buffer)
+  "TODO"
+  (unless buffer
+    (setq buffer (current-buffer)))
+
+  (with-current-buffer buffer
+    (setq rudel-buffer-document document)))
 
 (defun rudel-buffer-has-document-p (&optional buffer)
   "Return non-nil if a document object is attached to BUFFER.
