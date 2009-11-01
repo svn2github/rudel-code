@@ -196,23 +196,36 @@ supported by the initiating peer."
 
       (puthash id channel channels))))
 
-(defmethod rudel-create-channel ((this rudel-beep-transport) id profiles) ;; TODO allow (null id) for auto-allocation?
+(defmethod rudel-create-channel ((this rudel-beep-transport) id profiles
+				 &optional name) ;; TODO allow (null id) for auto-allocation?
   "Create a new channel with id ID on THIS connection using one of PROFILES.
 ID should be an integer. The set of integers that are permissible
 as channel ids depends on role of THIS.
 PROFILES should be a list of strings each of which being the uri
 of a BEEP profile."
-  ;; Request the allocation of a new channel on channel 0.
-  (with-slots (channel-zero) this
-    (rudel-switch channel-zero 'starting profiles)
-    (rudel-state-wait channel-zero '(idle)))
+  (let ((profile))
+    ;; Request the allocation of a new channel on channel 0.
+    (with-slots (channel-zero) this
+      (unwind-protect
+	  (progn
+	    (rudel-switch channel-zero 'requesting profiles)
+	    (destructuring-bind (symbol . state)
+		(rudel-state-wait channel-zero
+				  '(request-success) '(request-failure))
+	      (with-slots ((profile1 :profile)) state
+		(setq profile profile1))))
+      ;; TODO we could catch -entered-error-state and re-signal; worth the effort?
+	(rudel-switch channel-zero 'idle)))
 
-  ;; Create the channel object and it to the channel hash-table.
-  (let ((channel (rudel-beep-channel
-		  (format "%d" id)
-		  :id        id
-		  :transport this)))
-    (rudel-add-channel this channel))
+    ;; Create the channel object and it to the channel hash-table.
+    (let ((channel (rudel-beep-channel
+		    (if name
+			(format "%d (%s)" id name)
+		      (format "%d" id))
+		    :id        id
+		    :profile   profile
+		    :transport this)))
+      (rudel-add-channel this channel)))
   )
 
 (defmethod rudel-remove-channel ((this rudel-beep-transport) channel)
