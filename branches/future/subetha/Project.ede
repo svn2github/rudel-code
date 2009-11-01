@@ -7,7 +7,7 @@
    (ede-proj-target-elisp "subetha"
     :name "subetha"
     :path ""
-    :source '("rudel-subetha.el")
+    :source '("rudel-subetha.el" "rudel-subetha-client.el")
     )
    )
   )

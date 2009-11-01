@@ -64,16 +64,21 @@
 
   (oset this :version rudel-subetha-version))
 
-(defmethod rudel-ask-connect-info ((this rudel-subetha-backend))
+(defmethod rudel-ask-connect-info ((this rudel-subetha-backend) &optional info)
   ""
-  (let ((host     (read-string "Server: "))
-	(port     (read-number "Port: " 6742))
-	(username (read-string "Username: " rudel-default-username))
-	(color    (read-color  "Color: " t)))
-    (list :host host :port port :username username :color color)))
+  (let ((username (or (and info (plist-get info :username))
+		      (read-string "Username: " rudel-default-username)))
+	(color    (or (and info (plist-get info :color))
+		      (read-color  "Color: " t))))
+    (list :username username :color color)))
 
-(defmethod rudel-connect ((this rudel-subetha-backend) info)
-  "TODO")
+(defmethod rudel-connect ((this rudel-subetha-backend) transport info)
+  "TODO"
+  ;; Before we start, load the client functionality.
+  (require 'rudel-subetha-client)
+
+  ;;
+  (rudel-subetha-client-connection "bla"))
 
 (defmethod rudel-make-document ((this rudel-subetha-backend)
 				name encoding session)
