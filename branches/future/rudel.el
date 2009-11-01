@@ -3,6 +3,7 @@
 ;; Copyright (C) 2008, 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
+;; Version: 0.2
 ;; Keywords: rudel, collaboration
 ;; URL: http://rudel.sourceforge.net/
 ;; X-RCS: $Id:$
@@ -87,7 +88,13 @@ It would be nice to find another way to do this.")
 
 (defgroup rudel nil
   "Rudel collaborative editing framework."
-  :group 'applications)
+  :group 'applications
+  :link  '(url-link :tag "Report Issues"
+		    "http://sourceforge.net/tracker/?group_id=249139")
+  :link  '(url-link :tag "Ask Questions (Mailing List)"
+		    "http://sourceforge.net/mail/?group_id=249139")
+  :link  '(url-link :tag "Ask Questions (EmacsWiki)"
+		    "http://www.emacswiki.org/emacs/Rudel"))
 
 (defcustom rudel-allocate-buffer-function
   'rudel-allocate-buffer-clear-existing
