@@ -3,11 +3,11 @@
 (ede-proj-project "rudel/subetha"
   :name "rudel/subetha"
   :file "Project.ede"
-  :targets (list 
+  :targets (list
    (ede-proj-target-elisp "subetha"
     :name "subetha"
     :path ""
-    :source '("rudel-subetha.el" "rudel-subetha-client.el")
+    :source '("rudel-subetha.el" "rudel-subetha-client.el" "rudel-subetha-channel-protocol.el" "rudel-subetha-constants.el")
     )
    )
   )
