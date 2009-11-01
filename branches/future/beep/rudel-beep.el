@@ -66,8 +66,9 @@
 
   (oset this :version rudel-beep-transport-version))
 
-(defmethod rudel-make-connection ((this rudel-beep-backend) info
-				  &optional callback)
+(defmethod rudel-make-connection ((this rudel-beep-backend)
+				  info info-callback
+				  &optional progress-callback)
   "Connect to a BEEP peer using the information in INFO.
 INFO has to be a property list containing at least the
 keys :host, :port and :profiles.
@@ -75,13 +76,19 @@ keys :host, :port and :profiles.
 The value of the :profile property should be a list of string
 each of which should be an uri identifying one the profiles
 supported by the initiating peer."
+  ;; Ensure that INFO contains all necessary information.
+  (unless (every (lambda (keyword) (member keyword info))
+		 '(:host :port))
+    (setq info (funcall info-callback this info)))
+
+  ;; Extract information from INFO and establish the connection.
   (let* ((host           (plist-get info :host))
 	 (profiles       (plist-get info :profiles))
 	 ;; Create the underlying transport.
 	 ;; TODO handle errors
 	 (tcp-transport  (rudel-make-connection
 			  (cdr (rudel-backend-get 'transport 'tcp))
-			  info))
+			  info info-callback progress-callback))
 	 ;; Create a suitable stack of transport filters on top of the
 	 ;; underlying transport.
 	 (stack          (rudel-beep-make-transport-filter-stack
@@ -99,7 +106,7 @@ supported by the initiating peer."
     (rudel-state-wait
      (rudel-get-channel beep-transport 0)
      '(idle) nil ;;'(we-finalize they-finalize)
-     callback)
+     progress-callback)
 
     ;; Return the transport.
     beep-transport))

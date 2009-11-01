@@ -75,20 +75,25 @@ XMPP connections.")
 
   (oset this :version rudel-xmpp-transport-version))
 
-(defmethod rudel-make-connection ((this rudel-xmpp-backend) info
-				  &optional callback)
+(defmethod rudel-make-connection ((this rudel-xmpp-backend)
+				  info info-callback
+				  &optional progress-callback)
   "Connect to an XMPP server using the information in INFO.
 INFO has to be a property list containing at least the
-keys :host, :port and :jid.
-If non-nil CALLBACK has to be a function which is called
-repeatedly to report progress."
+keys :host, :port and :jid."
+  ;; Ensure that INFO contains all necessary information.
+  (unless (every (lambda (keyword) (member keyword info))
+		 '(:host :jid))
+    (setq info (funcall info-callback this info)))
+
+  ;; Extract information from INFO and connect.
   (let* ((host           (plist-get info :host))
 	 (jid            (plist-get info :jid))
 	 ;; Create the underlying transport.
 	 ;; TODO handle errors
 	 (tcp-transport  (rudel-make-connection
 			  (cdr (rudel-backend-get 'transport 'tcp))
-			  info))
+			  info info-callback progress-callback))
 	 ;; Create a suitable stack of transport filters on top of the
 	 ;; underlying transport.
 	 (stack          (rudel-xmpp-make-transport-filter-stack
@@ -105,7 +110,7 @@ repeatedly to report progress."
     (rudel-state-wait xmpp-transport
 		      '(established)
 		      '(we-finalize they-finalize disconnected)
-		      callback)
+		      progress-callback)
 
     ;; Return the usable transport object.
     xmpp-transport))

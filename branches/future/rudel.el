@@ -547,11 +547,19 @@ will be prompted for."
 
     ;; Create transport object
     (condition-case error-data
-	(setq transport (rudel-make-connection transport-backend info))
+	(flet ((augment-info (backend info)
+	         (append
+		  (list
+		   (intern (concat ":" (read-string "Key: ")))
+		   (read-string "Value: "))
+		  info)))
+	  (setq transport (rudel-make-connection
+			   transport-backend
+			   info #'augment-info)))
       (error (error "Could not connect using transport backend `%s' with %s: %s"
-		     (object-name-string transport-backend)
-		     info
-		     (car error-data))))
+		    (object-name-string transport-backend)
+		    info
+		    (car error-data))))
 
     ;; Create connection
     (condition-case error-data
@@ -565,15 +573,17 @@ will be prompted for."
 
 		    ;; Done
 		    (t
-		     (progress-reporter-force-update reporter nil "Joining ")
+		     (progress-reporter-force-update
+		      reporter nil "Joining ")
 		     (progress-reporter-done reporter)))))
 	    (setq connection
 		  (rudel-connect protocol-backend
-				 transport info #'display-progress))))
+				 transport
+				 info #'display-progress))))
       (error (error "Could not connect using protocol backend `%s' with %s: %s"
-		     (object-name-string protocol-backend)
-		     info
-		     (car error-data))))
+		    (object-name-string protocol-backend)
+		    info
+		    (car error-data))))
     (oset session :connection connection)
 
     ;; Store the new session object globally.
