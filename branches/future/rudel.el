@@ -545,13 +545,32 @@ will be prompted for."
     ;; Store session in INFO.
     (setq info (plist-put info :session session))
 
-    ;; Create transport object and connection
+    ;; Create transport object
     (condition-case error-data
-	(progn
-	  (setq transport  (rudel-make-connection transport-backend info))
-	  (setq connection (rudel-connect protocol-backend transport info)))
-      ('error (error "Could not connect using transport backend `%s' and protocol backend `%s' with %s: %s"
+	(setq transport (rudel-make-connection transport-backend info))
+      (error (error "Could not connect using transport backend `%s' with %s: %s"
 		     (object-name-string transport-backend)
+		     info
+		     (car error-data))))
+
+    ;; Create connection
+    (condition-case error-data
+	(lexical-let ((reporter (make-progress-reporter "Joining ")))
+	  (flet ((display-progress (state) ;; TODO Think about this callback interface
+		   (cond
+		    ;; For all states, just spin.
+		    ((consp state)
+		     (progress-reporter-force-update
+		      reporter nil (format "Joining (%s)" (car state))))
+
+		    ;; Done
+		    (t
+		     (progress-reporter-force-update reporter nil "Joining ")
+		     (progress-reporter-done reporter)))))
+	    (setq connection
+		  (rudel-connect protocol-backend
+				 transport info #'display-progress))))
+      (error (error "Could not connect using protocol backend `%s' with %s: %s"
 		     (object-name-string protocol-backend)
 		     info
 		     (car error-data))))

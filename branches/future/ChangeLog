@@ -1,3 +1,54 @@
+2009-10-29  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel.el (rudel-join-session): construct a progress reporter and
+	pass it to `rudel-connect' of the protocol backend
+	* obby/rudel-obby.el (rudel-obby-backend::rudel-connect): do not
+	construct a progress reporter; use the provided callback for
+	progress reporting
+
+2009-10-23  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* subetha/rudel-subetha.el
+	(rudel-subetha-backend::rudel-ask-connect-info): do not handle
+	:host and :port
+	(rudel-subetha-backend::rudel-connect): stub implementation
+	* subetha/rudel-subetha-client.el: new file; client part of the
+	SubEthaEdit backend
+	* subetha/Project.ede (target subetha): added rudel-subetha-client.el
+
+2009-10-22  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* beep/rudel-beep.el (require rudel-beep-channel): required for
+	channel management
+	(rudel-beep-backend::capabilities): added capabilities
+	(rudel-beep-backend::initialize-instance): removed &rest from slots
+	(rudel-beep-backend::rudel-make-connection): added some notes;
+	extended documentation string
+	(rudel-beep-transport::profiles): new slot; list of supported
+	profiles
+	(rudel-beep-transport::initialize-instance): use profiles slot;
+	create channel 0 properly
+	(rudel-beep-transport::rudel-get-channel): new method; retrieve
+	channel by id
+	(rudel-beep-transport::rudel-add-channel): new method; add
+	existing channel object to channel list
+	(rudel-beep-transport::rudel-create-channel): access channel 0
+	properly; added documentation string
+	* beep/rudel-beep-util.el (rudel-beep-parse-frame): added a note
+	(rudel-beep-parse-payload): minor fixes and notes
+	(rudel-beep-generate-payload): minor fixes and notes
+	(rudel-beep-make-transport-filter-stack): fixed documentation
+	string and comment
+
+	* tcp/rudel-tcp.el (rudel-tcp-backend::capabilities): added
+	capabilities
+
+2009-10-21  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport.el (require rudel-errors): new require; for
+	condition names
+	(rudel-malformed-message): new error condition
+
 2009-10-17  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* xmpp/rudel-xmpp.el (rudel-xmpp-backend::rudel-make-connection):

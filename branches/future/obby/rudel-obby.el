@@ -167,31 +167,18 @@ Return the connection object."
 	    (rudel-switch connection switch-to))
 
 	  ;; Wait for the login procedure to succeed or fail.
-	  (condition-case error
+	  (condition-case error-data
 	      ;; When the connection enters state 'idle', the login
 	      ;; succeeded; Break out of the while loop then.
-	      (lexical-let ((reporter (make-progress-reporter "Joining "))) ;; TODO user interface
-		(flet ((display-progress (state)
-	           (cond
-		    ;; TODO we can display progress for session-synching
-		    ;; For all states, just spin.
-		    ((consp state)
-		     (progress-reporter-force-update
-                      reporter nil (format "Joining (%s)" (car state))))
-
-		    ;; Done
-		    (t
-		     (progress-reporter-force-update reporter nil "Joining ")
-		     (progress-reporter-done reporter)))))
-		  (progn
-		    (rudel-state-wait connection
-				      '(idle) '(join-failed they-finalized)
-				      #'display-progress)
-		    (throw 'connect t))))
+	      (progn
+		(rudel-state-wait connection
+				  '(idle) '(join-failed they-finalized)
+				  callback)
+		(throw 'connect t))
 
 	    ;; Connection entered error state
 	    (rudel-entered-error-state
-	     (destructuring-bind (symbol . state) (cdr error)
+	     (destructuring-bind (symbol . state) (cdr error-data)
 	       (if (eq (rudel-find-state connection 'join-failed) state)
 
 		   ;; For the join-failed state, we can extract
