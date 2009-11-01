@@ -73,6 +73,7 @@ INFO has to be a property list containing at least the keys :host
 and :port."
   (let* ((host      (plist-get info :host))
 	 (port      (plist-get info :port))
+	 (jid       (plist-get info :port))
 	 ;; Create the network process
 	 ;; TODO do this in the transport's constructor?
 	 (socket    (funcall
@@ -95,7 +96,8 @@ and :port."
 		     :stop     t))
 	 (transport (rudel-xmpp-transport
 		     host
-		     :socket socket)))
+		     :socket socket
+		     :start  (list 'new host jid))))
 
     ;; Now start receiving and wait until the connection has been
     ;; established.
@@ -115,9 +117,9 @@ and :port."
   ()
   "Initial state of new XMPP connections.")
 
-(defmethod rudel-enter ((this rudel-xmpp-state-new))
+(defmethod rudel-enter ((this rudel-xmpp-state-new) to jid)
   ""
-  '(negotiate-stream sasl-start))
+  (list 'negotiate-stream to jid 'sasl-start))
 
 
 ;;; Class rudel-xmpp-state-negotiate-stream
@@ -132,27 +134,33 @@ negotiation."))
   "Stream negotiation state.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-negotiate-stream)
-			success-state) ;; host)
-  ""
+			to jid success-state)
+  "Send opening stream tag constructed with TO and JID."
   ;; Store the name of the successor state in case of successful
   ;; stream negotiation for later.
   (oset this :success-state success-state)
 
-  ;; The first message we receive will be an incomplete <stream:stream
-  ;; ... > XML tree.
+  ;; The first message we receive will be an incomplete XML document
+  ;; with root <stream:stream ... >.
   (rudel-set-assembly-function this #'rudel-xmpp-assemble-stream)
 
   ;; We cannot generate this message by serializing an XML infoset
   ;; since the document is incomplete. We construct it as a string
   ;; instead.
   (rudel-send this
-	      (format "<?xml version=\"1.0\" encoding=\"%s\"?><stream:stream xmlns:stream=\"http://etherx.jabber.org/streams\" xmlns=\"jabber:client\" version=\"%s\" to=\"%s\" id=\"%s\">"
+	      (format "<?xml version=\"1.0\" encoding=\"%s\"?>\
+                       <stream:stream
+                         xmlns:stream=\"http://etherx.jabber.org/streams\" \
+                         xmlns=\"jabber:client\" \
+                         version=\"%s\" \
+                         to=\"%s\" \
+                         id=\"%s\">"
 		      "UTF-8"
 		      (mapconcat #'identity
 				 (mapcar #'number-to-string rudel-xmpp-protocol-version)
 				 ".") ;; TODO rudel-version->string. hm, Emacs has version-to-list, maybe also version-list-to-string?
-		      "jabber.org" ;;"gunhead.local"
-		      "scymtym@jabber.org")) ;; "361729367874")) ;; "gunhead")) ;; host))
+		      to
+		      jid))
   nil)
 
 (defmethod rudel-leave ((this rudel-xmpp-state-negotiate-stream))
@@ -169,6 +177,8 @@ negotiation."))
 
    ;; Success
    (t
+    ;; Extract features from received message and pass them to success
+    ;; state.
     (with-slots (success-state) this
       (let ((features (xml-tag-children
 		       (xml-tag-child xml "stream:features"))))
@@ -186,6 +196,8 @@ negotiation."))
 
 (defmethod rudel-enter ((this rudel-xmpp-state-authenticated))
   ""
+  ;; Switch to negotiate-stream telling it to switch to established in
+  ;; case the negotiation succeeds.
   (list 'negotiate-stream 'established))
 
 
@@ -281,8 +293,7 @@ negotiation."))
 	    ""))
   "")
 
-(defmethod initialize-instance ((this rudel-xmpp-transport)
-				&rest slots)
+(defmethod initialize-instance ((this rudel-xmpp-transport) slots)
   "Initialize THIS and register states."
   ;; Initialize slots of THIS.
   (when (next-method-p)

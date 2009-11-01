@@ -1,3 +1,37 @@
+2009-10-17  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/rudel-xmpp.el (rudel-xmpp-backend::rudel-make-connection):
+	extract jid property; pass host, jid and start state to transport
+	constructor
+	(rudel-xmpp-state-new::rudel-enter): accept arguments to and jid;
+	pass to negotiate-stream state
+	(rudel-xmpp-state-negotiate-stream::rudel-enter): accept to and
+	jid arguments; use to and jid when constructing opening stream
+	tag; added documentation string; cleanup
+	(rudel-xmpp-state-negotiate-stream::rudel-accept): added comment
+	(rudel-xmpp-state-authenticated::rudel-enter): added comment
+	(rudel-xmpp-transport::initialize-instance): removed &rest from
+	slots argument
+
+	* rudel-state-machine.el
+	(rudel-state-machine::initialize-instance): new method; remove
+	:start initarg
+	(rudel-state-machine::initialize-instance :after): allow :start
+	initarg to specify arguments to start state
+
+2009-10-14  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-backend.el (rudel-backend-get-factory): relocated
+	(rudel-backend-register): new function; register a backend
+
+2009-10-09  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport-util.el
+	(rudel-assembling-transport-filter::assembly-function): removed
+	initform and accessor
+	(rudel-transport-make-filter-stack): new function; construct a
+	stack of transport filters according to a specification
+
 2009-10-08  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* jupiter/jupiter.el (header): downcased keywords
@@ -22,6 +56,14 @@
 
 	* doc/card.tex (Session Initiation): mention configured sessions;
 	explain Zeroconf-advertised session in more detail
+
+	* rudel-transport-util.el: new file; utility functions for
+	implementing transport functionality
+	* Project.ede (target rudel): added rudel-transport-util.el
+
+	* obby/doc/rudel-obby-transport-layers.cogre: new file; layers
+	used when constructing transport filter chain for obby connections
+	* obby/doc/rudel-obby-transport-layers.png: new file; generated
 
 2009-10-06  Jan Moringen  <scymtym@users.sourceforge.net>
 
