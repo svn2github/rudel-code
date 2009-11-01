@@ -31,9 +31,11 @@
 
 ;;; History:
 ;;
-;; 0.2 - Refactored client and server to employ state machine.
+;; 0.3 - Support for transports in client code
 ;;
-;; 0.1 - Initial revision.
+;; 0.2 - Refactored client and server to employ state machine
+;;
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -87,40 +89,44 @@ connections and creates obby servers.")
 
   (oset this :version rudel-obby-version))
 
-(defmethod rudel-ask-connect-info ((this rudel-obby-backend) &optional info)
+(defmethod rudel-ask-connect-info ((this rudel-obby-backend)
+				   &optional info)
   "Ask user for the information required to connect to an obby server."
   ;; Read server host and port.
   (let ((host            (or (and info (plist-get info :host))
 			     (read-string "Server: ")))
 	(port            (or (and info (plist-get info :port))
-			     (read-number "Port: " 6522)))
+			     (read-number "Port: " rudel-obby-default-port)))
 	;; Read desired username and color
 	(username        (or (and info (plist-get info :username))
-			     (read-string "Username: " user-login-name)))
+			     (rudel-read-user-name)))
 	(color           (or (and info (plist-get info :color))
-			     (read-color  "Color: " t)))
+			     (rudel-read-user-color)))
 	(encryption      (if (and info (member :encryption info))
 			     (plist-get info :encryption)
-			   (y-or-n-p "Use encryption? ")))
+			   (y-or-n-p "Use encryption (Required by Gobby server, not supported by Rudel server)? ")))
 	(global-password (if (and info (member :global-password info))
 			     (plist-get info :global-password)
 			   (read-string "Global password: " "")))
 	(user-password   (if (and info (member :user-password info))
 			     (plist-get info :user-password)
 			   (read-string "User password: " ""))))
-    (append (list :host            host
-		  :port            port
-		  :username        username
-		  :color           color
-		  :encryption      encryption
-		  :global-password (unless (string= global-password "")
-				     global-password)
-		  :user-password   (unless (string= user-password "")
-				     user-password))
+    (append (list :transport-backend 'tcp
+		  :protocol-backend  'obby
+		  :host              host
+		  :port              port
+		  :username          username
+		  :color             color
+		  :encryption        encryption
+		  :global-password   (unless (string= global-password "")
+				       global-password)
+		  :user-password     (unless (string= user-password "")
+				       user-password))
 	    info))
   )
 
-(defmethod rudel-connect ((this rudel-obby-backend) info)
+(defmethod rudel-connect ((this rudel-obby-backend) transport info
+			  &optional callback)
   "Connect to an obby server using the information INFO.
 Return the connection object."
   ;; Before we start, load the client functionality.
@@ -130,42 +136,44 @@ Return the connection object."
   (let* ((session    (plist-get info :session))
 	 (host       (plist-get info :host))
 	 (port       (plist-get info :port))
-	 (encryption (plist-get info :encryption))
-	 ;; Create the network process
-	 (socket     (funcall
-		      (if encryption
-			  (progn
-			    (require 'rudel-tls)
-			    #'rudel-tls-make-process)
-			#'make-network-process)
-		      :name     host
-		      :host     host
-		      :service  port
-		      ;; Install connection filter to redirect data to
-		      ;; the connection object
-		      :filter   #'rudel-filter-dispatch
-		      ;; Install connection sentinel to redirect state
-		      ;; changes to the connection object
-		      :sentinel #'rudel-sentinel-dispatch
-		      ;; Do not start receiving immediately since the
-		      ;; filter function is not yet setup properly.
-		      :stop     t))
+	 (encryption (plist-get info :encryption)) ;; TODO temp
 	 (connection (rudel-obby-connection
 		      host
-		      :session session
-		      :socket  socket
-		      :info    info)))
+		      :session   session
+		      :transport transport
+		      :info      info)))
 
-    ;; Now start receiving and wait until the basic session setup is
+    ;; Start the transport and wait until the basic session setup is
     ;; complete.
-    (continue-process socket)
+    (rudel-start transport)
 
-    ;; Wait for the connection to reach one of the states idle,
-    ;; join-failed and they-finalized.
-    (condition-case error
-	(lexical-let ((reporter (make-progress-reporter "Joining ")))
-	  (flet ((display-progress (state)
+    (rudel-state-wait connection
+		      '(waiting-for-join-info) nil
+		      callback)
+
+    ;; Wait until we join the session.
+    (catch 'connect
+      (let ((switch-to 'joining))
+	(while t
+	  ;; Read username and/or color when necessary.
+	  (unless (plist-get info :username)
+	    (plist-put info :username (rudel-read-user-name))) ;; TODO temp
+	  (unless (plist-get info :color)
+	    (plist-put info :color    (rudel-read-user-color)))
+
+	  ;; Switch connection to specified state to start the login
+	  ;; procedure.
+	  (when switch-to
+	    (rudel-switch connection switch-to))
+
+	  ;; Wait for the login procedure to succeed or fail.
+	  (condition-case error
+	      ;; When the connection enters state 'idle', the login
+	      ;; succeeded; Break out of the while loop then.
+	      (lexical-let ((reporter (make-progress-reporter "Joining "))) ;; TODO user interface
+		(flet ((display-progress (state)
 	           (cond
+		    ;; TODO we can display progress for session-synching
 		    ;; For all states, just spin.
 		    ((consp state)
 		     (progress-reporter-force-update
@@ -175,18 +183,47 @@ Return the connection object."
 		    (t
 		     (progress-reporter-force-update reporter nil "Joining ")
 		     (progress-reporter-done reporter)))))
+		  (progn
+		    (rudel-state-wait connection
+				      '(idle) '(join-failed they-finalized)
+				      #'display-progress)
+		    (throw 'connect t))))
 
-	    (rudel-state-wait connection
-			      '(idle) '(join-failed they-finalized)
-			      #'display-progress)))
+	    ;; Connection entered error state
+	    (rudel-entered-error-state
+	     (destructuring-bind (symbol . state) (cdr error)
+	       (if (eq (rudel-find-state connection 'join-failed) state)
 
-      (rudel-entered-error-state
-       (destructuring-bind (symbol . state) (cdr error)
-	 (if (eq (rudel-find-state connection 'join-failed) state)
-	     (with-slots (error-symbol error-data) state
-	       (signal 'rudel-join-error
-		       (append (list error-symbol) error-data)))
-	   (signal 'rudel-join-error nil)))))
+		   ;; For the join-failed state, we can extract
+		   ;; details and react accordingly.
+		   (case symbol
+		     ;; Error state is 'join-failed'
+		     (join-failed
+		      (with-slots (error-symbol error-data) state
+			(message "Login error: %s %s."
+				 error-symbol error-data)
+			(sleep-for 2)
+			(case error-symbol
+			  ;; Invalid username; reset it
+			  (rudel-obby-username-invalid
+			   (plist-put info :username nil)
+			   (setq switch-to 'joining))
+
+			  ;; Username already in use; reset it
+			  (rudel-obby-username-in-use
+			   (plist-put info :username nil)
+			   (setq switch-to 'joining))
+
+			  ;; Color already in use; reset it
+			  (rudel-obby-color-in-use
+			   (plist-put info :color nil)
+			   (setq switch-to 'joining))
+
+			  ;; Unknown error TODO should we signal?
+			  (t nil)))))
+
+		 ;; For all other error states, we just give up.
+		 (signal 'rudel-join-error nil))))))))
 
     ;; The connection is now usable; return it.
     connection)

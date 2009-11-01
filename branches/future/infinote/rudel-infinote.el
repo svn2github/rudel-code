@@ -32,7 +32,9 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.2 - Support for transports
+;;
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -45,7 +47,7 @@
 ;;; Constants
 ;;
 
-(defconst rudel-infinote-version '(0 1)
+(defconst rudel-infinote-version '(0 2)
   "Version of the infinote backend for Rudel.")
 
 
@@ -85,7 +87,8 @@
 	    ;; :color color)))
   )
 
-(defmethod rudel-connect ((this rudel-infinote-backend) transport info)
+(defmethod rudel-connect ((this rudel-infinote-backend) transport info
+			  &optional callback)
   "Connect to an infinote server using the information INFO.
 Return the connection object."
   ;; Before we start, load the client functionality.
@@ -94,38 +97,20 @@ Return the connection object."
   ;; Create the network process
   (let* ((session    (plist-get info :session))
 	 (host       (plist-get info :host)) ;; Just as name
-	;;  (port       (plist-get info :port))
-	 ;; Create the network process
-	 ;; (socket     (make-network-process ;; TODO This call is identical to the obby backend
-	 ;; 	      :name     host
-	 ;; 	      :host     host
-	 ;; 	      :service  port
-	 ;; 	      ;; Install connection filter to redirect data to
-	 ;; 	      ;; the connection object
-	 ;; 	      :filter   #'rudel-filter-dispatch
-	 ;; 	      ;; Install connection sentinel to redirect state
-	 ;; 	      ;; changes to the connection object
-	 ;; 	      :sentinel #'rudel-sentinel-dispatch
-	 ;; 	      ;; Do not start receiving immediately since the
-	 ;; 	      ;; filter function is not yet setup properly.
-	 ;; 	      :stop     t))
-	 ;; (transport  (rudel-xmpp-transport
-	 ;; 	      "bla"
-	 ;; 	      :socket socket))
 	 (connection (rudel-infinote-client-connection
 		      host
-		      :session session
-		      ;;:socket  socket
-		      :transport transport
-		      )))
+		      :session   session
+		      :transport transport)))
 
-    ;; Now start receiving
-    ;; (continue-process socket)
+    ;; Start the transport and wait for it to establish the
+    ;; connection.
+    ;; TODO the waiting code is specific to the XMPP backend. avoid
+    ;; this coupling
+    (rudel-start transport)
 
-    ;;
-    ;; (rudel-state-wait transport
-    ;; 		      '(established) '(we-finalize they-finalize)
-    ;; 		      "Connecting")
+    (rudel-state-wait transport
+		      '(established) '(we-finalize they-finalize)
+		      callback)
 
     ;; The connection is now ready for action; Return it.
     connection)

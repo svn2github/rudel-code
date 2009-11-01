@@ -805,42 +805,50 @@ will be prompted for."
    (list
     (let ((info)
 	  (session-initiation-backend))
+      ;; Query the chosen backend until session info is available.
       (while (not info)
 	(message "Discovering Sessions ...")
 	(let* ((sessions   (rudel-session-initiation-discover
 			    session-initiation-backend))
 	       (maybe-info (if (= (length sessions) 1)
-				 (car sessions)
-			       (rudel-read-session
-				sessions "Choose Session: " 'object))))
+			       (car sessions)
+			     (rudel-read-session
+			      sessions "Choose Session: " 'object))))
 	  (if (rudel-backend-cons-p maybe-info)
 	      (setq session-initiation-backend (car maybe-info))
 	    (setq info maybe-info))))
-    info)))
+      info)))
 
   ;; First, create the session object.
-  (let* ((backend    (cdr (plist-get info :backend)))
-	 (session    (rudel-client-session
-		      (plist-get info :name)
-		      :backend backend))
+  (let* ((session-name      (plist-get info :name))
+	 (transport-backend (cdr (plist-get info :transport-backend)))
+	 (protocol-backend  (cdr (plist-get info :protocol-backend)))
+
+	 ;; First, create the session object.
+	 (session           (rudel-client-session
+			     session-name
+			     :backend protocol-backend))
+	 (transport)
 	 (connection))
-    ;; Give the backend a chance to collect remaining connect
-    ;; info. For session initiation methods like Zeroconf, we have the
-    ;; _connection_ info, but are still missing the username and
-    ;; stuff.
-    (setq info (rudel-ask-connect-info backend info))
 
-    ;; Add the session object to the connect information.
-    (plist-put info :session session)
+    ;; Store session in INFO.
+    (setq info (plist-put info :session session))
 
-    ;; Ask BACKEND to connect using INFO. Do not catch errors since
-    ;; the error messages are probably the best feedback we can give.
-    (setq connection (rudel-connect backend info))
-
-    ;; Set the connection slot of the session object and store it
-    ;; globally.
+    ;; Create transport object and connection
+    (condition-case error-data
+	(progn
+	  (setq transport  (rudel-make-connection transport-backend info))
+	  (setq connection (rudel-connect protocol-backend transport info)))
+      ('error (error "Could not connect using transport backend `%s' and protocol backend `%s' with %s: %s"
+		     (object-name-string transport-backend)
+		     (object-name-string protocol-backend)
+		     info
+		     (car error-data))))
     (oset session :connection connection)
+
+    ;; Store the new session object globally.
     (setq rudel-current-session session)
+    ;;(add-to-list 'rudel-sessions session)) ; only one session for now
 
     ;; Reset the global session variable when the session ends.
     (object-add-hook session 'end-hook
@@ -848,8 +856,9 @@ will be prompted for."
 		       (setq rudel-current-session nil)))
 
     ;; Run the hook.
-    (run-hook-with-args 'rudel-session-start-hook session))
-  )
+    (run-hook-with-args 'rudel-session-start-hook session)
+
+    session))
 
 ;;;###autoload
 (defun rudel-host-session ()
