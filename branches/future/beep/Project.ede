@@ -1,0 +1,13 @@
+;; Object rudel/beep
+;; EDE project file.
+(ede-proj-project "rudel/beep"
+  :name "rudel/beep"
+  :file "Project.ede"
+  :targets (list 
+   (ede-proj-target-elisp "beep"
+    :name "beep"
+    :path ""
+    :source '("rudel-beep.el" "rudel-beep-channel.el" "rudel-beep-state.el" "rudel-beep-util.el")
+    )
+   )
+  )

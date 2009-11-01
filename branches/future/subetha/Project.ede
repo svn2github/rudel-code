@@ -1,0 +1,13 @@
+;; Object rudel/subetha
+;; EDE project file.
+(ede-proj-project "rudel/subetha"
+  :name "rudel/subetha"
+  :file "Project.ede"
+  :targets (list 
+   (ede-proj-target-elisp "subetha"
+    :name "subetha"
+    :path ""
+    :source '("rudel-subetha.el")
+    )
+   )
+  )
