@@ -1,5 +1,39 @@
 2009-10-31  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* xmpp/rudel-xmpp-state.el
+	(rudel-xmpp-state::impersonating-target-slot): renamed master-slot
+	-> impersonating-target-slot
+	(rudel-xmpp-state::delegation-target-slot): socket-owner-slot ->
+	delegation-target-slot
+	(rudel-xmpp-state::rudel-set-assembly-function): obsolete; removed
+
+	* xmpp/rudel-xmpp-sasl.el
+	(rudel-xmpp-state-sasl-start::rudel-enter): accept additional
+	arguments and pass them to sasl-try-one successor
+	(rudel-xmpp-state-sasl-try-one::rudel-enter): accept additional
+	arguments name and server and pass them to sasl-try-one when
+	self-transitioning
+	(rudel-xmpp-state-sasl-mechanism-start::rudel-enter): accept
+	additional arguments name and server and use them when calling
+	`sasl-make-client'; also pass them to sasl-mechanism-step
+	(rudel-xmpp-state-sasl-mechanism-step::name): new slot; stores
+	username
+	(rudel-xmpp-state-sasl-mechanism-step::server): new slot; stores
+	server name
+	(rudel-xmpp-state-sasl-mechanism-step::schema): added
+	documentation string
+	(rudel-xmpp-state-sasl-mechanism-step::client): added
+	documentation string
+	(rudel-xmpp-state-sasl-mechanism-step::step): added documentation
+	string
+	(rudel-xmpp-state-sasl-mechanism-step::rest): added documentation
+	string
+	(this rudel-xmpp-state-sasl-mechanism-step::rudel-enter): accept
+	arguments name and server and store them
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): pass name
+	and server to sasl-try-one and to sasl-mechanism-step when
+	self-transitioning
+
 	* tls/rudel-tls.el: moved to tls directory
 	* tls/Project.ede (target tls): added rudel-tls.el
 	* Project.ede (target autoloads): added tls directory

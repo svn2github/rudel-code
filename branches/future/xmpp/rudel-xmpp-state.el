@@ -50,13 +50,13 @@
 
 (defclass rudel-xmpp-state (rudel-impersonating-state
 			    rudel-delegating-state)
-  ((master-slot       :initform 'transport)
-   (socket-owner-slot :initform 'transport)
-   (transport         :initarg  :transport
-		      :type     rudel-transport ;; TODO rudel-xmpp-transport?
-		      :documentation
-		      "The transport class the state machine of
-which uses the state object."))
+  ((impersonating-target-slot :initform 'transport)
+   (delegation-target-slot    :initform 'transport)
+   (transport                 :initarg  :transport
+			      :type     rudel-transport ;; TODO rudel-xmpp-transport?
+			      :documentation
+			      "The transport class the state
+machine of which uses the state object."))
   "Base class for XMPP state classes.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state))
@@ -85,12 +85,6 @@ which uses the state object."))
      ;; we do not accept unexpected messages.
      (t 'we-finalize)))
   )
-
-(defmethod rudel-set-assembly-function ((this rudel-xmpp-state) ;; TODO can this be solved by delegation?
-					function)
-  "Install FUNCTION as assembly function in the transport object of THIS."
-  (with-slots (transport) this
-    (rudel-set-assembly-function transport function)))
 
 (provide 'rudel-xmpp-state)
 ;;; rudel-xmpp-state.el ends here
