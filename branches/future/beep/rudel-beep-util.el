@@ -75,8 +75,9 @@
   (with-slots (entities payload) this
     (apply
      #'+
-     4
+     2
      (length payload)
+     (if entities 2 0)
      (or (mapcar
 	  (lambda (element)
 	    (if (keywordp element)
@@ -139,7 +140,7 @@
 	  (payload-start)
 	  (payload))
       ;; Process header
-      (string-match "\\([A-Z]+\\) \\([0-9]+\\) \\([0-9]+\\) \\(\\.\\|\\*\\) \\([0-9]+\\) \\([0-9]+\\)" frame)
+      (string-match "\\([A-Z]+\\) \\([0-9]+\\) \\([0-9]+\\) \\(\\.\\|\\*\\) \\([0-9]+\\) \\([0-9]+\\)\n" frame)
       (let ((type     (match-string 1 frame))
 	    (channel  (string-to-number (match-string 2 frame)))
 	    (message  (string-to-number (match-string 3 frame)))
@@ -155,20 +156,21 @@
 	      entities-start (match-end 0))
 
 	;; Process entities
-	(string-match "\\(.*\\)\n\n" frame entities-start)
-	(setq payload-start (match-end 0)
-	      entities      (apply
-			     #'append
-			     (mapcar
-			      (lambda (line)
-				(destructuring-bind (key value)
-				    (split-string line ":")
-				  (list
-				   (intern
-				    (concat ":" (downcase key)))
-				   value)))
-			      (split-string (match-string 1 frame)
-					    "\n" t))))
+	(if (string-match "\\(.*\\)\n\n" frame entities-start)
+	    (setq payload-start (match-end 0)
+		  entities      (apply
+				 #'append
+				 (mapcar
+				  (lambda (line)
+				    (destructuring-bind (key value)
+					(split-string line ":")
+				      (list
+				       (intern
+					(concat ":" key))
+				       value)))
+				  (split-string (match-string 1 frame)
+						"\n" t))))
+	  (setq payload-start entities-start))
 
 	;; Payload
 	(setq payload (substring frame payload-start))
