@@ -9,12 +9,12 @@
     :name "autoloads"
     :path ""
     :autoload-file "rudel-loaddefs.el"
-    :autoload-dirs '("." "jupiter" "tcp" "xmpp" "obby" "infinote" "wave" "zeroconf")
+    :autoload-dirs '("." "jupiter" "tcp" "tls" "xmpp" "obby" "infinote" "wave" "zeroconf")
     )
    (ede-proj-target-elisp "compile"
     :name "rudel"
     :path ""
-    :source '("rudel.el" "rudel-util.el" "rudel-xml.el" "rudel-user.el" "rudel-document.el" "rudel-mode.el" "rudel-interactive.el" "rudel-overlay.el" "rudel-speedbar.el" "rudel-operators.el" "rudel-operations.el" "rudel-compat.el" "rudel-tls.el" "rudel-errors.el" "rudel-state-machine.el" "rudel-backend.el" "rudel-protocol.el" "rudel-session-initiation.el" "rudel-icons.el" "rudel-display.el" "rudel-hooks.el" "rudel-transport.el" "rudel-chat.el" "rudel-state-util.el" "rudel-transport-util.el")
+    :source '("rudel.el" "rudel-util.el" "rudel-xml.el" "rudel-user.el" "rudel-document.el" "rudel-mode.el" "rudel-interactive.el" "rudel-overlay.el" "rudel-speedbar.el" "rudel-operators.el" "rudel-operations.el" "rudel-compat.el" "rudel-errors.el" "rudel-state-machine.el" "rudel-backend.el" "rudel-protocol.el" "rudel-session-initiation.el" "rudel-icons.el" "rudel-display.el" "rudel-hooks.el" "rudel-transport.el" "rudel-chat.el" "rudel-state-util.el" "rudel-transport-util.el")
     )
    )
   :mailinglist "rudel-devel@lists.sourceforge.net"

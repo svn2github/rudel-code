@@ -1,3 +1,12 @@
+2009-10-31  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* tls/rudel-tls.el: moved to tls directory
+	* tls/Project.ede (target tls): added rudel-tls.el
+	* Project.ede (target autoloads): added tls directory
+	(target compile): removed rudel-tls.el
+
+	* rudel-tls.el (header): fixed typo
+
 2009-10-29  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* rudel.el (rudel-join-session): construct a progress reporter and
@@ -6,7 +15,157 @@
 	construct a progress reporter; use the provided callback for
 	progress reporting
 
-2009-10-23  Jan Moringen  <scymtym@users.sourceforge.net>
+2009-10-28  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel.el (rudel-user): removed; now in file rudel-user.el
+	(rudel-document): removed; now in file rudel-document.el
+	(rudel-buffer-has-document-p): new function; check whether a
+	buffer has an associated document object
+	(rudel-buffer-document): new function; return associated document
+	object of a buffer
+	(rudel-set-buffer-document): new function; set the document object
+	of a buffer
+
+	* rudel.el (header): adder version attribute
+	(custom group rudel): added URL links
+
+	* rudel.el (rudel-join-session): obtain transport and protocol
+	backends from info; do not call `rudel-ask-connect-info' as this
+	is now done by a session-initiation backend
+
+	* rudel-protocol.el
+	(rudel-protocol-backend::rudel-ask-connect-info): renamed
+	`rudel-ask-join-info' -> `rudel-ask-connect-info'
+	(rudel-protocol-backend::rudel-connect): renamed `rudel-join ->
+	`rudel-connect; added argument transport; updated documentation
+	string
+	* obby/rudel-obby.el (header): added 0.3 to history
+	(rudel-obby-backend::rudel-ask-connect-info): added optional
+	argument info; use specialized read functions; return info list
+	containing entries for transport and protocol backend
+	(rudel-obby-backend::rudel-connect): added arguments transport and
+	optional callback; use transport object instead of creating a
+	socket; monitor connection state and prompt for info if required
+	 (temporary solution)
+	* infinote/rudel-infinote.el (header): added 0.2 to history
+	(rudel-infinote-version): bumped to 0.2
+	(rudel-infinote-backend::rudel-connect): accept additional
+	argument callback; call `rudel-start' on transport; pass callback
+	to `rudel-state-wait'; cleanup
+
+2009-10-27  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* beep/rudel-beep.el (rudel-beep-transport::rudel-create-channel):
+	wait for success or failure state; in case of success, extract
+	profile
+	* beep/rudel-beep-channel.el (header): added commentary section
+	(rudel-beep-channel::initialize-instance): removed; did nothing
+	(rudel-beep-channel::rudel-close): cleanup; added documentation
+	string
+	(rudel-beep-channel-zero-state-requesting): renamed
+	`rudel-beep-channel-zero-state-starting ->
+	`rudel-beep-channel-zero-state-requesting'
+	(rudel-beep-channel-zero-state-requesting::profiles): new slots;
+	stores profiles offered to the peer
+	(rudel-beep-channel-zero-state-requesting::rudel-enter): store
+	profiles for later evaluation of the peer's response
+	(rudel-beep-channel-zero-state-requesting::rudel-accept): evaluate
+	peer's response; switch states accordingly
+	(rudel-beep-channel-zero-state-request-success): new class;
+	successful channel request
+	(rudel-beep-channel-zero-state-request-failure): new class; failed
+	channel request
+	(rudel-beep-channel-zero-state-idle::rudel-accept): cleanup
+	(rudel-beep-channel-zero-states): renamed starting -> requesting;
+	added request-success, request-failure
+
+2009-10-26  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* subetha/rudel-subetha-constants.el: new file; some constants
+	used in the SubEthaEdit backend
+	* subetha/rudel-subetha-channel-protocol.el: new file; channel
+	protocol support classes
+	* subetha/Project.ede (target rudel/subetha): added
+	rudel-subetha-constants.el and rudel-subetha-channel-protocol.el
+
+2009-10-25  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* subetha/rudel-subetha-client.el
+	(rudel-subetha-client-connection-state): new class; base class for
+	client connection state classes
+	(rudel-subetha-client-connection-state-handshake): now derived
+	from `rudel-subetha-client-connection-state'
+	(rudel-subetha-client-connection-state-handshake::rudel-enter):
+	construct a channel and attach the handshake protocol object
+	(rudel-subetha-client-connection-state-opening-status): renamed
+	from `rudel-subetha-client-connection-state-opening'; now derived
+	from `rudel-subetha-client-connection-state'
+	(rudel-subetha-client-connection-state-opening-status::rudel-enter):
+	create channel and attach status protocol object
+	(rudel-subetha-client-connection-state-established): now derived
+	from `rudel-subetha-client-connection-state'
+	(rudel-subetha-client-connection-states): renamed opening ->
+	opening-status
+	(rudel-subetha-client-connection::transport): new slot; stores
+	underlying transport object
+	(rudel-subetha-client-connection::status-channel): new slot;
+	stores status channel object
+	(rudel-subetha-client-connection::next-channel-id): new slot;
+	keeps track of next free channel id
+	(rudel-subetha-client-connection::initialize-instance): new
+	method; register states
+	(rudel-subetha-client-connection::rudel-register-state): new
+	method; set connection slot of the state
+	(rudel-subetha-client-connection::rudel-create-channel): new
+	method; create a channel using next free channel id
+	(rudel-subetha-client-connection::rudel-next-channel-id): new
+	method; return next free channel id
+
+	* subetha/rudel-subetha.el (rudel-subetha-backend::rudel-connect):
+	create the client connection properly and wait for it to reach the
+	established state
+
+	* subetha/uuid.el: new file; function for generating a random uuid
+
+	* beep/rudel-beep.el (rudel-beep-backend::rudel-make-connection):
+	use `rudel-get-channel' to obtain channel 0; state established is
+	now called idle
+	(rudel-beep-transport): added a note about storing profile ->
+	protocol mapping
+	(rudel-beep-transport::rudel-dispatch-frame): some notes and
+	changes
+	(rudel-beep-transport::rudel-create-channel): state established is
+	now called idle
+	(rudel-beep-transport::rudel-remove-channel): new method; remove
+	channel from channel list
+	(rudel-beep-transport::rudel-close-channel): make channel 0 close
+	the channel, then call `rudel-remove-channel' to remove the
+	channel object
+
+	* beep/rudel-beep-util.el (rudel-beep-frame::slot-missing):
+	compute correct size when no entities are present
+	(rudel-beep-parse-frame): parse frame without MIME entities; do
+	not downcase MIME keywords
+
+	* beep/rudel-beep-channel.el (rudel-state-machine)
+	(rudel-beep-channel): no longer derived from state machine
+	(rudel-beep-channel-zero-state-greeting): renamed from
+	`rudel-beep-channel-state-greeting'
+	(rudel-beep-channel-zero-state-starting): renamed from
+	`rudel-beep-channel-state-starting'
+	(rudel-beep-channel-zero-state-starting::rudel-accept): properly
+	look at payload
+	(rudel-beep-channel-zero-state-idle): renamed from
+	`rudel-beep-channel-state-established'
+	(rudel-beep-channel-zero-state-idle::rudel-accept): look at
+	payload
+	(rudel-beep-channel-zero-states): renamed from
+	`rudel-beep-channel-states'
+	(rudel-beep-channel-zero): now derived from state machine
+	(rudel-beep-channel-zero::rudel-register-state): renamed from
+	class `rudel-beep-channel'
+
+	2009-10-23  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* subetha/rudel-subetha.el
 	(rudel-subetha-backend::rudel-ask-connect-info): do not handle
@@ -43,11 +202,52 @@
 	* tcp/rudel-tcp.el (rudel-tcp-backend::capabilities): added
 	capabilities
 
+	* xmpp/rudel-xmpp-util.el: new file; miscellaneous functions for
+	the XMPP transport
+	* xmpp/Project.ede (target rudel/xmpp): added rudel-xmpp-util.el
+
+	* subetha/Project.ede: new file; subproject for SubEthaEdit
+	backend
+	* subetha/rudel-subetha.el: new file; SubEthaEdit backend
+	implementation
+	* subetha/bencode.el: new file; bencoding implementation used in
+	SubEthaEdit backend
+
+	* beep/Project.ede: new file; subproject for BEEP transport
+	* beep/rudel-beep.el: new file; BEEP transport backend
+	* beep/rudel-beep-util.el: new file; miscellaneous functions for
+	the BEEP transport
+	* beep/rudel-beep-state.el: new file; base class for state classes
+	used in BEEP transport
+	* beep/rudel-beep-channel.el: new file; channel implementation for
+	BEEP transport
+	* beep/doc/rfc3117.txt: new file; BEEP protocol documentation
+	* beep/doc/rfc3081.txt: new file; BEEP protocol documentation
+	* beep/doc/rfc3080.txt: new file; BEEP protocol documentation
+
 2009-10-21  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* rudel-transport.el (require rudel-errors): new require; for
 	condition names
 	(rudel-malformed-message): new error condition
+
+2009-10-20  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport-util.el (rudel-transport-filter::filter): use
+	reader and writer instead of accessor; removed `rudel-set-filter'
+	method
+	(rudel-transport-filter::sentinel): use reader and writer instead
+	of accessor; removed `rudel-set-sentinel method
+	(rudel-transport-filter::no-applicable-method): delegate method
+	calls to underlying transport
+	(rudel-assembling-transport-filter::buffer): changed type to list
+
+	* rudel-state-machine.el
+	(rudel-state-machine::initialize-instance): value of :start can
+	now be a rudel-state-child, a symbol, or a list starting with a
+	symbol; improved documentation string documentation string
+	(rudel-state-machine::object-print): pass strings argument to next
+	method
 
 2009-10-17  Jan Moringen  <scymtym@users.sourceforge.net>
 
@@ -70,12 +270,232 @@
 	(rudel-state-machine::initialize-instance :after): allow :start
 	initarg to specify arguments to start state
 
+2009-10-16  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-operators.el (rudel-overlay-operators::rudel-move-cursor):
+	new method; move cursor overlay
+	(rudel-overlay-operators::rudel-move-selection): new method; move
+	selection overlay
+
+	* rudel-operators.el (rudel-document-operators::rudel-insert):
+	fixed paren mismatch
+	(rudel-overlay-operators::rudel-delete): handle case in which user
+	is nil
+
+	* rudel-operators.el (rudel-overlay-operators::user): allow slot
+	to be nil
+	(rudel-overlay-operators::rudel-insert): handle case in which user
+	slot is nil
+	(rudel-hook-operators::user): allow slot to be nil
+
+	* rudel-user.el (require rudel-util): required for
+	`rudel-hook-object'
+
+	* rudel-interactive.el (header): improved commentary section
+	(require cl): required for `flet', `find'
+	(require rudel-display): for `rudel-display-string'
+	(rudel-read-user-color): handle default color; allow multiple
+	attempts and rejection
+	(rudel-read-user): cosmetic changes
+
+	* rudel-backend.el (rudel-backend-factory): added autoload cookie
+
+2009-10-15  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport.el
+	(rudel-transport-backend::rudel-make-connection): added optional
+	argument callback; improved documentation string
+	(rudel-transport-backend::rudel-wait-for-connections): added
+	argument dispatch; fixed and improved documentation string
+
+	* rudel-transport-util.el (rudel-transport-filter::slot-missing):
+	new method; makes slots of the underlying transport available as
+	virtual slots of the filter
+	(rudel-progress-reporting-transport-filter::reporter): fixed initarg
+	(rudel-dummy-transport): new class; used in unit tests
+	(rudel-transport-util-test-transport-filter): new test; checks
+	class `rudel-transport-filter'
+	(rudel-transport-util-test-make-filter-stack): new test; checks
+	`rudel-transport-make-filter-stack'
+
 2009-10-14  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* rudel-backend.el (rudel-backend-get-factory): relocated
 	(rudel-backend-register): new function; register a backend
 
+	* xmpp/rudel-xmpp-tunnel.el: use `rudel-backend-register' instead
+	of `rudel-add-backend' and `rudel-backend-get-factory'
+
+	* zeroconf/rudel-zeroconf.el: use `rudel-backend-register' instead
+	of `rudel-add-backend' and `rudel-backend-get-factory'
+	* xmpp/rudel-xmpp.el: use `rudel-backend-register' instead of
+	`rudel-add-backend' and `rudel-backend-get-factory'
+	* wave/rudel-wave.el: use `rudel-backend-register' instead of
+	`rudel-add-backend' and `rudel-backend-get-factory'
+	* tcp/rudel-tcp.el: use `rudel-backend-register' instead of
+	`rudel-add-backend' and `rudel-backend-get-factory'
+	* rudel-session-initiation.el: use `rudel-backend-register'
+	instead of `rudel-add-backend' and `rudel-backend-get-factory'
+	* obby/rudel-obby.el: use `rudel-backend-register' instead of
+	`rudel-add-backend' and `rudel-backend-get-factory'
+	* infinote/rudel-infinote.el: use `rudel-backend-register' instead
+	of `rudel-add-backend' and `rudel-backend-get-factory'
+
+	* infinote/rudel-infinote.el (header): downcased keywords
+	(rudel-connect): added documentation string
+
+	* wave/rudel-wave.el (header): downcased keywords
+
+	* telepathy/rudel-telepathy.el (header): downcased keywords
+	(require dbus): required for telepathy communication
+	(rudel-telepathy-backend): improved documentation string
+	(rudel-telepathy-backend::rudel-make-connection): new method;
+	implements creating connections
+
+	* xmpp/rudel-xmpp.el (header): fixed license
+
+	* obby/rudel-obby-state.el (rudel-obby-state::connection): allow
+	objects of any type to be used as associated connection
+
+	* rudel-document.el (rudel-document::rudel-attached-p): new
+	method; check whether document is attached to some buffer
+	(rudel-document::rudel-chunks): cosmetic changes
+
+	* rudel-backend.el (rudel-backend-get-factory): relocated
+        (rudel-backend-register): new function; register a backend
+
+2009-10-12  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/doc/notes.org: new file; notes concerning the XMPP backend
+
+	* xmpp/rudel-xmpp-sasl.el
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): minor cleanup
+
+	* rudel-display.el: new file; display functions for Rudel objects
+	* obby/rudel-obby-display.el: new file; display functions for
+	objects used in the obby backend
+	* obby/Project.ede (target rudel/obby): added
+	rudel-obby-display.el
+	* Project.ede (target rudel): added rudel-display.el
+
+	* doc/Project.ede (target manual): new target; contains rules to
+	build manual.pdf from manual.xml using xsltproc and fop
+
+	* rudel-backend.el (header): downcased keywords
+	(save-factories); new macro; used around unit test body to undo
+	changes to factories
+	(rudel-dummy-backend): new class; dummy backend for unit tests
+	(rudel-backend-test-get-factory): new test; test retrieving
+	backend for specified categories
+	(rudel-backend-test-add-backend): test adding backends to a
+	factory
+	(rudel-backend-test-get-backend): test getting a specific backend
+	(rudel-backend-test-dump-backends): smoke test for the
+	`rudel-backend-dump' function
+
+	* rudel-session-initiation.el (rudel-discover): use
+	`condition-case' when trying to choose backends and return nil in
+	case of signalling
+	* rudel-backend.el (rudel-backend-error): new condition; condition
+	name for all backend-related conditions
+	(rudel-no-backend): new condition; used when a backend is
+	requested but not found
+	(rudel-backend-choose): signal `rudel-no-backend' instead of using
+	`error'
+	(rudel-backend-dump): save created buffer in a local variable
+
+2009-10-11  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport.el: socket-like interface for transports
+	(header): downcased keywords; expanded "Commentary" section
+	(rudel-transport::rudel-set-filter): renamed
+	`rudel-transport-set-handler' -> rudel-set-filter
+	(rudel-transport::rudel-set-sentinel): new method; like
+	`set-process-sentinel'
+	(rudel-send): renamed `rudel-transport-send' -> `rudel-send'
+	(rudel-transport::rudel-start): new method start stopped transport
+	(rudel-transport-backend::rudel-make-connection): expanded
+	documentation string
+
+	* xmpp/rudel-xmpp-sasl.el
+	(rudel-xmpp-state-sasl-start::rudel-enter): use `let*' instead of
+	`let'
+	(rudel-xmpp-sasl-states): added documentation string
+
+	* infinote/rudel-infinote-group.el: replaced loose testing code
+	with actual unit test
+	(header): added a "Commentary" comment
+	(rudel-infinote-test-embed-in-group): unit test for
+	`rudel-infinote-embed-in-group'
+
+	* infinote/rudel-infinote-client.el
+	(rudel-infinote-client-connection::rudel-publish): added a comment
+	(rudel-infinote-client-connection::rudel-subscribe-to): changed
+	the waiting for state machine states to the new callback-style
+
+	* infinote/rudel-infinote-client.el
+	(rudel-infinote-client-connection): removed base
+	`rudel-infinote-socket-owner'
+	(rudel-infinote-client-connection::rudel-message): removed
+	completely
+	(rudel-infinote-client-connection::rudel-publish): fixed comments
+	(rudel-infinote-client-connection::rudel-subscribe-to): fixed
+	comments
+	(rudel-infinote-client-connection::rudel-add-document): whitespace
+	cleanup
+
+	* infinote/rudel-infinote-client.el: removed lots of obsolete,
+	commented code
+	(header): fixed X-RCS field
+	(require rudel-infinote-sasl): removed; part of the XMPP backend
+	now
+	(rudel-infinote-client-connection::initialize-instance): remove
+	&rest from slots argument
+	(rudel-infinote-client-connection::rudel-receive): use
+	`display-warning' instead of `warn'
+
+2009-10-10  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-loaddefs: removed; merge artifact
+
+	* rudel-xml.el: cleanup
+	(header): started commentary
+	(with-tag-attrs): some whitespace cleanup
+	(do-tag-children): use `first' and `second' instead of `car' and
+	`cadr'
+	(rudel-xml-toplevel-tag-positions): added documentation string
+	(rudel-xml-toplevel-tags): added documentation string
+	(rudel-test-do-tag-children): fixed reversal in result; makes test
+	pass
+	(rudel-test-xml-toplevel-tags): added a case
+
+	* infinote/rudel-infinote-util.el: removed obsolete, commented
+	code
+	(header): cosmetic changes
+
+	* infinote/rudel-infinote-group-directory.el (header): cosmetic
+	changes
+	(rudel-infinote-directory-state-idle): added documentation string
+	(rudel-infinote-directory-state-exploring): added documentation
+	string
+	(rudel-infinote-directory-state-subscribing): added documentation
+	string
+	(initialize-instance): slots argument is not &rest; do not set
+	start state as the state machine does this automatically
+
+	* rudel-transport-util.el (initialize-instance): in generated
+	handler, do not loop over fragments
+
 2009-10-09  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* tcp/rudel-tcp.el (rudel-make-connection): create a stopped network
+        process
+        (this rudel-tcp-transport::rudel-start): new method; start the
+	transport
+
+	* rudel-transport-util.el
+	(rudel-progress-reporting-transport-filter): new class; progress
+	reporting transport filter
 
 	* rudel-transport-util.el
 	(rudel-assembling-transport-filter::assembly-function): removed
@@ -84,6 +504,21 @@
 	stack of transport filters according to a specification
 
 2009-10-08  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* obby/doc/server-connection-states.cogre: new file; states of the
+	state machine used by server connections
+	* obby/doc/client-connection-states.cogre: new file; states of the
+	state machine used by client connections
+
+	* rudel-transport-util.el (header): fixed license text; extended
+	commentary
+        (require rudel-transport): require for class `rudel-transport'
+        (rudel-transport-filter): new class; base class for transport
+        filters
+        (rudel-assembling-transport-filter): new class; assembles received
+        data fragments into messages
+        (rudel-parsing-transport-filter): new class; applies parse/generate
+        function to received/sent data
 
 	* jupiter/jupiter.el (header): downcased keywords
 	(object-print): new method; add revisions and log length to string
@@ -104,6 +539,14 @@
 	representation
 
 2009-10-07  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport-util.el: new file; utility functions for
+	implementing transport functionality
+	* Project.ede (target rudel): added rudel-transport-util.el
+
+	* obby/doc/rudel-obby-transport-layers.cogre: new file; layers
+	used when constructing transport filter chain for obby connections
+	* obby/doc/rudel-obby-transport-layers.png: new file; generated
 
 	* doc/card.tex (Session Initiation): mention configured sessions;
 	explain Zeroconf-advertised session in more detail
@@ -143,7 +586,79 @@
 
 	* README: Mention Eshell issue and license.
 
+2009-10-04  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* adopted/adopted.el: new file; Adopted algorithm entry point
+	* adopted/adopted-operation.el: new file; Adopted operation base
+	class
+	* adopted/adopted-nop.el: new file; Adopted no operation class
+	* adopted/adopted-insert.el: new file; Adopted insert operation
+	* adopted/adopted-delete.el: new file; Adopted delete operation
+	* adopted/adopted-compound.el: new file Adapted compound operation
+	* adopted/Project.ede: new file; project file adopted subdirectory
+
+	* tcp/rudel-tcp.el (rudel-make-connection): call
+	`make-network-process' properly; return created transport object
+
+	* doc/manual.xml: adjust references to
+	infinote-client-connection-states.png and
+	obby-client-connection-states.png
+	* doc/images/infinote-client-connection-states.png: new file;
+	state transition graph for the infinote client
+	* doc/images/obby-client-connection-states.png: new file; state
+	transition graph for the obby client
+
+	* obby/rudel-obby-state.el (header): downcased keywords
+        (require rudel-state-util): new; required for
+	rudel-impersonating-state
+        (rudel-obby-document-handler::document-container-slot): new slot;
+	holds the name of the slot in which the object holding the
+	document list is stored
+        (rudel-obby-document-handler::rudel-obby/obby_document): use
+	document-container-slot; cosmetic changes in warning message
+
+	* rudel-state-util.el: new file; utility functions for state
+	machine state implementations
+	* Project.ede (target rudel): added rudel-state-util.el
+
+	* tcp/rudel-tcp.el: new file; TCP transport backend for Rudel
+	* tcp/Project.ede: new file; project file for TCP transport
+	backend for Rudel
+	* Project.ede (target autoloads): added directory tcp
+
+	* rudel-notification.el: new file; dispatch notifications to
+	configurable mechanisms
+
 2009-10-03  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* tcp/rudel-tcp.el (rudel-make-connection): call
+        `make-network-process' properly; return created transport object
+
+	* doc/manual.xml: adjust references to
+	infinote-client-connection-states.png and
+	obby-client-connection-states.png
+	* doc/images/infinote-client-connection-states.png: new file;
+	state transition graph for the infinote client
+	* doc/images/obby-client-connection-states.png: new file; state
+	transition graph for the obby client
+
+	* obby/rudel-obby-state.el (header): downcased keywords
+        (require rudel-state-util): new; required for
+	rudel-impersonating-state
+        (rudel-obby-document-handler::document-container-slot): new slot;
+	holds the name of the slot in which the object holding the
+	document list is stored
+        (rudel-obby-document-handler::rudel-obby/obby_document): use
+	document-container-slot; cosmetic changes in warning message
+
+	* rudel-state-util.el: new file; utility functions for state
+	machine state implementations
+	* Project.ede (target rudel): added rudel-state-util.el
+
+	* tcp/rudel-tcp.el: new file; TCP transport backend for Rudel
+	* tcp/Project.ede: new file; project file for TCP transport
+	backend for Rudel
+	* Project.ede (target autoloads): added directory tcp
 
 	* rudel-compat.el (make-pulsing-progress-reporter): removed;
 	`make-progress-reporter' is sufficient
@@ -173,6 +688,9 @@
 	(progress-reporter-pulse): removed message change option
 
 2009-10-02  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-notification.el: new file; dispatch notifications to
+	configurable mechanisms
 
 	* rudel-state-machine.el (rudel-state-wait): accept callback
 	function instead of message; adjusted documentation string
@@ -266,7 +784,8 @@
 	(rudel-xmpp-backend::rudel-make-connection): renamed
 	`rudel-connect' -> `rudel-make-connection'
 	(rudel-xmpp-state-new): added documentation string
-	(rudel-xmpp-state-negotiate-stream::success-state): added documentation string
+	(rudel-xmpp-state-negotiate-stream::success-state): added
+	documentation string
 	(rudel-xmpp-state-negotiate-stream): added documentation string
 	(rudel-xmpp-state-negotiate-stream::rudel-enter): fixed comment;
 	generate stream version from `rudel-xmpp-protocol-version'
@@ -279,8 +798,8 @@
 	string
 	(rudel-xmpp-state-sasl-mechanism-step::rudel-enter): added
 	documentation string
-	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): added documentation
-	string; added some comments
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): added
+	documentation string; added some comments
 	(rudel-xmpp-sasl-states): new variable; list of states used by the
 	SASL implementation; states are added to `rudel-xmpp-states'
 
