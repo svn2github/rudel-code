@@ -46,7 +46,9 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision
+;; 0.2 - Monitoring backend
+;;
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -58,6 +60,7 @@
 (require 'eieio)
 
 (require 'rudel-backend)
+(require 'rudel-util) ;; for `rudel-hook-object'
 
 
 ;;; Customization options
@@ -129,6 +132,9 @@ The programmatic equivalent looks like this:
 ;;; Variables and constants
 ;;
 
+;; TODO we have object hooks in rudel-session-initiation-monitoring-backend
+;; do we still want these?
+
 (defvar rudel-session-discovered-hook nil
   "This hook is run when collaboration sessions are discovered.")
 
@@ -175,6 +181,47 @@ for a description of the format of this list.
 
 The presence of an implementation of this generic function should
 be indicated by the presence of the 'withdraw' capability.")
+
+
+;;; Class rudel-session-initiation-monitoring-backend
+;;
+
+(defclass rudel-session-initiation-monitoring-backend
+  (rudel-session-initiation-backend
+   rudel-hook-object)
+  ((session-discovered-hook :initarg  :session-discovered
+			    :type     list
+			    :initform nil
+			    :documentation
+			    "This hook is run whenever a new
+session is discovered.")
+   (session-vanished-hook   :initarg  :session-discovered
+			    :type     list
+			    :initform nil
+			    :documentation
+			    "This hook is run whenever a session
+disappears."))
+  "This interface should be implemented by session initiation
+backends which can detect when sessions appear or disappear.
+
+Implementations should have the 'monitor' capability and are
+expected to start monitoring sessions when `rudel-monitor-start'
+is called until `rudel-monitor-stop' is called."
+  :abstract t)
+
+(defgeneric rudel-monitor-start
+  ((this rudel-session-initiation-monitoring-backend))
+  "Start monitoring sessions.
+
+The presence of an implementation of this generic function should
+be indicated by the presence of the 'monitor' capability.")
+
+(defgeneric rudel-monitor-stop
+  ((this rudel-session-initiation-monitoring-backend))
+  "Stop monitoring sessions.
+
+The presence of an implementation of this generic function should
+be indicated by the presence of the 'monitor' capability.")
 
 
 ;;; Client programming interface functions.
