@@ -168,6 +168,14 @@ for a description of the format of this list.
 The presence of an implementation of this generic function should
 be indicated by the presence of the 'advertise' capability.")
 
+(defgeneric rudel-withdraw ((this rudel-session-initiation-backend) info)
+  "Withdraw previous advertisement of the session described by INFO.
+INFO is a connect info property list. See `rudel-host-session'
+for a description of the format of this list.
+
+The presence of an implementation of this generic function should
+be indicated by the presence of the 'withdraw' capability.")
+
 
 ;;; Client programming interface functions.
 ;;
@@ -232,15 +240,23 @@ advertise the session."
   (multiple-value-bind (primary-backends fallback-backends)
       (rudel-session-initiation-suitable-backends 'advertise)
     (or ;; Try to advertise the session using primary backends.
-        (some (mapcar (lambda (backend)
+        (some #'identity
+	      (mapcar (lambda (backend)
 			(rudel-advertise backend info))
 		      (mapcar #'cdr primary-backends)))
 	;; When the primary backends fail, try to advertise the
 	;; session using fallback backends
-	(some (mapcar (lambda (backend)
+	(some #'identity
+	      (mapcar (lambda (backend)
 			(rudel-advertise backend info))
 		      (mapcar #'cdr fallback-backends)))))
   )
+
+(defun rudel-session-initiation-withdraw (info)
+  "Withdraw previous advertisement of the session described by INFO.
+INFO is a connect info property list. See `rudel-host-session'
+for a description of the format of this list."
+  (error "not implemented"))
 
 
 ;;; Class rudel-ask-protocol-backend
