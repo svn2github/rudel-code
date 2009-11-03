@@ -24,12 +24,14 @@
 
 ;;; Commentary:
 ;;
-;; Debugging functions for Rudel.
+;; This file contains debugging functions for Rudel. The most
+;; important aspects are functions to data-debug central Rudel objects
+;; and tracing support for basic Rudel objects.
 
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -118,7 +120,7 @@
   (rudel-adebug-server ad-return-value))
 
 
-;;; Network functions
+;;; Interactive network messing functions
 ;;
 
 (defun rudel-suspend-session-socket ()
@@ -150,12 +152,12 @@
 ;;
 
 (defun rudel-kill-processes ()
-  "TODO"
+  "Kill all processes - USE WITH CARE."
   (interactive)
   (mapc #'delete-process (process-list)))
 
 (defun rudel-reset ()
-  "TODO"
+  "Delete Rudel objects and kill processes - USE WITH CARE."
   (interactive)
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
