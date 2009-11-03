@@ -134,7 +134,7 @@ The programmatic equivalent looks like this:
 
 (defvar rudel-session-vanished-hook nil
   "This hook is run when previously discovered collaboration
-session disappear.")
+sessions disappear.")
 
 
 ;;; Class rudel-session-initiation-backend
@@ -258,8 +258,8 @@ user select a suitable backend and asking for connect information
 required by the chosen backend.")
 
 (defmethod initialize-instance ((this rudel-ask-protocol-backend)
-				&rest slots)
-  "Set backend version."
+				slots)
+  "Initialize slots and set backend version of THIS."
   (when (next-method-p)
     (call-next-method))
 
@@ -304,8 +304,8 @@ required by the chosen backend.")
 configured using customization.")
 
 (defmethod initialize-instance ((this rudel-configured-sessions-backend)
-				&rest slots)
-  "Set backend version."
+				slots)
+  "Initialize slots and set backend version of THIS."
   (when (next-method-p)
     (call-next-method))
 
