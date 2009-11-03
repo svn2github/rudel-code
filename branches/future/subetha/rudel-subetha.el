@@ -28,7 +28,7 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -40,6 +40,7 @@
 (require 'eieio)
 
 (require 'rudel-backend)
+(require 'rudel-protocol)
 (require 'rudel-util)
 
 (defconst rudel-subetha-version '(0 1)
@@ -49,12 +50,13 @@
 ;;;  Class rudel-subetha-backend
 ;;
 
-(defclass rudel-subetha-backend (rudel-backend)
+(defclass rudel-subetha-backend (rudel-protocol-backend)
   ((capabilities :initform '(join host
 			     change-color
 			     chat
 			     track-subscriptions
-			     track-cursor)))
+			     track-cursor
+			     user-icons)))
   "Class rudel-subetha-backend ")
 
 (defmethod initialize-instance ((this rudel-subetha-backend) slots)
@@ -75,16 +77,26 @@
 
 (defmethod rudel-connect ((this rudel-subetha-backend) transport info
 			  &optional progress-callback)
-  "TODO"
+  "Connect to an SubEthaEdit server using the information INFO.
+Return the connection object."
   ;; Before we start, load the client functionality.
   (require 'rudel-subetha-client)
 
-  ;;
-  (let ((connection (rudel-subetha-client-connection
-		     "bla"
-		     :transport transport)))
+  ;; Create the connection object.
+  (let* ((host       (plist-get info :host))
+	 (connection (rudel-subetha-client-connection
+		      host
+		      :transport transport)))
 
-    (rudel-state-wait connection '(established))
+    ;; Start the transport and wait until the basic session setup is
+    ;; complete.
+    (rudel-start transport)
+
+    (rudel-state-wait connection
+		      '(established) nil
+		      progress-callback)
+
+    ;; The connection is now usable; return it.
     connection))
 
 (defmethod rudel-make-document ((this rudel-subetha-backend)
@@ -100,7 +112,7 @@
 
 ;;;###autoload
 (eval-after-load 'rudel-zeroconf
-  '(rudel-zeroconf-register-service "_see._tcp" 'tcp 'subetha))
+  '(rudel-zeroconf-register-service "_see._tcp" 'beep 'subetha))
 
 (provide 'rudel-subetha)
 ;;; rudel-subetha.el ends here
