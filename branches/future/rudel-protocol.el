@@ -62,10 +62,13 @@
   "Retrieve information for joining a session from user.
 Return a property list that contains the collected information.")
 
-(defgeneric rudel-connect ((this rudel-protocol-backend) transport info)
+(defgeneric rudel-connect ((this rudel-protocol-backend) transport info
+			   &optional progress-callback)
   "Create a new connection through TRANSPORT according to the data in INFO.
 TRANSPORT has to be an object of a class derived from `rudel-transport'.
 INFO has to be a property list.
+When non-nil, PROGRESS-CALLBACK has to be a function that may be
+called repeatedly while the connection is established.
 
 Implementations can rely on the fact that the property :session
 in INFO contains the `rudel-session' object to which the new

@@ -64,7 +64,8 @@
 
   (oset this :version rudel-subetha-version))
 
-(defmethod rudel-ask-connect-info ((this rudel-subetha-backend) &optional info)
+(defmethod rudel-ask-connect-info ((this rudel-subetha-backend)
+				   &optional info)
   ""
   (let ((username (or (and info (plist-get info :username))
 		      (read-string "Username: " rudel-default-username)))
@@ -72,7 +73,8 @@
 		      (read-color  "Color: " t))))
     (list :username username :color color)))
 
-(defmethod rudel-connect ((this rudel-subetha-backend) transport info)
+(defmethod rudel-connect ((this rudel-subetha-backend) transport info
+			  &optional progress-callback)
   "TODO"
   ;; Before we start, load the client functionality.
   (require 'rudel-subetha-client)

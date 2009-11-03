@@ -126,7 +126,7 @@ connections and creates obby servers.")
   )
 
 (defmethod rudel-connect ((this rudel-obby-backend) transport info
-			  &optional callback)
+			  &optional progress-callback)
   "Connect to an obby server using the information INFO.
 Return the connection object."
   ;; Before we start, load the client functionality.
@@ -149,7 +149,7 @@ Return the connection object."
 
     (rudel-state-wait connection
 		      '(waiting-for-join-info) nil
-		      callback)
+		      progress-callback)
 
     ;; Wait until we join the session.
     (catch 'connect
@@ -173,7 +173,7 @@ Return the connection object."
 	      (progn
 		(rudel-state-wait connection
 				  '(idle) '(join-failed they-finalized)
-				  callback)
+				  progress-callback)
 		(throw 'connect t))
 
 	    ;; Connection entered error state

@@ -88,7 +88,7 @@
   )
 
 (defmethod rudel-connect ((this rudel-infinote-backend) transport info
-			  &optional callback)
+			  &optional progress-callback)
   "Connect to an infinote server using the information INFO.
 Return the connection object."
   ;; Before we start, load the client functionality.
@@ -110,7 +110,7 @@ Return the connection object."
 
     (rudel-state-wait transport
 		      '(established) '(we-finalize they-finalize)
-		      callback)
+		      progress-callback)
 
     ;; The connection is now ready for action; Return it.
     connection)
