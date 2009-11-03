@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, backend, protocol
+;; Keywords: rudel, backend, protocol
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -28,8 +28,8 @@
 ;; interface consists of the following functions:
 ;;
 ;; + joining sessions
-;;   + `rudel-ask-join-info'
-;;   + `rudel-join'
+;;   + `rudel-ask-connect-info'
+;;   + `rudel-connect'
 ;; + hosting sessions
 ;;   + `rudel-ask-host-info'
 ;;   + `rudel-host'
@@ -39,7 +39,7 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision
+;; 0.1 - Initial version
 
 
 ;;; Code:
