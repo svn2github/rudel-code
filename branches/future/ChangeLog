@@ -1,4 +1,71 @@
+2009-11-03  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-debug.el (header): downcased keywords; added version 0.2
+	to history
+	(rudel-debug-target): new generic function; find associated debug
+	stream for an object
+	(eieio-default-superclass::rudel-debug-target): new method;
+	default implementation
+	(rudel-debug-write-to-stream): renamed `rudel-debug-stream-insert'
+	-> `rudel-debug-write-to-stream'; accept label argument
+	(rudel-debug-write): new function; convenience wrapper
+	(rudel-debug-old-state): new variable; used by state machine
+	tracing
+	(rudel-state-machine::rudel-switch :before): new method; state
+	machine tracing
+	(rudel-state-machine::rudel-switch :after): new method; state
+	machine tracing
+	(rudel-transport-filter::rudel-debug-target): new method;
+	transport filter debugging
+	(rudel-assembling-transport-filter::rudel-set-assembly-function):
+	new method; log changes of assembly function
+	(rudel-assembling-transport-filter::rudel-send): new method; log
+	raw data
+	(rudel-parsing-transport-filter::rudel-set-parse-function): new
+	method; log changes of parse function
+	(rudel-parsing-transport-filter::rudel-set-generate-function): new
+	method; log changes of generate function
+	(rudel-parsing-transport-filter::rudel-send): new method; log data
+	before going through the generate function
+	(rudel-socket-transport::rudel-send): new method; log data before
+	going through the socket
+
+	* rudel-debug.el (header): extended commentary section
+	(rudel-kill-processes): added documentation string
+	(rudel-reset): added documentation string
+
 2009-11-02  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-session-initiation.el (header): added version 0.2 to
+	history
+	(require rudel-util): required for `rudel-hook-object'
+	(rudel-session-initiation-monitoring-backend): new class; derived
+	from `rudel-session-initiation-backend' for backends that can
+	detect appearing and disappearing sessions
+	(rudel-session-initiation-monitoring-backend::rudel-monitor-start):
+	new method; start monitoring sessions
+	(rudel-session-initiation-monitoring-backend::rudel-monitor-stop):
+	new method; stop monitoring sessions
+
+	* rudel-session-initiation.el
+	(rudel-session-initiation-backend::rudel-withdraw): new method;
+	withdraw session advertisement
+	(rudel-session-initiation-advertise): fixed use of `some'
+	(rudel-session-initiation-withdraw): new function; withdraw
+	session advertisement; stub
+
+	* rudel-session-initiation.el (rudel-session-vanished-hook): fixed
+	typo in documentation string
+	(rudel-ask-protocol-backend::initialize-instance): removed &rest
+	from slots argument; improved documentation string
+	(rudel-configured-sessions-backend::initialize-instance): removed
+	&rest from slots argument; improved documentation string
+
+	* rudel-transport-util.el (header): cosmetic changes
+	(rudel-parsing-transport-filter::parse-function): added reader and
+	writer
+	(rudel-parsing-transport-filter::generate-function): added reader
+	and writer
 
 	* beep/rudel-beep-channel.el
 	(rudel-beep-channel-zero-state-closing): new class; entered when

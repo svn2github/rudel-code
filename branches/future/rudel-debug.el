@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, debugging
+;; Keywords: rudel, debugging
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -30,6 +30,8 @@
 
 
 ;;; History:
+;;
+;; 0.2 - New tracing framework
 ;;
 ;; 0.1 - Initial version
 
@@ -167,32 +169,19 @@
   (setq rudel-current-session nil))
 
 
-;;; Socket debugging
-;;
-
-(defmethod rudel-state-change :before ((this rudel-socket-owner)
-				       state message)
-  "Print STATE and MESSAGE to debug stream."
-  (with-slots (socket) this
-    (rudel-debug-stream-insert
-     (rudel-debug-stream-name socket)
-     :state
-     (format "connection state changed to %s: \"%s\""
-	     (upcase (symbol-name state))
-	     ;; MESSAGE ends with a newline; remove it
-	     (substring message 0 -1))))
-  )
-
-
 ;;; Utility functions
 ;;
 
-(defun rudel-debug-stream-name (socket)
-  "Return debug stream name for SOCKET."
-  (process-name socket))
+(defgeneric rudel-debug-target (object)
+  "Return debug stream name for OBJECT."
+  )
 
-(defun rudel-debug-stream-insert (stream tag data &optional object)
-  "Insert DATA and possibly OBJECT into stream using TAG as style."
+(defmethod rudel-debug-target ((this eieio-default-superclass))
+  "Default implementation simply uses the object name of THIS."
+  (object-name-string this))
+
+(defun rudel-debug-write-to-stream (stream tag label data &optional object)
+  "Insert DATA and maybe OBJECT into stream using TAG and LABEL as style."
   (let* ((buffer-name (format "*%s stream*" stream))
 	 (buffer      (or (get-buffer buffer-name)
 			  (data-debug-new-buffer buffer-name)))
@@ -206,12 +195,151 @@
       (set-buffer buffer)
       (goto-char 0)
       (insert prefix
+	      (if label
+		  (format
+		   "%-8s"
+		   (propertize label 'face 'font-lock-type-face))
+		"        ")
+	      " "
 	      (propertize data 'face face)
 	      (if (string= (substring data -1) "\n")
 		  "" "\n"))
       (when object
-	(data-debug-insert-thing object prefix ""))))
+	(data-debug-insert-thing
+	 object
+	 (concat prefix
+		 (propertize "OBJECT   " 'face 'font-lock-type-face))
+	 ""))))
     )
+
+(defun rudel-debug-write (source tag label data &optional object)
+  "Write DATA and OBJECT to debug stream associated to SOURCE.
+TAG and LABEL determine the logging style."
+  (rudel-debug-write-to-stream
+   (rudel-debug-target source) tag label data object))
+
+
+;;; State machine debugging
+;;
+
+(defvar rudel-debug-old-state nil
+  "Saves state of state machines across one function call.")
+
+(defmethod rudel-switch :before ((this rudel-state-machine)
+				 state &rest arguments)
+  "Store name of STATE for later printing."
+  (with-slots (state) this
+    (setq rudel-debug-old-state
+	  (if state
+	      (object-name-string state)
+	    "#start")))
+  )
+
+(defmethod rudel-switch :after ((this rudel-state-machine)
+				state &rest arguments)
+  "Log STATE and ARGUMENTS to debug stream."
+  (with-slots (state) this
+    (let ((old-state rudel-debug-old-state)
+	  (new-state (object-name-string state)))
+      (unless (string= old-state new-state)
+	(rudel-debug-write
+	 this
+	 :special
+	 "FSM"
+	 (if arguments
+	     (format "%s -> %s %s" old-state new-state arguments)
+	   (format "%s -> %s" old-state new-state))))))
+  )
+
+
+;;; Debugging functions for `rudel-transport-filter'
+;;
+
+(defmethod rudel-debug-target ((this rudel-transport-filter))
+  "Find target of filter THIS by looking at underlying transport."
+  (with-slots (transport) this
+    (rudel-debug-target transport)))
+
+
+;;; Debugging functions for `rudel-assembling-transport-filter'
+;;
+
+(defmethod rudel-set-assembly-function :before
+  ((this rudel-assembling-transport-filter) function)
+  "Log change of assembly function to FUNCTION."
+  (with-slots (socket assembly-function) this
+    (rudel-debug-write
+     this
+     :special
+     "ASSEMBLE"
+     (format "%s -> %s"
+	     (symbol-name assembly-function)
+	     (symbol-name function))))
+  )
+
+(defmethod rudel-send :before ((this rudel-assembling-transport-filter)
+			       data)
+  "Log DATA as it goes through THIS."
+  (rudel-debug-write this :sent "RAW" data nil))
+
+
+;;; Debugging function `rudel-parsing-transport-filter'
+;;
+
+(defmethod rudel-set-parse-function :before
+  ((this rudel-parsing-transport-filter) function)
+  "Log parse function change to FUNCTION."
+  (with-slots (parse-function) this
+    (rudel-debug-write
+     this
+     :special
+     "PARSE"
+     (format "%s -> %s"
+	     (symbol-name parse-function)
+	     (symbol-name function))))
+  )
+
+(defmethod rudel-set-generate-function :before
+  ((this rudel-parsing-transport-filter) function)
+  "Log generate function change to FUNCTION."
+  (with-slots (generate-function) this
+    (rudel-debug-write
+     this
+     :special
+     "GENERATE"
+     (format "%s -> %s"
+	     (symbol-name generate-function)
+	     (symbol-name function))))
+  )
+
+(defmethod rudel-send :before ((this rudel-parsing-transport-filter)
+			       string-or-data)
+  "Log STRING-OR-DATA as it goes through THIS."
+  (let ((formatted (cond
+		    ((stringp string-or-data)
+		     string-or-data)
+
+		    ((object-p string-or-data)
+		     (object-print string-or-data))
+
+		    (t
+		     (format "%s" string-or-data)))))
+    (rudel-debug-write
+     this
+     :sent
+     "GEN"
+     formatted (unless (stringp string-or-data)
+		 string-or-data)))
+  )
+
+
+;;; Socket transport debugging
+;;
+
+(defmethod rudel-send :before ((this rudel-socket-transport)
+			       data)
+  "Log DATA verbatim as it is sent through the socket of THIS."
+  (rudel-debug-write this :sent "SOCKET" data nil))
 
 (provide 'rudel-debug)
 ;;; rudel-debug.el ends here
