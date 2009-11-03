@@ -24,12 +24,15 @@
 
 ;;; Commentary:
 ;;
-;;
+;; This file contains the assemble function
+;; `rudel-xmpp-assemble-stream' which is used by
+;; `rudel-xmpp-make-transport-filter-stack' to parametrize assembling
+;; and parsing transport filters to handle XML data transparently.
 
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -39,7 +42,42 @@
 
 (require 'rudel-transport-util)
 
-(require 'rudel-xmpp-socket-owner) ;; TODO temp for rudel-xmpp-assemble-stream
+
+;;; Fragmentation and assembling functions.
+;;
+
+(defun rudel-xmpp-assemble-stream (data)
+  "Extract complete XML stanzas from DATA.
+Return a list the first element of which is a list of strings
+that contain the serialized forms of the stanzas. The second
+element is a string containing the rest of the data or nil DATA
+does not contains any incomplete stanzas."
+  ;; TODO mention limitations
+  (let ((string (concat (nth 1 data) (nth 0 data))))
+    (if (not (or (search "</stream:features>" string)
+		 (search "<stream:features/>" string)))
+	(list nil (list string))
+      (destructuring-bind (tags buffer)
+	  (rudel-xml-toplevel-tags (concat string "</stream:stream>"))
+	(list
+	 (remove-if
+	  (lambda (tag)
+	    (= (aref tag 1) ??))
+	  tags)
+	 (list buffer))))) ;; TODO wrong
+  )
+;; One problem: peer can send
+;; <stream:stream xmlns:stream="http://etherx.jabber.org/streams"
+;;                xmlns="jabber:client"
+;;                version="1.0"
+;;                from="gunhead">
+;; and then
+;; <stream:features/>
+;; we cannot assemble this properly; look into the RFC
+
+
+;;; Transport filter stack construction
+;;
 
 (defun rudel-xmpp-make-transport-filter-stack (transport)
   "Construct an XMPP protocol filter stack on top of TRANSPORT."

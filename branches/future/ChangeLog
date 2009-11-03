@@ -1,5 +1,39 @@
 2009-11-02  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* xmpp/Project.ede (target xmpp): removed
+	rudel-xmpp-socket-owner.el
+	* rudel-xmpp-socket-owner.el: removed obsolete
+	* xmpp/rudel-xmpp-util.el (header): added commentary
+	(require rudel-xmpp-socket-owner): removed; was required for
+	`rudel-xmpp-assemble-stream' which is now included
+	(rudel-xmpp-assemble-stream): new function; moved from
+	rudel-xmpp-socket-owner.el
+
+	* xmpp/rudel-xmpp-debug.el (require base64): required for
+	displaying base64-decoded data
+	(rudel-xmpp-debug-old-state): removed; handled for all state
+	machines now
+	(rudel-xmpp-state::rudel-debug-target): new method; use debug
+	target of transport
+	(rudel-xmpp-socket-owner::rudel-set-assembly-function): removed;
+	obsolete
+	(rudel-xmpp-socket-owner::rudel-set-parse-function): removed;
+	obsolete
+	(rudel-xmpp-socket-owner::rudel-send): removed; obsolete
+	(rudel-xmpp-socket-owner::rudel-message): removed; obsolete
+	(rudel-xmpp-socket-owner::rudel-switch :before): removed; obsolete
+	(rudel-xmpp-socket-owner::rudel-switch :after): removed; obsolete
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-send): use
+	`rudel-debug-write'
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): use
+	`rudel-debug-write'
+
+	* xmpp/rudel-xmpp-debug.el (header): downcase keywords; fixed
+	commentary; cosmetic changes
+
+	* xmpp/rudel-xmpp.el (rudel-xmpp-backend::capabilities): added;
+	capability connect
+
 	* xmpp/rudel-xmpp.el (rudel-xmpp-test-connect): pass `identity'
 	as info-callback to `rudel-make-connection'
 

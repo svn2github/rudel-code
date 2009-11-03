@@ -3,11 +3,11 @@
 (ede-proj-project "rudel/xmpp"
   :name "xmpp"
   :file "Project.ede"
-  :targets (list 
+  :targets (list
    (ede-proj-target-elisp "xmpp"
     :name "xmpp"
     :path ""
-    :source '("rudel-xmpp.el" "rudel-xmpp-sasl.el" "rudel-xmpp-socket-owner.el" "rudel-xmpp-debug.el" "rudel-xmpp-state.el" "rudel-xmpp-tunnel.el" "rudel-xmpp-tls.el" "rudel-xmpp-util.el")
+    :source '("rudel-xmpp.el" "rudel-xmpp-sasl.el" "rudel-xmpp-debug.el" "rudel-xmpp-state.el" "rudel-xmpp-tunnel.el" "rudel-xmpp-tls.el" "rudel-xmpp-util.el")
     )
    )
   )
