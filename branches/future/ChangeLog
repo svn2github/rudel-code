@@ -1,5 +1,21 @@
 2009-11-02  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* beep/rudel-beep-channel.el
+	(rudel-beep-channel-zero-state-closing): new class; entered when
+	closing a channel
+	(rudel-beep-channel-zero-state-closing::rudel-enter): new method;
+	send close message
+	(rudel-beep-channel-zero-state-closing::rudel-accept): new method;
+	check response to close message
+	(rudel-beep-channel-zero-states): added closing state
+
+	* subetha/uuid.el (header): fixed copyright; added keyword and rcs
+	fields; extended commentary section
+	(uuid=): new function; compare two UUIDs for equality
+	(uuid-generate-random-uuid): cosmetic changes
+	(uuid--generate-random-hex-string): fill a pre-allocated vector
+	(uuid-test-uuid=): new test; checks `uuid='
+
 	* xmpp/Project.ede (target xmpp): removed
 	rudel-xmpp-socket-owner.el
 	* rudel-xmpp-socket-owner.el: removed obsolete

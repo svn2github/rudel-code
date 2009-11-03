@@ -218,8 +218,7 @@
 ;;; Class rudel-beep-channel-zero-state-request-success
 ;;
 
-(defclass rudel-beep-channel-zero-state-request-success
-  (rudel-beep-state)
+(defclass rudel-beep-channel-zero-state-request-success (rudel-beep-state)
   ((profile :initarg :profile
 	    :type    string
 	    :documentation
@@ -239,8 +238,7 @@ succeeds.")
 ;;; Class rudel-beep-channel-zero-state-request-failure
 ;;
 
-(defclass rudel-beep-channel-zero-state-request-failure
-  (rudel-beep-state)
+(defclass rudel-beep-channel-zero-state-request-failure (rudel-beep-state)
   ((condition :initarg :profile
 	      :type    symbol
 	      :documentation
@@ -259,6 +257,37 @@ succeeds.")
     (setq condition condition1
 	  data      data1))
   nil)
+
+(defclass rudel-beep-channel-zero-state-closing (rudel-beep-state)
+  ()
+  "Channel 0 enters this state when a channel is closed.")
+
+(defmethod rudel-enter ((this rudel-beep-channel-zero-state-closing)
+			channel)
+  "Send the close message."
+  (with-slots (id) channel
+    (rudel-send
+     this
+     `(("close"
+	("number" . ,(format "%d" id))
+	("code"   . ,(format "%d" 200))))))
+
+  nil)
+
+(defmethod rudel-accept ((this rudel-beep-channel-zero-state-closing)
+			 frame)
+  "Check whether closing the state succeeded."
+  (let* ((data (oref frame :payload)) ;; TODO
+	 (name (xml-tag-name data)))
+    (cond
+     ;;
+     ((string= name "ok")
+      'idle)
+
+     ;;
+     (t
+      'idle)))
+  )
 
 
 ;;; Class rudel-beep-channel-zero-state-idle
@@ -308,6 +337,7 @@ succeeds.")
     (requesting      . rudel-beep-channel-zero-state-requesting)
     (request-success . rudel-beep-channel-zero-state-request-success)
     (request-failure . rudel-beep-channel-zero-state-request-failure)
+    (closing         . rudel-beep-channel-zero-state-closing)
     (idle            . rudel-beep-channel-zero-state-idle))
   "BEEP channel states for channel 0.")
 
