@@ -382,7 +382,7 @@ Authentication mechanisms can add more states to this list.")
 			 ;; :jid  "jan@gunhead"
 			 ))
 	     (backend   (cdr (rudel-backend-get 'transport 'xmpp))))
-	(rudel-make-connection backend info))
+	(rudel-make-connection backend info #'identity))
       )
 
     ))

@@ -1,3 +1,107 @@
+2009-11-02  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/rudel-xmpp.el (rudel-xmpp-test-connect): pass `identity'
+	as info-callback to `rudel-make-connection'
+
+	* xmpp/rudel-xmpp-sasl.el (header): downcased keywords; cosmetic changes
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): analyze
+	failure responses more thoroughly
+
+	* subetha/rudel-subetha.el (header): cosmetic changes
+	(require rudel-protocol): required since a protocol backend is
+	implemented
+	(rudel-subetha-backend): now derived from `rudel-protocol-backend'
+	instead of `rudel-backend'
+	(rudel-subetha-backend::capabilities): added user-icons
+	(rudel-connect): name created object properly; start transport;
+	added documentation string; added some comments
+	(zeroconf registration): use beep transport
+
+	* rudel-protocol.el (rudel-connect): added optional argument
+	progress-callback; added explanation of new argument to
+	documentation string
+	* subetha/rudel-subetha.el (rudel-subetha-backend::rudel-connect):
+	added optional argument progress-callback
+	* obby/rudel-obby.el (rudel-obby-backend::rudel-connect): renamed
+	argument callback -> progress-callback
+	* infinote/rudel-infinote.el
+	(rudel-infinote-backend::rudel-connect): renamed argument callback
+	-> progress-callback
+
+	* rudel-protocol.el (header): downcased keywords; fixed method
+	names in commentary section
+
+2009-11-01  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport.el
+	(rudel-transport-backend::rudel-make-connection): added argument
+	info-callback; renamed argument callback -> progress-callback;
+	improved and extended documentation string
+	(rudel-transport-backend::rudel-wait-for-connections):
+	documentation string wording
+	* xmpp/rudel-xmpp.el
+	(rudel-xmpp-backend::rudel-make-connection): added argument
+	info-callback; renamed argument callback -> progress-callback;
+	call info-callback when info elements are missing
+	* tcp/rudel-tcp.el (rudel-tcp-backend::rudel-make-connection):
+	added arguments info-callback and progress-callback; call
+	info-callback when info elements are missing
+	* beep/rudel-beep.el (rudel-beep-backend::rudel-make-connection):
+	added argument info-callback; renamed argument callback ->
+	progress-callback; call info-callback when info elements are
+	missing; pass info-callback and progress-callback to
+	`rudel-make-connection' method of TCP backend
+	* rudel.el (rudel-join-session): construct a function for asking
+	for missing info elements; pass to `rudel-make-connection' as
+	info-callback
+
+	* xmpp/rudel-xmpp.el (header): added commentary section
+	(require rudel-state-machine): required for the state classes
+	(require rudel-transport-util): required since a
+	`rudel-transport-filter' is implemented
+	(require rudel-tcp): required since the TCP transport underlies
+	the XMPP transport
+	(require rudel-xmpp-util): required for transport stack
+	construction
+	(rudel-xmpp-transport-version): bumped to 0.2
+	(rudel-xmpp-backend): added documentation string
+	(rudel-xmpp-backend::initialize-instance): removed &rest from
+	slots; added documentation string
+	(rudel-xmpp-backend::rudel-make-connection): added optional
+	argument callback; use a transport filter stack on top of a TCP
+	transport instead of a socket; improved documentation string
+	(rudel-xmpp-state-new::rudel-enter): pass jid and server name to
+	successor state; added documentation string
+	(rudel-xmpp-state-negotiate-stream::success-state): changed type
+	to include list
+	(rudel-xmpp-state-negotiate-stream::rudel-enter): some cleanup
+	(rudel-xmpp-state-negotiate-stream::rudel-leave): added
+	documentation string; improved comment
+	(rudel-xmpp-state-negotiate-stream::rudel-accept): handle symbol
+	and list successor state specification
+	(rudel-xmpp-state-authenticated::rudel-enter): pass server- and
+	username to successor state; hack
+	(rudel-xmpp-state-authentication-failed::rudel-enter): new method;
+	switch to we-finalize
+	(rudel-xmpp-states): added documentation string
+	(rudel-xmpp-transport): now derived from `rudel-transport-filter'
+	(rudel-xmpp-transport::handler): removed slot; provided by base
+	class
+	(rudel-xmpp-transport::initialize-instance): install
+	`rudel-accept' as filter in the underlying transport
+	(rudel-xmpp-transport::rudel-register-state): call next method in
+	a safe manner
+	(rudel-xmpp-transport::rudel-transport-set-handler): removed;
+	replaced by `rudel-set-filter'
+	(rudel-xmpp-transport::rudel-set-filter): new method; install
+	specified handler in the established state object
+	(rudel-xmpp-transport::rudel-close): switch to closing state;
+	added documentation string
+	(rudel-xmpp-transport::rudel-message): removed; obsolete
+	(rudel-xmpp-transport::rudel-disconnect): removed; obsolete
+	(rudel-xmpp-test-connect): new test; test connecting to an XMPP
+	server
+
 2009-10-31  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* xmpp/rudel-xmpp-state.el
