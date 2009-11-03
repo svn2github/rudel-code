@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: Rudel, xmpp, SASL, authentication
+;; Keywords: rudel, xmpp, sasl, authentication
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -28,7 +28,7 @@
 
 ;;; History:
 ;;
-;; 0.1 - Initial revision.
+;; 0.1 - Initial version
 
 
 ;;; Code:
@@ -193,10 +193,18 @@ mechanism.")
   (cond
    ;; Authentication mechanism failed. Try next.
    ((string= (xml-tag-name xml) "failure")
-    (with-slots (name server rest) this
-      (list 'sasl-try-one name server rest)))
-   ;; TODO Handle <not-authorized/> differently? We could retry with
-   ;; the same mechanism
+    (let ((child (car (xml-tag-children xml))))
+      (cond
+       ;; The not-authorized failure means that the credentials we
+       ;; provided were wrong.
+       ((string= (xml-tag-name child) "not-authorized")
+	(with-slots (name server rest) this
+	  (list 'sasl-try-one name server rest)))
+
+       ;; Default behavior is to try next mechanism.
+       (t
+	(with-slots (name server rest) this
+	  (list 'sasl-try-one name server rest))))))
 
    ;; Authentication mechanism succeeded. Switch to authenticated
    ;; state.
