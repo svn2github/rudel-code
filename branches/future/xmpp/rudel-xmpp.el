@@ -64,7 +64,7 @@
 ;;
 
 (defclass rudel-xmpp-backend (rudel-transport-backend)
-  ()
+  ((capabilities :initform '(connect)))
   "Transport backend works by transporting XMPP messages through
 XMPP connections.")
 
@@ -376,7 +376,7 @@ Authentication mechanisms can add more states to this list.")
       (let* ((info      (list
 			 :host "jabber.org"
 			 :port 5222
-			 :jid  "scymtymx"
+			 :jid  "scymtym"
 			 ;; :host "localhost"
 			 ;; :port 6523
 			 ;; :jid  "jan@gunhead"
