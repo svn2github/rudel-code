@@ -1,5 +1,37 @@
 2009-11-09  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* subetha/Project.ede (target subetha): renamed `rudel/subetha' ->
+	`subetha'
+	* beep/Project.ede (target rudel/beep): renamed `rudel/beep' ->
+	`beep'
+
+	* zeroconf/rudel-zeroconf.el (zeroconf initialization): try to
+	avoid initialization when zeroconf.el is initialized
+
+	* tls/rudel-tls.el (rudel-start-tls-transport): now derived from
+	`rudel-socket-transport'
+	* tcp/rudel-tcp.el (require cl): required for `every'
+	(rudel-tcp-version): renamed `rudel-tcp-transport-version' ->
+	`rudel-tcp-version'; bumped to 0.2
+	(rudel-socket-transport): renamed `rudel-tcp-transport' ->
+	`rudel-socket-transport'
+	(rudel-socket-transport::filter): removed; stored in process
+	object
+	(rudel-socket-transport::sentinel): removed; stored in process
+	object
+	(rudel-socket-transport::rudel-filter): new method; retrieve
+	filter from process
+	(rudel-socket-transport::rudel-set-filter): set filter of process
+	(rudel-socket-transport::rudel-sentinel): new method; retrieve
+	sentinel from process
+	(rudel-tcp-transport::rudel-set-sentinel): set sentinel of process
+	(rudel-tcp-transport::rudel-receive): removed; now handled
+	directly
+	(rudel-tcp-backend::initialize-instance): use `rudel-tcp-version'
+	(rudel-tcp-backend::rudel-make-connection): pass constructed
+	socket to a `rudel-socket-transport'; do not install filter or
+	sentinel
+
 	* tls/rudel-tls.el (required rudel-tcp): required since base class
 	of `rudel-start-tls-transport'
 	(rudel-start-tls-transport): new class; TCP transport with START

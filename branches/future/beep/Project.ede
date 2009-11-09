@@ -1,9 +1,9 @@
 ;; Object rudel/beep
 ;; EDE project file.
 (ede-proj-project "rudel/beep"
-  :name "rudel/beep"
+  :name "beep"
   :file "Project.ede"
-  :targets (list 
+  :targets (list
    (ede-proj-target-elisp "beep"
     :name "beep"
     :path ""

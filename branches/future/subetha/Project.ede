@@ -1,7 +1,7 @@
 ;; Object rudel/subetha
 ;; EDE project file.
 (ede-proj-project "rudel/subetha"
-  :name "rudel/subetha"
+  :name "subetha"
   :file "Project.ede"
   :targets (list
    (ede-proj-target-elisp "subetha"
