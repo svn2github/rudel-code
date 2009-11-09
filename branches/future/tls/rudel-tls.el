@@ -209,7 +209,7 @@ This only works if PROCESS has been created by
 ;;; Class rudel-start-tls-transport
 ;;
 
-(defclass rudel-start-tls-transport (rudel-tcp-transport)
+(defclass rudel-start-tls-transport (rudel-socket-transport)
   ()
   "Objects of this class provide TCP transports with START TLS
 capability.")

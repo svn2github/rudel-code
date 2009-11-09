@@ -35,6 +35,8 @@
 ;;; Code:
 ;;
 
+(require 'cl) ;; for `every'
+
 (require 'rudel-backend)
 (require 'rudel-transport)
 
@@ -44,57 +46,58 @@
 ;;; Constants
 ;;
 
-(defconst rudel-tcp-transport-version '(0 1)
+(defconst rudel-tcp-version '(0 2)
   "Version of the TCP transport backend for Rudel.")
 
 
-;;; Class rudel-tcp-transport
+;;; Class rudel-socket-transport
 ;;
 
-;; TODO rudel-socket-transport?
-(defclass rudel-tcp-transport (rudel-socket-owner
-			       rudel-transport)
-  ((filter   :initarg  :filter
-	     :type     (or null function)
-	     :initform nil
-	     :accessor rudel-filter
-	     :documentation
-	     "")
-   (sentinel :initarg  :sentinel
-	     :type     (or null function)
-	     :initform nil
-	     :accessor rudel-sentinel
-	     :documentation
-	     ""))
-  "TCP transport.")
+(defclass rudel-socket-transport (rudel-transport)
+  ((socket :initarg :socket
+	   :type    process
+	   :documentation
+	   "The socket represented by this transport object."))
+  "Objects of this class use sockets to transport data.")
 
-(defmethod rudel-set-filter ((this rudel-tcp-transport) filter)
-  "Install FILTER as dispatcher for messages received by THIS."
-  (oset this :filter filter))
-
-(defmethod rudel-set-sentinel ((this rudel-tcp-transport) sentinel)
-  ""
-  (oset this :sentinel sentinel))
-
-(defmethod rudel-send ((this rudel-tcp-transport) data)
-  ""
+(defmethod rudel-filter ((this rudel-socket-transport))
+  "Return filter function of THIS."
   (with-slots (socket) this
-    ;;(rudel-send socket data)
-    (process-send-string socket data)
-    ))
+    (process-filter socket)))
 
-(defmethod rudel-close ((this rudel-tcp-transport))
-  ""
-  )
+(defmethod rudel-set-filter ((this rudel-socket-transport) filter)
+  "Install FILTER as dispatcher for messages received by THIS."
+  (with-slots (socket) this
+    (lexical-let ((filter1 filter))
+      (set-process-filter socket (lambda (process data)
+				   (funcall filter1 data))))))
 
-(defmethod rudel-start ((this rudel-tcp-transport))
+(defmethod rudel-sentinel ((this rudel-socket-transport))
+  "Return sentinel function of THIS."
+  (with-slots (socket) this
+    (process-sentinel socket)))
+
+(defmethod rudel-set-sentinel ((this rudel-socket-transport) sentinel)
+  "Install SENTINEL as dispatcher for out-of-band events of THIS."
+  (with-slots (socket) this
+    (lexical-let ((sentinel1 sentinel))
+      (set-process-sentinel socket (lambda (process message)
+				     (funcall sentinel1 message))))))
+
+(defmethod rudel-send ((this rudel-socket-transport) data)
+  "Send DATA through THIS."
+  (with-slots (socket) this
+    (process-send-string socket data)))
+
+(defmethod rudel-close ((this rudel-socket-transport))
+  "Close THIS."
+  (with-slots (socket) this
+    (delete-process socket)))
+
+(defmethod rudel-start ((this rudel-socket-transport))
+  "Start THIS after it has been suspended."
   (with-slots (socket) this
     (continue-process socket)))
-
-(defmethod rudel-receive ((this rudel-tcp-transport) data)
-  (with-slots (filter) this
-    (when filter
-      (funcall filter data))))
 
 
 ;;; Class rudel-tcp-backend
@@ -110,7 +113,7 @@ The transport backend is a factory for TCP transport objects.")
   (when (next-method-p)
     (call-next-method))
 
-  (oset this :version rudel-tcp-transport-version))
+  (oset this :version rudel-tcp-version))
 
 (defmethod rudel-make-connection ((this rudel-tcp-backend)
 				  info info-callback
@@ -128,20 +131,14 @@ and :port."
 	 (port      (plist-get info :port))
 	 ;; Create the network process
 	 (socket    (make-network-process
-		     :name     host
+		     :name     (format "TCP to %s" host)
 		     :host     host
 		     :service  port
-		     ;; Install connection filter to redirect data to
-		     ;; the connection object
-		     :filter   #'rudel-filter-dispatch
-		     ;; Install connection sentinel to redirect state
-		     ;; changes to the connection object
-		     :sentinel #'rudel-sentinel-dispatch
-		     :stop     t))
-	 (transport (rudel-tcp-transport
-		     (format "to %s:%s" host port)
-		     :socket socket)))
-    transport))
+		     :stop     t)))
+    (rudel-socket-transport
+     (format "to %s:%s" host port)
+     :socket socket))
+  )
 
 
 ;;; Autoloading
