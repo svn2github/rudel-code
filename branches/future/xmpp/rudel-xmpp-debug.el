@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Jan Moringen
 ;;
 ;; Author: Jan Moringen <scymtym@users.sourceforge.net>
-;; Keywords: rudel, xmpp, debugging
+;; Keywords: rudel, xmpp, debug
 ;; X-RCS: $Id:$
 ;;
 ;; This file is part of Rudel.
@@ -58,6 +58,15 @@
 ;;; Handle base64 encoded data in SASL steps
 ;;
 
+(defmethod rudel-send ((this rudel-xmpp-state-sasl-mechanism-step)
+		       &rest args)
+  "Delegate sending ARGS to the transport associated with THIS."
+  ;; We need this primary method in order for the :after method below
+  ;; to work as intended. Without this method, the :after method would
+  ;; get called and `no-applicable-method' would not get called.
+  (with-slots (transport) this
+    (apply #'rudel-send transport args)))
+
 (defmethod rudel-send :after
   ((this rudel-xmpp-state-sasl-mechanism-step) xml)
   "Show base64-decoded version of XML."
@@ -68,6 +77,7 @@
        (rudel-debug-write
 	this
 	:sent
+	"RESPDATA"
 	(if (find ?= pair)
 	    (apply #'format "%-16s: %s" (split-string pair "="))
 	  pair)))
@@ -86,6 +96,7 @@
        (rudel-debug-write
 	this
 	:received
+	"CHALDATA"
 	(if (find ?= pair)
 	    (apply #'format "%-16s: %s" (split-string pair "="))
 	  pair)))
