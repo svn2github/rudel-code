@@ -1,3 +1,38 @@
+2009-11-08  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* zeroconf/rudel-zeroconf.el (header): downcased keywords; updated
+	commentary section; added version 0.2 to history
+	(rudel-zeroconf-version): bumped to 0.2
+	(rudel-zeroconf-service-types): updated documentation string
+	(rudel-zeroconf-service-backend): removed
+	(rudel-zeroconf-transport-backend): new; accessor for transport
+	backend
+	(rudel-zeroconf-protocol-backend): new; accessor for protocol
+	backend
+	(rudel-zeroconf-register-service): accept a transport and a
+	protocol backend argument; update documentation string
+	(initialize-instance): remove &rest from argument slots
+	(rudel-advertise): handle transport and protocol backend
+	(rudel-zeroconf-services): updated to work with new service
+	representation
+	(rudel-zeroconf-services-present-p): updated to work with new
+	service representation
+	(rudel-zeroconf-publish): accept a transport and a protocol
+	backend argument
+	(rudel-zeroconf-service->plist): handle transport and protocol
+	backends
+
+	* tcp/rudel-tcp.el (rudel-make-connection): made object name of
+	transport object more unique
+
+	* xmpp/rudel-xmpp-debug.el (header): fixed keywords
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-send): new method;
+	required for dispatching rules
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-send :after): changed
+	label
+	(rudel-xmpp-state-sasl-mechanism-step::rudel-accept): changed
+	label
+
 2009-11-07  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* rudel-debug.el (rudel-debug-tag-faces): removed
@@ -15,6 +50,26 @@
 	`rudel-transport' -> `rudel-tcp-transport'
 
 2009-11-03  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* obby/rudel-obby-debug.el (header): downcased keywords; added
+	version 0.2 to history
+	(rudel-obby-debug-old-state): removed; now handled by generic
+	state machine tracing functions
+	(rudel-obby-socket-owner::rudel-switch :before): removed; now
+	handled by generic state machine tracing functions
+	(rudel-obby-socket-owner::rudel-switch :after): removed; now
+	handled by generic state machine tracing functions
+	(rudel-obby-socket-owner::rudel-send): removed; now handled by
+	generic transport tracing functions
+	(rudel-obby-socket-owner::rudel-receive): removed; now handled by
+	generic transport tracing functions
+	(rudel-obby-socket-owner::rudel-message): removed; now handled by
+	generic transport tracing functions
+	(rudel-obby-connection::rudel-debug-target): new method; use debug
+	target of transport for connection
+
+	* beep/rudel-beep-debug.el: new file; debug function for the BEEP
+	backend
 
 	* rudel-debug.el (header): downcased keywords; added version 0.2
 	to history
