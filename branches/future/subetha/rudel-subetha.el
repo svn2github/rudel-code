@@ -50,6 +50,7 @@
 ;;;  Class rudel-subetha-backend
 ;;
 
+;;;###autoload
 (defclass rudel-subetha-backend (rudel-protocol-backend)
   ((capabilities :initform '(join host
 			     change-color
