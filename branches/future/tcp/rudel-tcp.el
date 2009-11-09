@@ -105,8 +105,8 @@
   "TCP transport backend.
 The transport backend is a factory for TCP transport objects.")
 
-(defmethod initialize-instance ((this rudel-tcp-backend) &rest slots)
-  ""
+(defmethod initialize-instance ((this rudel-tcp-backend) slots)
+  "Initialize slots and set version of THIS."
   (when (next-method-p)
     (call-next-method))
 
