@@ -68,11 +68,11 @@
 	     ""))
   "TCP transport.")
 
-(defmethod rudel-set-filter ((this rudel-transport) filter)
+(defmethod rudel-set-filter ((this rudel-tcp-transport) filter)
   "Install FILTER as dispatcher for messages received by THIS."
   (oset this :filter filter))
 
-(defmethod rudel-set-sentinel ((this rudel-transport) sentinel)
+(defmethod rudel-set-sentinel ((this rudel-tcp-transport) sentinel)
   ""
   (oset this :sentinel sentinel))
 
