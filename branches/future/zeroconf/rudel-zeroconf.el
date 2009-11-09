@@ -103,8 +103,12 @@ service type TYPE."
 ;;; Initialization
 ;;
 
-(message "Initializing Zeroconf ...")
-(zeroconf-init)
+;; This is a bit hackish. However, it seems like we cannot determine
+;; whether zeroconf.el has already been initialized or not in a clean
+;; way.
+(unless zeroconf-path-avahi-service-type-browser
+  (message "Initializing Zeroconf ...")
+  (zeroconf-init))
 
 
 ;;; Class rudel-zeroconf-backend
