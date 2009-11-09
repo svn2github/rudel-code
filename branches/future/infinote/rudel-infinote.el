@@ -56,15 +56,15 @@
 
 ;;;###autoload
 (defclass rudel-infinote-backend (rudel-protocol-backend)
-  (;(version      :initform rudel-infinote-version) ;; TODO this is not evaluated
-   (capabilities :initform '(join host
+  ((capabilities :initform '(join host
 			     change-color
 			     chat
 			     track-subscriptions track-cursors
-			     track-selections track-viewports)))
+			     track-selections track-viewports
+			     group-undo)))
   "")
 
-(defmethod initialize-instance ((this rudel-infinote-backend) &rest slots)
+(defmethod initialize-instance ((this rudel-infinote-backend) slots)
   ""
   (when (next-method-p)
     (call-next-method))
@@ -98,7 +98,7 @@ Return the connection object."
   (let* ((session    (plist-get info :session))
 	 (host       (plist-get info :host)) ;; Just as name
 	 (connection (rudel-infinote-client-connection
-		      host
+		      (format "to %s" host)
 		      :session   session
 		      :transport transport)))
 
