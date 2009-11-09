@@ -1,3 +1,39 @@
+2009-11-09  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* xmpp/rudel-xmpp-sasl.el (state registration): add SASL states to
+	state list after loading of rudel-xmpp
+
+	* xmpp/rudel-xmpp.el (rudel-xmpp-backend): added autoload cookie
+	(rudel-xmpp-backend::rudel-make-connection): better object name
+	for transport object
+	(rudel-xmpp-state-established): added documentation string
+	(rudel-xmpp-state-established::rudel-accept): use filter slot of
+	the transport object
+	(rudel-transport::rudel-set-filter): removed handled by base class
+
+	* infinote/rudel-infinote.el
+	(rudel-infinote-backend::capabilities): added group-undo
+	capability
+	(rudel-infinote-backend::initialize-instance): removed &rest from
+	slots argument
+	(rudel-infinote-backend::rudel-connect): better object name for
+	the created connection object
+
+	* zeroconf/rudel-zeroconf.el (header): mention monitoring support
+	in history section
+	(rudel-zeroconf-backend::capabilities): added monitor capability
+	(rudel-zeroconf-backend::rudel-monitor-start): new method; start
+	monitoring Zeroconf services
+	(rudel-zeroconf-backend::rudel-monitor-stop): new method; stop
+	monitoring Zeroconf services
+	(rudel-zeroconf-backend::rudel-service-added): new method; handle
+	appearing Zeroconf services
+	(rudel-zeroconf-backend::rudel-service-removed): new method;
+	handle disappearing Zeroconf services
+
+	* obby/rudel-obby.el (zeroconf service registration): register
+	transport and protocol backend
+
 2009-11-08  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* zeroconf/rudel-zeroconf.el (header): downcased keywords; updated
