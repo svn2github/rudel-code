@@ -505,7 +505,8 @@ calling this function."
 
 ;;;###autoload
 (eval-after-load 'rudel-zeroconf
-  '(rudel-zeroconf-register-service "_lobby._tcp" 'obby))
+  '(rudel-zeroconf-register-service "_lobby._tcp"
+				    'start-tls 'obby))
 
 (provide 'rudel-obby)
 ;;; rudel-obby.el ends here
