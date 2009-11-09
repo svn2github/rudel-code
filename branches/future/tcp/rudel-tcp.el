@@ -139,7 +139,7 @@ and :port."
 		     :sentinel #'rudel-sentinel-dispatch
 		     :stop     t))
 	 (transport (rudel-tcp-transport
-		     host
+		     (format "to %s:%s" host port)
 		     :socket socket)))
     transport))
 
