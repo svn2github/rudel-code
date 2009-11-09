@@ -41,6 +41,7 @@
 ;;; History:
 ;;
 ;; 0.2 - Support for transport and protocol backends
+;;     - Monitoring support
 ;;
 ;; 0.1 - Initial version
 
@@ -111,7 +112,7 @@ service type TYPE."
 
 ;;;###autoload
 (defclass rudel-zeroconf-backend (rudel-session-initiation-backend)
-  ((capabilities :initform (discover advertise))
+  ((capabilities :initform (discover advertise monitor))
    (priority     :initform primary))
   "")
 
@@ -153,6 +154,46 @@ service type TYPE."
 (defmethod rudel-withdraw ((this rudel-session-initiation-backend))
   "Withdraw Zeroconf record."
   (error "Not implemented, yet"))
+
+(defmethod rudel-monitor-start ((this rudel-zeroconf-backend))
+  "Start monitoring Zeroconf services."
+  (dolist (service rudel-zeroconf-service-types)
+    (let ((type (rudel-zeroconf-service-type service)))
+      ;; Install handler for appearing services.
+      (lexical-let ((this1 this))
+	(zeroconf-service-add-hook
+	 type :new (lambda (service)
+		     (rudel-service-added this1 service))))
+
+      ;; Install handler for disappearing services.
+      (lexical-let ((this1 this))
+	(zeroconf-service-add-hook
+	 type :removed (lambda (service)
+			 (rudel-service-removed this1 service))))))
+  )
+
+(defmethod rudel-monitor-stop ((this rudel-zeroconf-backend))
+  "Stop monitoring Zeroconf services."
+  (display-warning
+   '(rudel zeroconf)
+   "Cannot stop monitoring Zeroconf services since the Emacs Zeroconf support lacks a way to do this."
+   :warning))
+
+(defmethod rudel-service-added ((this rudel-zeroconf-backend) service)
+  "This method is run when THIS discovers a new service SERVICE."
+  ;; Run the global hook `rudel-session-discovered-hook'. Convert the
+  ;; Zeroconf service description into a property list as required by
+  ;; the hook interface.
+  (run-hook-with-args 'rudel-session-discovered-hook
+		      (rudel-zeroconf-service->plist service)))
+
+(defmethod rudel-service-removed ((this rudel-zeroconf-backend) service)
+  "This method is run when THIS detects disappearing of SERVICE."
+  ;; Run the global hook `rudel-session-vanished-hook'. Convert the
+  ;; Zeroconf service description into a property list as required by
+  ;; the hook interface.
+  (run-hook-with-args 'rudel-session-vanished-hook
+		      (rudel-zeroconf-service->plist service)))
 
 
 ;;; Zeroconf wrapper functions
