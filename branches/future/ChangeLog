@@ -1,3 +1,19 @@
+2009-11-07  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-debug.el (rudel-debug-tag-faces): removed
+	:received-processed face
+	(rudel-join-session): added session argument; use
+	`rudel-current-session' when called interactively
+	(advice rudel-join-session): pass `ad-return-value' to
+	`rudel-join-session'
+
+2009-11-06  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* tcp/rudel-tcp.el (rudel-tcp-transport::rudel-set-filter):
+	changed class `rudel-transport' -> `rudel-tcp-transport'
+	(rudel-tcp-transport::rudel-set-sentinel): changed class
+	`rudel-transport' -> `rudel-tcp-transport'
+
 2009-11-03  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* rudel-debug.el (header): downcased keywords; added version 0.2
@@ -263,6 +279,15 @@
 	* rudel-tls.el (header): fixed typo
 
 2009-10-29  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-notification.el (header): fixed typo
+	(require rudel-display): required for user and document text
+	representation
+	(rudel-notify): `funcall' instead of `apply' backend functions
+	(rudel-notify-emacs-message): do not take args argument as &rest
+	(rudel-notify-libnotify): do not take args argument as &rest
+	(rudel-notify-format-object): new function; format objects using
+	`rudel-display-string'
 
 	* rudel.el (rudel-join-session): construct a progress reporter and
 	pass it to `rudel-connect' of the protocol backend

@@ -78,24 +78,21 @@
   :group 'rudel-debug)
 
 (defvar rudel-debug-tag-faces
-  '((:sent               . (rudel-debug-sent-data-face               "<  "))
-    (:received           . (rudel-debug-received-data-face           ">  "))
-    (:received-processed . (rudel-debug-received-processed-data-face ">> "))
-    (:state              . (rudel-debug-state-face                   "|  "))
-    (:special            . (rudel-debug-special-face                 ";  ")))
+  '((:sent     . (rudel-debug-sent-data-face     "<  "))
+    (:received . (rudel-debug-received-data-face ">  "))
+    (:state    . (rudel-debug-state-face         "|  "))
+    (:special  . (rudel-debug-special-face       ";  ")))
   "Associate tag to faces and prefixes.")
 
 
 ;;; Data debug functions
 ;;
 
-(defun rudel-adebug-session ()
+(defun rudel-adebug-session (session)
   "Analyze current session in data debug buffer."
-  (interactive)
-
   ;; Make sure we have a session.
-  (unless rudel-current-session
-    (error "No active Rudel session"))
+  (interactive (list (or rudel-current-session
+			 (error "No active Rudel session"))))
 
   (with-current-buffer (data-debug-new-buffer "RUDEL-SESSION")
     (data-debug-insert-thing rudel-current-session "# " "")))
@@ -114,7 +111,7 @@
 (defadvice rudel-join-session (after rudel-debug last activate)
   "Run data-debug inspection on newly created session objects."
   (require 'rudel-debug)
-  (rudel-adebug-session))
+  (rudel-adebug-session ad-return-value))
 
 (defadvice rudel-host-session (after rudel-debug last activate)
   "Run data-debug inspection on newly created server objects."
