@@ -1,5 +1,30 @@
 2009-11-09  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* tls/rudel-tls.el (required rudel-tcp): required since base class
+	of `rudel-start-tls-transport'
+	(rudel-start-tls-transport): new class; TCP transport with START
+	TLS ability
+	(rudel-start-tls-transport::rudel-enable-encryption): new method;
+	enable TLS encryption
+	(rudel-start-tls-backend): new class; START TLS transport backend
+	(rudel-start-tls-backend::initialize-instance): new method
+	(rudel-start-tls-backend::rudel-make-connection): new method;
+	create new START TLS transport object
+
+	* tls/rudel-tls.el (rudel-tls-wait-init): use
+	`rudel-assemble-fragments' instead of
+	`rudel-assemble-line-fragments'; use `rudel-loop-fragments'
+	instead of `rudel-loop-lines'
+	(rudel-tls-wait-handshake): use `rudel-assemble-fragments' instead
+	of `rudel-assemble-line-fragments'; use `rudel-loop-fragments'
+	instead of `rudel-loop-lines'
+	(rudel-tls-established): use `rudel-assemble-fragments' instead of
+	`rudel-assemble-line-fragments'; use `rudel-loop-fragments'
+	instead of `rudel-loop-lines'
+
+	* subetha/rudel-subetha.el (rudel-subetha-backend): added autoload
+	cookie
+
 	* xmpp/rudel-xmpp-sasl.el (state registration): add SASL states to
 	state list after loading of rudel-xmpp
 

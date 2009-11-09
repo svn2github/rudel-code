@@ -41,6 +41,7 @@
 
 (require 'rudel)
 (require 'rudel-util)
+(require 'rudel-tcp)
 
 
 ;;; Customization
@@ -57,6 +58,13 @@
   "Arguments passed to the gnutls client program."
   :group 'rudel
   :type  'string)
+
+
+;;; Constants
+;;
+
+(defconst rudel-tls-transport-version '(0 1)
+  "Version of the TLS transport backend for Rudel.")
 
 
 ;;; TLS functions
@@ -196,6 +204,70 @@ This only works if PROCESS has been created by
     (when client-data
       (funcall old-filter process client-data)))
   )
+
+
+;;; Class rudel-start-tls-transport
+;;
+
+(defclass rudel-start-tls-transport (rudel-tcp-transport)
+  ()
+  "Objects of this class provide TCP transports with START TLS
+capability.")
+
+(defmethod rudel-enable-encryption ((this rudel-start-tls-transport))
+  "Try to enable TLS encryption on THIS transport."
+  (with-slots (socket) this
+    (rudel-tls-start-tls socket)))
+
+
+;;; Class rudel-start-tls-backend
+;;
+
+;;;###autoload
+(defclass rudel-start-tls-backend (rudel-transport-backend)
+  ((capabilities :initform (connect)))
+  "STARTTLS transport backend.
+The transport backend is a factory for transport objects that
+support STARTTLS behavior.")
+
+(defmethod initialize-instance ((this rudel-start-tls-backend) slots)
+  "Initialize slots and set version of THIS."
+  (when (next-method-p)
+    (call-next-method))
+
+  (oset this :version rudel-tls-transport-version))
+
+(defmethod rudel-make-connection ((this rudel-start-tls-backend)
+				  info info-callback
+				  &optional progress-callback)
+  "Connect to a START-TLS server using the information in INFO.
+INFO has to be a property list containing the keys :host
+and :port."
+  ;; Ensure that INFO contains all necessary information.
+  (unless (every (lambda (keyword) (member keyword info))
+		 '(:host :port))
+    (setq info (funcall info-callback this info)))
+
+  ;; Extract information from INFO and create the socket.
+  (let* ((host      (plist-get info :host))
+	 (port      (plist-get info :port))
+	 ;; Create the network process
+	 (socket    (rudel-tls-make-process
+		     :name     (format "STARTTLS TCP to %s" host)
+		     :host     host
+		     :service  port
+		     :stop     t)))
+    (rudel-socket-transport
+     (format "to %s" host)
+     :socket socket)))
+
+
+;;; Autoloading
+;;
+
+;;;###autoload
+(rudel-backend-register 'transport
+			'start-tls 'rudel-start-tls-backend)
 
 (provide 'rudel-tls)
 ;;; rudel-tls.el ends here
