@@ -63,6 +63,7 @@
 ;;; Class rudel-xmpp-backend
 ;;
 
+;;;###autoload
 (defclass rudel-xmpp-backend (rudel-transport-backend)
   ((capabilities :initform '(connect)))
   "Transport backend works by transporting XMPP messages through
@@ -100,7 +101,7 @@ keys :host, :port and :jid."
 			  tcp-transport))
 	 ;; Create the actual XMPP transport.
 	 (xmpp-transport (rudel-xmpp-transport
-			  (format "to %s" host)
+			  (format "to %s as %s" host jid)
 			  :transport stack
 			  :start     (list 'new host jid))))
 
@@ -233,7 +234,9 @@ negotiation."))
 
 (defclass rudel-xmpp-state-established (rudel-xmpp-state)
   ()
-  "")
+  "The XMPP connection enters this state when security
+negotiation and the negotiation of the actual stream are
+complete.")
 
 (defmethod rudel-enter ((this rudel-xmpp-state-established) features)
   ""
@@ -241,9 +244,9 @@ negotiation."))
 
 (defmethod rudel-accept ((this rudel-xmpp-state-established) xml)
   ""
-  (with-slots (handler) this
-    (when handler
-      (funcall handler xml)))
+  (with-slots (filter) this
+    (when filter
+      (funcall filter xml)))
   nil)
 
 
@@ -337,11 +340,6 @@ Authentication mechanisms can add more states to this list.")
   (when (next-method-p)
     (call-next-method))
   )
-
-(defmethod rudel-set-filter ((this rudel-transport) handler)
-  "Install HANDLER as dispatcher for messages received by THIS."
-  (let ((established (rudel-find-state this 'established)))
-    (rudel-set-handler established handler)))
 
 (defmethod rudel-close ((this rudel-xmpp-transport))
   "Close the XMPP connection used by THIS."
