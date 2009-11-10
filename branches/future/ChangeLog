@@ -1,3 +1,27 @@
+2009-11-10  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* beep/rudel-beep-channel.el (header): extended commentary
+	(rudel-beep-channel-zero-state-requesting::rudel-enter): allow the
+	profile list to contain conses of profile URIs and inline data
+
+	* beep/rudel-beep-channel.el (require cl): require for `remove*'
+	(require rudel-util): required for `rudel-hook-object'
+	(rudel-beep-channel-zero-state-idle::rudel-accept): handle channel
+	requests properly
+	(rudel-beep-channel-zero::channel-requested-hook): new slot;
+	stores hook function for channel requested hook
+	(rudel-beep-channel-zero::rudel-send-error): new method; transmit
+	an error message
+
+	* rudel-transport.el (rudel-wait-for-connections): renamed
+	argument dispatch -> dispatch-callback
+
+	* tcp/rudel-tcp.el
+	(rudel-tcp-backend::rudel-wait-for-connections): new method; wait
+	for incoming connections and dispatch to callback
+	(rudel-tcp-handle-connect): new function; helper function to wrap
+	incoming connection sockets in transport objects
+
 2009-11-09  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* subetha/Project.ede (target subetha): renamed `rudel/subetha' ->

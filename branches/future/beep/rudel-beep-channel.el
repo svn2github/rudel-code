@@ -24,10 +24,13 @@
 
 ;;; Commentary:
 ;;
-;; This file contains the class `rudel-beep-channel' which a generic
-;; BEEP protocol channel. A BEEP channel implements the
+;; This file contains the class `rudel-beep-channel' which represents
+;; a generic BEEP protocol channel. A BEEP channel implements the
 ;; `rudel-transport-filter' interface and can thus be used as a
 ;; transport.
+;;
+;; The derived class `rudel-beep-channel-zero' implements the
+;; specified behavior of the special channel 0.
 
 
 ;;; History:
@@ -185,7 +188,11 @@
        ,@(mapcar
 	  (lambda (profile)
 	    `(("profile"
-	       ("uri" . ,profile))))
+	       ("uri" . ,(if (stringp profile)
+			     profile
+			   (car profile))))
+	      ,@(when (consp profile)
+		  (list (cdr profile)))))
 	  profiles))))
 
   ;; Stay in this state until the peer's response arrives.
