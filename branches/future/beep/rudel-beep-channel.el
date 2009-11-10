@@ -38,6 +38,11 @@
 ;;; Code:
 ;;
 
+(eval-when-compile
+  (require 'cl)) ;; for remove*
+
+(require 'rudel-util) ;; for `rudel-hook-object'
+
 (require 'rudel-state-machine) ;; channel 0 is a state machine
 
 (require 'rudel-transport) ;; channels are `rudel-transport-filter's
@@ -298,34 +303,57 @@ succeeds.")
   "Established channels remain in this state until something happens.")
 
 (defmethod rudel-accept ((this rudel-beep-channel-zero-state-idle) frame)
-  "."
-  (let* ((data (oref frame :payload)) ;; TODO
-	 (name (xml-tag-name data)))
-    (cond
-     ;; Peer requests a channel.
-     ((string= name "start")
+  "Handle incoming frame FRAME."
+  (with-slots (payload) frame
+    (let ((name (xml-tag-name payload)))
+      (cond
+       ;; Peer requests a channel.
+       ((string= name "start")
+	(let* (;; Extract id of the requested channel.
+	       (id       (string-to-number (xml-tag-attr payload "number")))
+	       ;; Extract supported profiles.
+	       (profiles (mapcar
+			  (lambda (tag)
+			    (let ((uri      (xml-tag-attr tag "uri"))
+				  (children (xml-tag-children tag)))
+			      (cons uri
+				    (when (xml-tag-text-p (car children))
+				      (car children)))))
+			  (remove*
+			   "profile" (xml-tag-children payload)
+			   :key #'xml-tag-name :test-not #'string=)))
+	       ;; Call the channel request hook the decide what to do.
+	       (selected (object-run-hook-with-args
+			  this 'channel-requested-hook id profiles)))
 
-      (rudel-send this (xml-tag-child (oref frame :payload) "profile") "RPY" nil 1)
+	  ;; If the hook function selected a profile, use
+	  ;; it. Otherwise deny the channel request.
+	  (if selected
+	      (rudel-send this
+			  `(("profile" ("uri" . ,selected)))
+			  "RPY" nil 1)
+	    (rudel-send-error this 501 "channel request denied")))
 
-      nil)
+	;; Stay in this state
+	nil)
 
-     ;; Peer requests closing a channel.
-     ((string= name "close")
-      nil)
-     ;; when receiving a <close/>:
-     ;; + goto closing state
-     ;; + take care of unfinished stuff
-     ;; finally:
-     ;; (rudel-send this (list "RPY" '(("ok"))))
-     ;; Note: closing channel "0" is special
+       ;; Peer requests closing a channel.
+       ((string= name "close")
+	nil)
+       ;; when receiving a <close/>:
+       ;; + goto closing state
+       ;; + take care of unfinished stuff
+       ;; finally:
+       ;; (rudel-send this (list "RPY" '(("ok"))))
+       ;; Note: closing channel "0" is special
 
-     ;; Error
-     ((string= name "error")
-      nil)
+       ;; Error
+       ((string= name "error")
+	nil)
 
-     ;; Unexpected message
-     (t
-      nil)))
+       ;; Unexpected message
+       (t
+	nil))))
   )
 
 
@@ -346,9 +374,16 @@ succeeds.")
 ;;
 
 (defclass rudel-beep-channel-zero (rudel-state-machine
-				   rudel-beep-channel)
-  ((id      :initform 0)
-   (profile :initform "urn:invalid:invalid"))
+				   rudel-beep-channel
+				   rudel-hook-object)
+  ((id                     :initform 0)
+   (profile                :initform "urn:invalid:invalid")
+   ;; Hooks
+   (channel-requested-hook :initarg  :channel-requested-hook
+			   :type     list
+			   :initform nil
+			   :documentation
+			   "TODO"))
   "Specialized class for channel 0.")
 
 (defmethod initialize-instance ((this rudel-beep-channel-zero) slots)
@@ -374,6 +409,14 @@ succeeds.")
 (defmethod rudel-handle ((this rudel-beep-channel-zero) data)
   ""
   (rudel-accept this data))
+
+(defmethod rudel-send-error ((this rudel-beep-channel-zero)
+			     code text)
+  "Send an error message with code CODE and description TEXT."
+  (rudel-send this
+	      `(("error" ("code" . ,(format "%d" code)))
+		,@(when text (list text)))
+	      "RPY"))
 
 (provide 'rudel-beep-channel)
 ;;; rudel-beep-channel.el ends here
