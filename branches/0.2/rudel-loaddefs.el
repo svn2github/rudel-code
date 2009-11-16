@@ -17,7 +17,9 @@
 (eval-after-load 'rudel
   '(progn
      (require 'rudel-obby)
-     (when (and (require 'dbus nil t)
+     ;; Carefully try to load zeroconf support
+     (when (and (featurep 'dbusbind)
+		(require 'dbus nil t)
 		(require 'zeroconf nil t)
 		(dbus-get-name-owner :system "org.freedesktop.Avahi"))
        (require 'rudel-zeroconf))
