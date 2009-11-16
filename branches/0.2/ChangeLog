@@ -1,3 +1,24 @@
+2009-11-16  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-loaddefs.el (require rudel-zeroconf): check presence of
+	feature dbusbind before attempting to load zeroconf stuff
+
+2009-10-14  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-loaddefs.el (eval-after-load rudel): before loading the
+	zeroconf backend, make sure Emacs's dbus and zeroconf features are
+	there
+
+	* rudel.el (rudel-version): bumped to 0.2
+
+2009-10-12  Phil Hagelberg  <phil@enigma>
+
+        * rudel-mode.el, rudel-overlay.el: Move use of :safe flag from
+	defcustom to a separate put. Required for Emacs 22 compatibility.
+
+        * rudel-loaddefs.el: Only require rudel-zeroconf if zeroconf is
+	available.
+
 2009-10-10  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* zeroconf/rudel-zeroconf.el: removed autoload cookies
