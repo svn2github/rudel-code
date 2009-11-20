@@ -45,12 +45,12 @@
 ;;
 
 (defclass rudel-impersonating-state (rudel-state) ;; TODO not sure whether this belongs here
-  ((master-slot :type       symbol
-		:allocation :class
-		:documentation
-		"A symbol specifying the name of the slot that
-holds the reference to the state machine which own the state
-object."))
+  ((impersonating-target-slot :type       symbol
+			      :allocation :class
+			      :documentation
+			      "A symbol specifying the name of
+the slot that holds the reference to the state machine which own
+the state object."))
   "A mixin that allows derived state classes to transparently
 accesses the slots of their state machines."
   :abstract t)
@@ -58,41 +58,35 @@ accesses the slots of their state machines."
 (defmethod slot-missing ((this rudel-impersonating-state)
 			 slot-name operation &optional new-value)
   "Look up SLOT-NAME in the state machine associated to THIS."
-  (let ((master (slot-value this (oref this master-slot))))
+  (let ((target (slot-value this (oref this impersonating-target-slot))))
     (case operation
       (oref
-       (slot-value master slot-name))
+       (slot-value target slot-name))
 
       (oset
-       (set-slot-value master slot-name new-value))))
+       (set-slot-value target slot-name new-value))))
   )
-
-;; TODO we could use (defmethod no-applicable-method ((object) method &rest args)
 
 
 ;;; Class rudel-delegating-state
 ;;
 
 (defclass rudel-delegating-state (rudel-state)
-  ((socket-owner-slot :type       symbol
-		      :allocation :class
-		      :documentation
-		      "A symbol specifying the name of the slot
-that holds the reference to the state machine which own the state
-object."))
+  ((delegation-target-slot :type       symbol
+			   :allocation :class
+			   :documentation
+			   "A symbol specifying the name of the
+slot that holds the reference to the state machine which own the
+state object."))
   "A mixin that allows derived state classes to transparently
 call certain methods of their state machines."
   :abstract t)
 
-(defmethod rudel-send ((this rudel-delegating-state) data)
-  "Call `rudel-send' of the state machine of THIS with DATA."
-  (let ((master (slot-value this (oref this socket-owner-slot))))
-    (rudel-send master data)))
-
-(defmethod rudel-close ((this rudel-delegating-state))
-  "Call `rudel-close' of the state machine of THIS"
-  (let ((master (slot-value this (oref this socket-owner-slot))))
-    (rudel-close master)))
+(defmethod no-applicable-method ((this rudel-delegating-state)
+				 method &rest args)
+  "Call METHOD on the target object instead of THIS."
+  (let ((target (slot-value this (oref this delegation-target-slot))))
+    (apply method target (rest args))))
 
 (provide 'rudel-state-util)
 ;;; rudel-state-util.el ends here
