@@ -82,10 +82,12 @@
   "Decode a bencoded string in the current buffer starting at
 point."
   (cond
+   ;; Number.
    ((looking-at "i\\([0-9]+\\)e")
     (goto-char (match-end 0))
     (string-to-number (match-string 1)))
 
+   ;; Probably UTF-8 string of indicated length.
    ((looking-at "\\([0-9]+\\):")
     (goto-char (match-end 0))
     (let ((start (point))
@@ -93,6 +95,15 @@ point."
       (goto-char end)
       (buffer-substring-no-properties start end)))
 
+   ;; Probably binary string of indicated length.
+   ((looking-at "\\([0-9]+\\)\\.")
+    (goto-char (match-end 0))
+    (let ((start (point))
+	  (end (+ (point) (string-to-number (match-string 1)))))
+      (goto-char end)
+      (buffer-substring-no-properties start end)))
+
+   ;; List
    ((looking-at "l")
     (goto-char (match-end 0))
     (let (result item)
@@ -100,6 +111,7 @@ point."
 	(setq result (cons item result)))
       (nreverse result)))
 
+   ;; Dictionary
    ((looking-at "d")
     (goto-char (match-end 0))
     (let (dict key)
