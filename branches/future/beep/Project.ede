@@ -3,11 +3,11 @@
 (ede-proj-project "rudel/beep"
   :name "beep"
   :file "Project.ede"
-  :targets (list
+  :targets (list 
    (ede-proj-target-elisp "beep"
     :name "beep"
     :path ""
-    :source '("rudel-beep.el" "rudel-beep-channel.el" "rudel-beep-state.el" "rudel-beep-util.el")
+    :source '("rudel-beep.el" "rudel-beep-channel.el" "rudel-beep-state.el" "rudel-beep-util.el" "rudel-beep-message.el")
     )
    )
   )

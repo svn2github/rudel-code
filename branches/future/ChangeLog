@@ -1,3 +1,35 @@
+2009-11-19  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* beep/rudel-beep-util.el (require rx): new; required for `rx'
+	macro
+	(require rudel-transport-util): fixed explanatory comment
+
+	* beep/rudel-beep-util.el (rudel-beep-frame::slot-missing):
+	argument new-value is &optional not &rest
+
+	* beep/rudel-beep-util.el (header): short commentary section
+	(require rudel-xml): removed; no more XML processing in this file
+	(rudel-beep-frame-header-regex): new constant; frame header
+	structure
+	(rudel-beep-frame): added comments
+	(rudel-beep-frame::entities): removed slot; messages have entity
+	headers; not frames
+	(rudel-beep-frame::slot-missing): check slot name and operation
+	type properly
+	(rudel-beep-frame::object-print): cleanup
+	(rudel-beep-assemble-frames): renamed rudel-beep-assemble-frame ->
+	rudel-beep-assemble-frames; added documentation string; do not
+	include END marker in payload; added some comments
+	(rudel-beep-parse-frame): use `rudel-beep-frame-header-regex';
+	more error checking; do not look for entity headers in the payload
+	(rudel-beep-generate-frame): generate "more" field of the header
+	properly
+	(rudel-beep-parse-payload)
+	(rudel-beep-generate-payload): removed; frame payload are never
+	modified; message payload are
+	(rudel-beep-make-transport-filter-stack): do not parse/generate
+	payload
+
 2009-11-10  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* beep/rudel-beep-channel.el (header): extended commentary
