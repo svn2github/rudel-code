@@ -36,7 +36,9 @@
 ;;; Code:
 ;;
 
-(require 'rudel-transport-util) for `rudel-transport-make-filter-stack'
+(require 'rx) ;; for `rx'
+
+(require 'rudel-transport-util) ;; for `rudel-transport-make-filter-stack'
 
 
 ;;; Constants
