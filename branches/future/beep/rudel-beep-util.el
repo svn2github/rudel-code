@@ -92,7 +92,7 @@ is a valid payload."))
 message.")
 
 (defmethod slot-missing ((this rudel-beep-frame)
-			 slot-name operation &rest new-value)
+			 slot-name operation &optional new-value)
   "Simulate slot :size of THIS."
   (cond
    ;; Slot :size, read only
