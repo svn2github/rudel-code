@@ -402,11 +402,15 @@ configured using customization.")
       (setq rest (cddr rest))
       (cond
        ;; Resolve backend arguments.
-       ((eq key :backend)
-	(let ((backend (rudel-backend-get 'protocol
-					  (if (stringp value)
-					      (intern value)
-					    value))))
+       ((or (eq key :transport-backend)
+	    (eq key :protocol-backend))
+	(let ((backend (rudel-backend-get
+			(if (eq key :transport-backend)
+			    'transport
+			  'protocol)
+			(if (stringp value)
+			    (intern value)
+			  value))))
 	  (push backend adjusted-info)
 	  (push key     adjusted-info)))
        ;; Keep other arguments unmodified.
