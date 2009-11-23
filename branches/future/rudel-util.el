@@ -241,7 +241,7 @@ it is a number."
 If no such method can be found, the condition
 rudel-dispatch-error is signalled."
   ;; Construct a matching symbol.
-  (let* ((method (intern-soft (concat prefix name))))
+  (let ((method (intern-soft (concat prefix name))))
     ;; If we found a suitable method, run it; Otherwise signal.
     (unless method
       (signal 'rudel-dispatch-error 'method-symbol-unbound))

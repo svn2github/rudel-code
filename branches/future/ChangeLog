@@ -1,3 +1,60 @@
+2009-11-23  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-util.el (rudel-dispatch): use `let' instead of `let*'
+
+	* rudel-transport.el (header): updated history section
+	(require rudel-errors): added a commit
+
+	* rudel-transport-util.el (require rudel-errors): required for
+	`rudel-error' condition
+	(rudel-invalid-state): new condition
+	(rudel-buffering-transport-filter): new class; a transport filter
+	that can queue incoming and outgoing data
+	(rudel-buffering-transport-filter::initialize-instance): new
+	method; initialize slots and install filter
+	(rudel-buffering-transport-filter::rudel-send): new method send or
+	queue data
+	(rudel-buffering-transport-filter::rudel-stop): new method; stop
+	the filter
+	(rudel-buffering-transport-filter::rudel-start): new method; start
+	the filter
+	(rudel-buffering-transport-filter::rudel-handle): new method;
+	handle incoming data
+
+2009-11-20  Jan Moringen  <scymtym@users.sourceforge.net>
+
+	* rudel-transport-util.el
+	(rudel-assembling-transport-filter::fragment-function): new slot;
+	optional fragmentation function
+	(rudel-assembling-transport-filter::rudel-send): if there is a
+	fragmentation function, use it
+	(rudel-injecting-transport-filter): new class; inject data using
+	method calls instead of receiving it from an underlying transport
+	(rudel-injecting-transport-filter::rudel-inject): new method;
+	inject data into transport filter
+
+	* rudel-session-initiation.el
+	(rudel-session-initiation-adjust-info): handle :transport-backend
+	and :protocol-backend keywords
+
+	* rudel-state-util.el
+	(rudel-impersonating-state::impersonating-target-slot): renamed
+	master-slot -> impersonating-target-slot
+	(rudel-impersonating-state::slot-missing): cosmetic changes
+	(rudel-delegating-state::delegation-target-slot):
+	socket-owner-slot -> renamed delegation-target-slot
+	(rudel-delegating-state::rudel-send): removed; there is a generic
+	solution now
+	(rudel-delegating-state::no-applicable-method): new method;
+	delegate calls to missing methods to target object
+
+	* rudel-state-machine.el
+	(rudel-state-machine::initialize-instance): use
+	`rudel-state-machine-strip-initargs' to get rid of virtual
+	initargs
+	(rudel-state-machine-strip-initargs): new function; remove certain
+	initargs from a property list of initargs
+
 2009-11-19  Jan Moringen  <scymtym@users.sourceforge.net>
 
 	* beep/rudel-beep-util.el (require rx): new; required for `rx'
