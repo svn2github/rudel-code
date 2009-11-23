@@ -51,55 +51,101 @@
 (require 'rudel-transport) ;; channels are `rudel-transport-filter's
 
 (require 'rudel-beep-state) ;; channel 0 is a state machine
+(require 'rudel-beep-message)
 
 
 ;;; Class rudel-beep-channel
 ;;
 
 (defclass rudel-beep-channel (rudel-transport-filter)
-  ((id        :initarg  :id
-	      :type     (integer 0)
-	      :documentation
-	      "Identifier of the channel.")
-   (seqno-in  :initarg  :seqno-in
-	      :type     (integer 0)
-	      :initform 0
-	      :documentation
-	      "Current sequence number for incoming messages.")
-   (seqno-out :initarg  :seqno-out
-	      :type     (integer 0)
-	      :initform 0
-	      :documentation
-	      "Current sequence number outgoing messages.")
-   (octet-out :initarg  :octet-out
-	      :type     (integer 0)
-	      :initform 0
-	      :documentation
-	      "TODO")
-   (profile   :initarg  :profile
-	      :type     string
-	      :documentation
-	      "TODO"))
-  "TODO")
+  ((id             :initarg  :id
+		   :type     (integer 0)
+		   :documentation
+		   "Identifier of the channel.")
+   (profile        :initarg  :profile
+		   :type     string
+		   :documentation
+		   "The profile URI identifying the protocol
+spoken on this channel.")
+   (seqno-in       :initarg  :seqno-in
+		   :type     (integer 0)
+		   :initform 0
+		   :documentation
+		   "Current sequence number for incoming
+messages.")
+   (seqno-out      :initarg  :seqno-out
+		   :type     (integer 0)
+		   :initform 0
+		   :documentation
+		   "Current sequence number of outgoing
+messages.")
+   (octet-out      :initarg  :octet-out
+		   :type     (integer 0)
+		   :initform 0
+		   :documentation
+		   "Current outgoing octet number.")
+   (injector       :initarg  :injector
+		   :type     rudel-injecting-transport-filter
+		   :documentation
+		   "The injecting transport filter which is
+somewhere in the transport filter stack. This is used to inject
+received frames into the data stream of the channel.")
+   (root-transport :initarg  :root-transport
+		   :type     rudel-transport ;; TODO rudel-beep-transport?
+		   :documentation
+		   "The most underlying transport."))
+  "Objects of this class represent BEEP channels.")
+
+(defmethod initialize-instance ((this rudel-beep-channel) slots)
+  "Initialize slots of THIS and setup transport connections."
+  ;; Initialize slots of THIS.
+  (when (next-method-p)
+    (call-next-method))
+
+  (with-slots (transport injector root-transport) this
+    ;; Wrap the transport in an injector. We have to inject frames
+    ;; since we receive them through function calls.
+    (setq injector (rudel-injecting-transport-filter
+		    "injector"
+		    :transport transport))
+
+    ;; Wrap the transport in a suitable filter stack.
+    (setq root-transport transport)
+    (setq transport      (rudel-beep-make-channel-filter-stack injector))
+
+    ;; Install our handler as filter of the transport.
+    (lexical-let ((this1 this))
+      (rudel-set-filter
+       transport (lambda (message)
+		   (with-slots (filter) this1
+		     (when filter
+		       (funcall filter message)))))))
+  )
 
 (defmethod rudel-send ((this rudel-beep-channel) data
-		       &optional type content-type seq-hack)
+		       &optional type content-type number)
   "Send DATA through THIS channel."
-  ;; Construct a frame and send it.
   (with-slots (transport id seqno-out octet-out) this
-    (let ((frame (rudel-beep-frame
-		  "bla" ;; TODO
-		  :type      (or type "MSG") ;; TODO
-		  :channel   id
-		  :message   (or seq-hack seqno-out)
-		  :sequence  octet-out
-		  :entities  (unless content-type
-			       '(:Content-Type "application/beep+xml")) ;; TODO
-		  :payload   data)))
-      (rudel-send transport frame)
+    ;; Construct a message and send it. Use automatic message number
+    ;; or NUMBER when present.
+    (let* ((type    (or type "MSG")) ;; TODO avoid these bindings?
+	   (number  (or number seqno-out))
+	   (message (rudel-beep-message
+		     (format "%s %d" type number)
+		     :type            type
+		     :channel         id
+		     :message-number  number
+		     :sequence-number octet-out
+		     :entities        (unless content-type
+					'(:Content-Type "application/beep+xml")) ;; TODO
+		     :payload         data)))
+      (rudel-send transport message)
 
-      (incf seqno-out)
-      (incf octet-out (oref frame :size))))
+      ;; Increase automatic sequence number in case one was
+      ;; used. Update outgoing octet count.
+      (unless number
+	(incf seqno-out))
+      (incf octet-out (oref message :size))))
   )
 
 (defmethod rudel-close ((this rudel-beep-channel))
@@ -108,11 +154,10 @@
     (rudel-close-channel transport this))
   )
 
-(defmethod rudel-handle ((this rudel-beep-channel) data) ;; TODO name accept is reserved for state machines ...
-  ""
-  (with-slots (filter) this
-    (when filter
-      (funcall filter data)))
+(defmethod rudel-handle ((this rudel-beep-channel) frame) ;; TODO name accept is reserved for state machines ...
+  "Inject FRAME into the transport filter stack of THIS."
+  (with-slots (injector) this
+    (rudel-inject injector frame))
   )
 
 (defmethod object-print ((this rudel-beep-channel) &rest strings)
@@ -166,25 +211,30 @@
 ;;
 
 (defclass rudel-beep-channel-zero-state-requesting (rudel-beep-state)
-  ((profiles :initarg  :profiles
-	     :initform nil
+  ((id       :initarg  :id
+	     :type     (integer 0)
+	     :documentation
+	     "Id of the channel that is currently being
+requested.")
+   (profiles :initarg  :profiles
 	     :type     list
 	     :documentation
 	     "List of profiles offered to remote peer."))
   "Channel 0 enters this state when requesting a new channel.")
 
 (defmethod rudel-enter ((this rudel-beep-channel-zero-state-requesting)
-			profiles1)
+			id1 profiles1)
   "Request channel state then wait for the response."
-  (with-slots (profiles) this
+  (with-slots (id profiles) this
     ;; Save profiles for evaluating the peer's response.
-    (setq profiles profiles1)
+    (setq id       id1
+	  profiles profiles1)
 
     ;; Send channel start request.
     (rudel-send
      this
      `(("start"
-	("number" . "1"))
+	("number" . ,(format "%d" id)))
        ,@(mapcar
 	  (lambda (profile)
 	    `(("profile"
@@ -206,10 +256,14 @@
      ;; A positive response looks like this:
      ;; <profile uri="http://iana.org/beep/SASL/OTP"/>
      ((string= (xml-tag-name payload) "profile")
-      (with-slots (profiles) this
+      (with-slots (id profiles) this
 	(let ((profile (xml-tag-attr payload "uri")))
-	  (if (member profile profiles)
-	      (list 'request-success profile)
+	  (if (member profile (mapcar (lambda (profile)
+					(if (stringp profile)
+					    profile
+					  (car profile)))
+				      profiles)) ;; TODO break this out?
+	      (list 'request-success id profile)
 	    (list 'request-failure 'invalid-profile nil))))) ;; TODO make this an error condition?
 
      ;; Negative response.
@@ -231,19 +285,27 @@
 ;;
 
 (defclass rudel-beep-channel-zero-state-request-success (rudel-beep-state)
-  ((profile :initarg :profile
+  ((id      :initarg :id
+	    :type    (integer 0)
+	    :documentation
+	    "The id of the new channel.")
+   (profile :initarg :profile
 	    :type    string
 	    :documentation
-	    "TODO"))
+	    "The profile the remote peer has chosen for the new
+channel."))
   "Channel 0 enters this state when requesting a channel
 succeeds.")
 
 (defmethod rudel-enter ((this rudel-beep-channel-zero-state-request-success)
-			profile1)
-  "TODO"
+			id1 profile1)
+  "Save ID1 and PROFILE1 in slots of THIS."
   ;; Save profile.
-  (with-slots (profile) this
-    (setq profile profile1))
+  (with-slots (id profile) this
+    (setq id      id1
+	  profile profile1))
+  ;; Stay in this state; the transition back to the idle state has to
+  ;; be triggered externally.
   nil)
 
 
@@ -254,20 +316,25 @@ succeeds.")
   ((condition :initarg :profile
 	      :type    symbol
 	      :documentation
-	      "TODO")
+	      "A condition symbol describing the reason for the
+failure.")
    (data      :initarg :data
 	      :type    list
 	      :documentation
-	      "TODO"))
+	      "Data associated to the condition that is the
+reason for the failure."))
   "Channel 0 enters this state when requesting a channel fails.")
 
 (defmethod rudel-enter ((this rudel-beep-channel-zero-state-request-failure)
 			condition1 data1)
-  "TODO"
+  "Save CONDITION1 and DATA1 in slots of THIS."
   ;; Save condition and error data.
   (with-slots (condition data) this
     (setq condition condition1
 	  data      data1))
+
+  ;; Stay in this state; the transition back to the idle state has to
+  ;; be triggered externally.
   nil)
 
 (defclass rudel-beep-channel-zero-state-closing (rudel-beep-state)
@@ -309,13 +376,14 @@ succeeds.")
   ()
   "Established channels remain in this state until something happens.")
 
-(defmethod rudel-accept ((this rudel-beep-channel-zero-state-idle) frame)
+(defmethod rudel-accept ((this rudel-beep-channel-zero-state-idle) message)
   "Handle incoming frame FRAME."
-  (with-slots (payload) frame
+  (with-slots (payload) message ;; TODO message types?
     (let ((name (xml-tag-name payload)))
       (cond
        ;; Peer requests a channel.
        ((string= name "start")
+	;; TODO break this up into several functions?
 	(let* (;; Extract id of the requested channel.
 	       (id       (string-to-number (xml-tag-attr payload "number")))
 	       ;; Extract supported profiles.
@@ -336,12 +404,33 @@ succeeds.")
 	  ;; If the hook function selected a profile, use
 	  ;; it. Otherwise deny the channel request.
 	  (if selected
-	      (rudel-send this
-			  `(("profile" ("uri" . ,selected)))
-			  "RPY" nil 1)
+
+	      ;; If the channel requested hook selected a profile,
+	      ;; acknowledge the request and create a channel object.
+	      (progn
+		;; Send the selected profile, thereby acknowledging
+		;; the channel request.
+		(rudel-send this
+			    `(("profile" ("uri" . ,selected)))
+			    "RPY" nil 1)
+
+		;; Create the channel object and pass it to observers
+		;; through the channel created hook.
+		;; TODO should we create the channel here?
+		(let ((channel (rudel-beep-channel
+				(format
+				 "%d req by listen" id)
+				:id        id
+				:profile   selected
+				:transport (oref this :root-transport))))
+		  (object-run-hook-with-args
+		   this 'channel-created-hook channel)))
+
+	    ;; If the channel requested hook did not select a profile,
+	    ;; deny the channel request.
 	    (rudel-send-error this 501 "channel request denied")))
 
-	;; Stay in this state
+	;; Stay in this state.
 	nil)
 
        ;; Peer requests closing a channel.
@@ -390,17 +479,34 @@ succeeds.")
 			   :type     list
 			   :initform nil
 			   :documentation
-			   "TODO"))
+			   "This hook is run when a request to
+create a channels is received.")
+   (channel-created-hook   :initarg  :channel-created-hook
+			   :type     list
+			   :initform nil
+			   :documentation
+			   "This hook is run after a channel has
+successfully been created."))
   "Specialized class for channel 0.")
 
 (defmethod initialize-instance ((this rudel-beep-channel-zero) slots)
   "Initialize THIS and register states."
-  ;; Initialize slots of THIS.
+  ;; Initialize base classes with non-virtual initargs.
   (when (next-method-p)
-    (call-next-method))
+    (call-next-method
+     this (rudel-state-machine-strip-initargs slots)))
 
   ;; Register states.
-  (rudel-register-states this rudel-beep-channel-zero-states))
+  (rudel-register-states this rudel-beep-channel-zero-states)
+
+  ;; Install our handler as filter of the transport.
+  (with-slots (transport) this
+    (lexical-let ((this1 this))
+      (rudel-set-filter
+       transport
+       (lambda (frame)
+	 (rudel-accept this1 frame)))))
+  )
 
 (defmethod rudel-register-state ((this rudel-beep-channel-zero)
 				 symbol state)
@@ -412,10 +518,6 @@ succeeds.")
   (when (next-method-p)
     (call-next-method))
   )
-
-(defmethod rudel-handle ((this rudel-beep-channel-zero) data)
-  ""
-  (rudel-accept this data))
 
 (defmethod rudel-send-error ((this rudel-beep-channel-zero)
 			     code text)

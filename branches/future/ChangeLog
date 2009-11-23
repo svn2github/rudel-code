@@ -1,5 +1,61 @@
 2009-11-23  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* beep/rudel-beep-channel.el (require rudel-beep-message): require
+	`rudel-beep-message'
+	(rudel-beep-channel): added documentation string
+	(rudel-beep-channel::octet-out): added documentation string
+	(rudel-beep-channel::profile): added documentation string
+	(rudel-beep-channel::injector): new slot; injecting transport
+	filter
+	(rudel-beep-channel::root-transport): new slot; most underlying
+	transport
+	(rudel-beep-channel::initialize-instance): new method; initialize
+	slots, store transports and install filter
+	(rudel-beep-channel::rudel-send): use `rudel-beep-message';
+	renamed argument seq-hack -> number
+	(rudel-beep-channel::rudel-handle): inject frame into transport
+	filter stack instead of calling the filter; added documentation
+	string
+	(rudel-beep-channel-zero-state-requesting::id): new slot; store id
+	of the channel being requested
+	(rudel-beep-channel-zero-state-requesting::rudel-enter): added
+	argument id; store it and transmit it
+	(rudel-beep-channel-zero-state-requesting::rudel-accept): make
+	sure the received profile is in the list of offered profiles
+	(rudel-beep-channel-zero-state-request-success::id): added slot;
+	store id of newly created channel
+	(rudel-beep-channel-zero-state-request-success::rudel-enter):
+	added argument id; store id
+	(rudel-beep-channel-zero-state-request-failure::condition): added
+	documentation string
+	(rudel-beep-channel-zero-state-request-failure::data): added
+	documentation string
+	(rudel-beep-channel-zero-state-request-failure::rudel-enter):
+	added some comments
+	(rudel-beep-channel-zero-state-idle::rudel-accept): when answering
+	a channel request, also create the channel object; added some
+	comments
+	(rudel-beep-channel-zero::channel-requested-hook): added
+	documentation string
+	(rudel-beep-channel-zero::channel-created-hook): new slot; this
+	hook is run after channel has successfully been created
+	(rudel-beep-channel-zero::initialize-instance): use
+	`rudel-state-machine-strip-initargs' when calling the next method;
+	install our `rudel-accept' as filter
+	(rudel-beep-channel-zero::rudel-handle): removed; we use
+	`rudel-accept' instead
+
+	* beep/rudel-beep-util.el (rudel-beep-frame-header-regex):
+	enumerate allowed types
+	(rudel-beep-frame::type): improved documentation string
+	(rudel-beep-frame::rudel-generate): new method; made
+	`rudel-beep-generate-frame' a method of the frame class
+	(rudel-beep-assemble-frames): reverse list of frames
+	(rudel-beep-generate-frame): removed; made
+	`rudel-beep-generate-frame' a method of the frame class
+	(rudel-beep-make-transport-filter-stack): call `rudel-generate'
+	instead of `rudel-beep-generate-frame'
+
 	* beep/rudel-beep-util.el (rudel-beep-make-channel-filter-stack):
 	moved here from beep/rudel-beep-message.el
 	* beep/rudel-beep-message.el (rudel-beep-message): added
