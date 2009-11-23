@@ -211,7 +211,7 @@ constitute a valid BEEP frame."
   )
 
 
-;;; Transport filter stack convenience function
+;;; Transport filter stack convenience functions
 ;;
 
 (defun rudel-beep-make-transport-filter-stack (transport)
@@ -227,6 +227,31 @@ protocol on top of TRANSPORT."
      (rudel-parsing-transport-filter
       :parse-function    rudel-beep-parse-frame
       :generate-function rudel-beep-generate-frame)))
+  )
+
+(defun rudel-beep-make-channel-filter-stack (transport)
+  "Construct a filter stack for the message level of the BEEP
+channel protocol on top of TRANSPORT."
+  (rudel-transport-make-filter-stack
+   transport
+   '(;; Make the filter stack stoppable and resumable.
+     (rudel-buffering-transport-filter)
+
+     ;; Assemble/fragment messages from/into frames.
+     (rudel-assembling-transport-filter
+      :assembly-function rudel-beep-message-assemble
+      :fragment-function rudel-beep-message-fragment)
+
+     ;; Separate/combine entity headers from payload and
+     ;; parse/generate them.
+     (rudel-parsing-transport-filter
+      :parse-function    rudel-beep-message-parse-entities
+      :generate-function rudel-beep-message-generate-entities)
+
+     ;; Parse/generate payloads
+     (rudel-parsing-transport-filter
+      :parse-function    rudel-beep-message-parse-payload
+      :generate-function rudel-beep-message-generate-payload)))
   )
 
 (provide 'rudel-beep-util)

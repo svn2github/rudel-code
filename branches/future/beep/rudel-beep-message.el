@@ -64,27 +64,31 @@ messages.")
   ((type            :initarg  :type
 		    :type     string
 		    :documentation
-		    "")
+		    "A three-letter code specifying the type of
+this message. Has to be one of MSG, RPY, ERR, ANS and NUL.")
    (channel         :initarg  :channel
 		    :type     (integer 0)
 		    :documentation
-		    "")
+		    "The channel on this message.")
    (message-number  :initarg  :message-number
 		    :type     (integer 0)
 		    :documentation
-		    "")
+		    "The number of this message")
    (sequence-number :initarg  :sequence-number
 		    :type     (integer 0)
 		    :documentation
-		    "")
+		    "The number of the first octet of this
+message in the octet stream of the channel.")
    (entities        :initarg  :entities
 		    :type     list
 		    :initform nil
 		    :documentation
-		    "")
+		    "MIME entity headers of this message
+represented as a property list. The list can be empty.")
    (payload         :initarg :payload
 		    :documentation
-		    ""))
+		    "The payload of this message. The empty
+string is a valid payload."))
   "Objects of this class represent BEEP messages.")
 
 (defmethod slot-missing ((this rudel-beep-message)
@@ -243,10 +247,12 @@ messages.")
 			       #'append
 			       (mapcar
 				(lambda (line)
+				  ;; TODO wrong for "key:value" without
+				  ;; space after :
 				  (destructuring-bind (key value)
 				      (split-string line ":")
 				    (list (intern (concat ":" key))
-					  (substring value 1)))) ;; TODO wrong for "key:value"
+					  (substring value 1))))
 				entity-lines))))
 	  (list entities (substring data payload-start)))
       (list nil data)))
@@ -298,9 +304,11 @@ MESSAGE is returned after the modification."
   "In MESSAGE, replace payload with parsed object.
 The parsing is done according to the specified content type."
   (with-slots (entities payload) message
+    ;; TODO do this in a less static way
     (let ((type (plist-get entities :Content-Type)))
       (cond
-       ((string= type "application/beep+xml") ;; TODO do this in a less static way
+       ;; If the content type is BEEP+XML parse the payload as XML.
+       ((string= type "application/beep+xml")
 	;; TODO string->xml should work for ' delimiters
 	(setq payload (string->xml (replace-regexp-in-string
 				    "'" "\"" payload)))))))
@@ -311,39 +319,14 @@ The parsing is done according to the specified content type."
 The serialization is done according to the specified content
 type."
   (with-slots (entities payload) message
+    ;; TODO do this in a less static way
     (let ((type (plist-get entities :Content-Type)))
       (cond
-       ((string= type "application/beep+xml") ;; TODO do this in a less static way
+       ;; If the content type is BEEP+XML assume the payload is an XML
+       ;; data structure and convert it to a string.
+       ((string= type "application/beep+xml")
 	(setq payload (xml->string payload))))))
   message)
-
-
-;;; Transport filter stack convenience function
-;;
-
-;; TODO move into -channel.el?
-(defun rudel-beep-make-channel-filter-stack (transport)
-  "Construct a filter stack for the message level of the BEEP
-channel protocol on top of TRANSPORT."
-  (rudel-transport-make-filter-stack
-   transport
-   '(;; Seperate/combine entity headers from payload and
-     ;; parse/generate them.
-     (rudel-assembling-transport-filter
-      :assembly-function rudel-beep-message-assemble
-      :fragment-function rudel-beep-message-fragment)
-
-     ;; Seperate/combine entity headers from payload and
-     ;; parse/generate them.
-     (rudel-parsing-transport-filter
-      :parse-function    rudel-beep-message-parse-entities
-      :generate-function rudel-beep-message-generate-entities)
-
-     ;; Parse/generate payloads
-     (rudel-parsing-transport-filter
-      :parse-function    rudel-beep-message-parse-payload
-      :generate-function rudel-beep-message-generate-payload)))
-  )
 
 (provide 'rudel-beep-message)
 ;;; rudel-beep-message.el ends here

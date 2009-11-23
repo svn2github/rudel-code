@@ -1,5 +1,24 @@
 2009-11-23  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* beep/rudel-beep-util.el (rudel-beep-make-channel-filter-stack):
+	moved here from beep/rudel-beep-message.el
+	* beep/rudel-beep-message.el (rudel-beep-message): added
+	documentation string
+	(rudel-beep-message::type): added documentation string
+	(rudel-beep-message::channel): added documentation string
+	(rudel-beep-message::message-number): added documentation string
+	(rudel-beep-message::sequence-number): added documentation string
+	(rudel-beep-message::entities): added documentation string
+	(rudel-beep-message::payload): added documentation string
+	(rudel-beep-message-entities-from-payload): improved comments
+	(rudel-beep-message-parse-payload): improved comments
+	(rudel-beep-message-generate-payload): improved comments
+	(rudel-beep-make-channel-filter-stack): moved to
+	beep/rudel-beep-util.el
+
+	* beep/doc/rfc822.txt: new file; referenced by RFC 2045
+	* beep/doc/rfc2045.txt: new file; contains specification of MIME
+
 	* rudel-util.el (rudel-dispatch): use `let' instead of `let*'
 
 	* rudel-transport.el (header): updated history section
