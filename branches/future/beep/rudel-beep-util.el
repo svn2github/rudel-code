@@ -45,12 +45,12 @@
 ;;
 
 (defconst rudel-beep-frame-header-regex
-  (rx (group (1+ upper)) ?\s ;; Type
-      (group (1+ digit)) ?\s ;; Channel
-      (group (1+ digit)) ?\s ;; Message number
-      (group (or ?. ?*)) ?\s ;; Final frame
-      (group (1+ digit)) ?\s ;; First octet
-      (group (1+ digit))     ;; Size
+  (rx (group (or "MSG" "RPY" "ERR" "ANS" "NUL")) ?\s ;; Type
+      (group (1+ digit))                         ?\s ;; Channel
+      (group (1+ digit))                         ?\s ;; Message number
+      (group (or ?. ?*))                         ?\s ;; Final frame
+      (group (1+ digit))                         ?\s ;; First octet
+      (group (1+ digit))                             ;; Size
       ?\r ?\n)
   "This regular expression describes the header of a BEEP
 frame.")
@@ -65,7 +65,7 @@ frame.")
 		    :documentation
 		    "A three-letter code specifying the type of
 the message this frame is part of. Has to be one of MSG, RPY,
-ERR, ANS and NUL.")
+ERR, ANS and NUL or defined by the transport mapping.")
    (channel         :initarg :channel
 		    :type    (integer 0)
 		    :documentation
@@ -92,6 +92,20 @@ in the octet stream of the channel.")
 is a valid payload."))
   "This class represents a Beep frame which is a part of BEEP
 message.")
+
+(defmethod rudel-generate ((this rudel-beep-frame))
+  "Return string representation of THIS frame."
+  (with-slots (type
+	       channel message-number final
+	       sequence-number size
+	       payload) this
+    (format
+     "%s %d %d %s %d %d\r\n%sEND\r\n"
+     type
+     channel message-number
+     (if final "." "*") sequence-number
+     size payload))
+  )
 
 (defmethod slot-missing ((this rudel-beep-frame)
 			 slot-name operation &optional new-value)
@@ -150,7 +164,7 @@ message.")
 	    (throw 'done nil)))))
     ;; Return complete frames and leftover data.
     (list
-     frames
+     (nreverse frames)
      (cons rest stored)))
   )
 
@@ -193,23 +207,6 @@ constitute a valid BEEP frame."
 	 :payload         payload))))
   )
 
-(defun rudel-beep-generate-frame (frame)
-  "Return string representation of FRAME."
-  (with-slots (type
-	       channel
-	       message-number
-	       final
-	       sequence-number
-	       size
-	       payload) frame
-    (format
-     "%s %d %d %s %d %d\r\n%sEND\r\n"
-     type
-     channel message-number
-     (if final "." "*") sequence-number
-     size payload))
-  )
-
 
 ;;; Transport filter stack convenience functions
 ;;
@@ -226,7 +223,7 @@ protocol on top of TRANSPORT."
      ;; Parse frames, leaving payload alone
      (rudel-parsing-transport-filter
       :parse-function    rudel-beep-parse-frame
-      :generate-function rudel-beep-generate-frame)))
+      :generate-function rudel-generate)))
   )
 
 (defun rudel-beep-make-channel-filter-stack (transport)
