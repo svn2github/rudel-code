@@ -1,5 +1,9 @@
 2009-11-23  Jan Moringen  <scymtym@users.sourceforge.net>
 
+	* beep/rudel-beep-tcp.el: new file; sequence frame class and flow
+	control transport filter for BEEP protocol over TCP transport
+	* beep/Project.ede (target beep): added file rudel-beep-tcp.el
+
 	* beep/rudel-beep-channel.el (require rudel-beep-message): require
 	`rudel-beep-message'
 	(rudel-beep-channel): added documentation string

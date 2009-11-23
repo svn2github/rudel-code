@@ -7,7 +7,7 @@
    (ede-proj-target-elisp "beep"
     :name "beep"
     :path ""
-    :source '("rudel-beep.el" "rudel-beep-channel.el" "rudel-beep-state.el" "rudel-beep-util.el" "rudel-beep-message.el")
+    :source '("rudel-beep.el" "rudel-beep-channel.el" "rudel-beep-state.el" "rudel-beep-util.el" "rudel-beep-message.el" "rudel-beep-tcp.el")
     )
    )
   )
